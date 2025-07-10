@@ -17,16 +17,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    - name: Build SonarQube Plugin
-      run: mvn package -DskipTests
-    - name: Upload Jar artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: crypto-plugin
-        path: sonar-crypto-plugin/target/*.jar
-        retention-days: 5
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build SonarQube Plugin
+        run: mvn package -DskipTests
+      - name: Upload Jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: crypto-plugin
+          path: sonar-crypto-plugin/target/*.jar
+          retention-days: 5
