@@ -17,9 +17,8 @@
     </modules>
 
     <properties>
-        <sonar.plugin.api.version>11.1.0.2693</sonar.plugin.api.version>
+        <sonar.plugin.api.version>13.0.0.3026</sonar.plugin.api.version>
         <packaging.plugin.version>1.23.0.740</packaging.plugin.version>
-
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+
+  build-test:
+    uses: ./.github/workflows/build.yml
+
+  release:
+    name: Release Plugin
+    needs: [build-test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build SonarQube Plugin
+        run: mvn package -DskipTests
+      - name: Upload Jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: crypto-plugin
+          path: sonar-crypto-plugin/target/*.jar
+          retention-days: 5
