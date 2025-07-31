@@ -14,7 +14,7 @@ import de.fraunhofer.iem.scanner.ScannerSettings;
 
 public class Main {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         CryslRuleProvider ruleProvider = new CryslRuleProvider();
         Path ruleDir = ruleProvider.extractCryslFilesToTempDir(s -> s.contains("JavaCryptographicArchitecture/"));
         String mavenProjectPath =

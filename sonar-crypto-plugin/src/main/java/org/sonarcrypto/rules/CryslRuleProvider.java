@@ -21,12 +21,8 @@ public class CryslRuleProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
     private final URL ruleDistribution;
 
-    public CryslRuleProvider() {
-        try {
-            this.ruleDistribution = new URL("https://github.com/CROSSINGTUD/Crypto-API-Rules/archive/refs/heads/master.zip");
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+    public CryslRuleProvider() throws MalformedURLException{
+        this.ruleDistribution = new URL("https://github.com/CROSSINGTUD/Crypto-API-Rules/archive/refs/heads/master.zip");
     }
 
 

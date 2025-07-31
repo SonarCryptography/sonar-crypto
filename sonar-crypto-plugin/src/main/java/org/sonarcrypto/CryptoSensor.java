@@ -44,7 +44,7 @@ public class CryptoSensor implements Sensor {
       try {
           CryslRuleProvider ruleProvider = new CryslRuleProvider();
           ruleDir = ruleProvider.extractCryslFilesToTempDir(s -> s.contains("BouncyCastle/"));
-      } catch (IOException e) {
+      } catch (Exception e) {
           LOGGER.error("Failed to extract Crysl rules", e);
           return;
       }
