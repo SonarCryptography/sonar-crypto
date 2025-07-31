@@ -31,7 +31,9 @@ public class CryptoSensor implements Sensor {
 
       Path ruleDir = null;
       try {
-          ruleDir = CryslRuleProvider.extractCryslFilesToTempDir(s -> s.contains("BouncyCastle/"));
+          // TODO: make this configurable in SonarCloud
+          CryslRuleProvider ruleProvider = new CryslRuleProvider();
+          ruleDir = ruleProvider.extractCryslFilesToTempDir(s -> s.contains("BouncyCastle/"));
       } catch (IOException e) {
           throw new RuntimeException(e);
       }

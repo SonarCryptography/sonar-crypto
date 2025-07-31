@@ -11,7 +11,9 @@ import de.fraunhofer.iem.scanner.ScannerSettings;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        Path ruleDir = CryslRuleProvider.extractCryslFilesToTempDir(s -> s.contains("JavaCryptographicArchitecture/"));
+        // TODO: This is for testing purposes, make configurable
+        CryslRuleProvider ruleProvider = new CryslRuleProvider();
+        Path ruleDir = ruleProvider.extractCryslFilesToTempDir(s -> s.contains("JavaCryptographicArchitecture/"));
         String mavenProjectPath =
                     new File(args[0])
                             .getAbsolutePath();
