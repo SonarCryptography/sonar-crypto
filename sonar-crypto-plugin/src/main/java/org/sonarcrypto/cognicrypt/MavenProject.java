@@ -13,6 +13,7 @@ import com.google.common.collect.Lists;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -25,21 +26,24 @@ import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.apache.maven.shared.invoker.PrintStreamHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MavenProject {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MavenProject.class);
     private final String pathToProjectRoot;
     private boolean compiled;
     private String fullProjectClassPath;
 
-    public MavenProject(String pathToProjectRoot) {
+    public MavenProject(String pathToProjectRoot) throws FileNotFoundException {
         File file = new File(pathToProjectRoot);
         if (!file.exists())
-            throw new RuntimeException("The path " + pathToProjectRoot + " does not exist!");
+            throw new FileNotFoundException("The path " + pathToProjectRoot + " does not exist!");
         this.pathToProjectRoot = new File(pathToProjectRoot).getAbsolutePath();
     }
 
-    public void compile() {
+    public void compile() throws MavenBuildException {
         InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile(new File(pathToProjectRoot + File.separator + "pom.xml"));
         ArrayList<String> goals = Lists.newArrayList();
@@ -53,20 +57,20 @@ public class MavenProject {
             request.setOutputHandler(new PrintStreamHandler(out, true));
             InvocationResult res = invoker.execute(request);
             if (res.getExitCode() != 0) {
-                throw new RuntimeException(
+                throw new MavenBuildException(
                         "Was not able to compile project " + pathToProjectRoot + ".");
             }
         } catch (MavenInvocationException | IOException e) {
-            throw new RuntimeException(
+            throw new MavenBuildException(
                     "Was not able to invoke maven in path "
                             + pathToProjectRoot
-                            + ". Does a pom.xml exist?");
+                            + ". Does a pom.xml exist?", e);
         }
         compiled = true;
         computeClassPath();
     }
 
-    private void computeClassPath() {
+    private void computeClassPath() throws MavenBuildException {
         InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile(new File(pathToProjectRoot + File.separator + "pom.xml"));
         ArrayList<String> goals = Lists.newArrayList();
@@ -79,32 +83,37 @@ public class MavenProject {
             Invoker invoker = new DefaultInvoker();
             InvocationResult res = invoker.execute(request);
             if (res.getExitCode() != 0) {
-                throw new RuntimeException(
+                throw new MavenBuildException(
                         "Was not able to compute dependencies " + pathToProjectRoot + ".");
             }
         } catch (MavenInvocationException | IOException e) {
-            throw new RuntimeException("Was not able to invoke maven to compute dependencies");
+            throw new MavenBuildException("Was not able to invoke maven to compute dependencies", e);
         }
         try {
             File classPathFile = new File(pathToProjectRoot + File.separator + "classPath.temp");
             fullProjectClassPath =
                     IOUtils.toString(new FileInputStream(classPathFile), StandardCharsets.UTF_8);
-            classPathFile.delete();
+            if (!classPathFile.delete()) {
+                LOGGER.warn("Failed to delete temporary classpath file: {}", classPathFile.getAbsolutePath());
+            }
         } catch (IOException e) {
-            throw new RuntimeException(
-                    "Was not able to read in class path from file classPath.temp");
+            throw new MavenBuildException(
+                    "Was not able to read in class path from file classPath.temp", e);
         }
     }
 
     public String getBuildDirectory() {
         if (!compiled) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "You first have to compile the project. Use method compile()");
         }
         return pathToProjectRoot + File.separator + "target" + File.separator + "classes";
     }
 
     public String getFullClassPath() {
+        if (!compiled) {
+            throw new IllegalStateException("Project has not been compiled yet.");
+        }
         return fullProjectClassPath;
     }
 }

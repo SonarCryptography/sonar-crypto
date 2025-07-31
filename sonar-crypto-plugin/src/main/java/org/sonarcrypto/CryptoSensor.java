@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -11,7 +13,10 @@ import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
+import org.sonarcrypto.cognicrypt.MavenBuildException;
 public class CryptoSensor implements Sensor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CryptoSensor.class);
 
   @Override
   public void describe(SensorDescriptor sensorDescriptor) {
@@ -26,22 +31,28 @@ public class CryptoSensor implements Sensor {
     String mavenProjectPath =
                 new File(fileSystem.baseDir().getAbsolutePath())
                         .getAbsolutePath();
-    MavenProject mi = new MavenProject(mavenProjectPath);
-    mi.compile();
-
-      Path ruleDir = null;
+    MavenProject mi;
       try {
-          // TODO: make this configurable in SonarCloud
+          mi = new MavenProject(mavenProjectPath);
+          mi.compile();
+      } catch (IOException | MavenBuildException e) {
+          LOGGER.error("Failed to build project", e);
+          return;
+      }
+
+      Path ruleDir;
+      try {
           CryslRuleProvider ruleProvider = new CryslRuleProvider();
           ruleDir = ruleProvider.extractCryslFilesToTempDir(s -> s.contains("BouncyCastle/"));
       } catch (IOException e) {
-          throw new RuntimeException(e);
+          LOGGER.error("Failed to extract Crysl rules", e);
+          return;
       }
       HeadlessJavaScanner scanner = new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
     
     scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
     scanner.scan();
     var errors = scanner.getCollectedErrors();
-    System.out.println("Errors: " + errors.size());
+    LOGGER.info("Errors: {}", errors.size());
   }
 }
