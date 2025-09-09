@@ -1,12 +1,18 @@
 package org.sonarcrypto.rules;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Predicate;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,46 +23,46 @@ import org.slf4j.LoggerFactory;
  * file names. The rules are extracted to a temporary directory.
  */
 public class CryslRuleProvider {
-  private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
 
-  private static final URL RULE_DISTRIBUTION;
+    private static final URI RULE_DISTRIBUTION =
+            URI.create("https://github.com/CROSSINGTUD/Crypto-API-Rules/archive/refs/heads/master.zip");
 
-  static {
-    try {
-      RULE_DISTRIBUTION =
-          new URL("https://github.com/CROSSINGTUD/Crypto-API-Rules/archive/refs/heads/master.zip");
-    } catch (MalformedURLException e) {
-      throw new RuntimeException(e);
-    }
-  }
+    private final HttpClient http = HttpClient.newHttpClient();
 
-  /**
-   * Downloads the zip from ruleDistribution, extracts all .crysl files to a temp directory, and
-   * returns the directory.
-   *
-   * @return The temp directory containing the extracted .crysl files.
-   * @throws IOException if an I/O error occurs
-   */
-  public Path extractCryslFilesToTempDir(Predicate<String> filter) throws IOException {
-    Path tempDir = Files.createTempDirectory("crysl_rules");
-    java.net.URLConnection connection = RULE_DISTRIBUTION.openConnection();
-    int count = 0;
-    try (java.io.InputStream is = connection.getInputStream();
-        java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(is)) {
-      java.util.zip.ZipEntry entry;
+    /**
+     * Downloads the zip from ruleDistribution, extracts all .crysl files to a temp directory, and
+     * returns the directory.
+     *
+     * @return The temp directory containing the extracted .crysl files.
+     * @throws IOException if an I/O error occurs
+     */
+    public Path extractCryslFilesToTempDir(Predicate<String> filter) throws IOException, InterruptedException {
+        Path tempDir = Files.createTempDirectory("crysl_rules");
+        int count = 0;
 
-      while ((entry = zis.getNextEntry()) != null) {
-        if (!entry.isDirectory()
-            && entry.getName().endsWith(".crysl")
-            && filter.test(entry.getName())) {
-          Path outFile = tempDir.resolve(Paths.get(entry.getName()).getFileName());
-          Files.write(outFile, zis.readAllBytes());
-          count++;
+        HttpRequest req = HttpRequest.newBuilder(RULE_DISTRIBUTION).GET().build();
+        HttpResponse<InputStream> resp = http.send(req, HttpResponse.BodyHandlers.ofInputStream());
+
+        if (resp.statusCode() != 200) {
+            throw new IOException("Failed to download rules: HTTP " + resp.statusCode());
         }
-        zis.closeEntry();
-      }
+
+        try (InputStream is = resp.body(); ZipInputStream zis = new ZipInputStream(is)) {
+            ZipEntry entry;
+
+            while ((entry = zis.getNextEntry()) != null) {
+                if (!entry.isDirectory()
+                        && entry.getName().endsWith(".crysl")
+                        && filter.test(entry.getName())) {
+                    Path outFile = tempDir.resolve(Paths.get(entry.getName()).getFileName());
+                    Files.write(outFile, zis.readAllBytes());
+                    count++;
+                }
+                zis.closeEntry();
+            }
+        }
+        LOGGER.info("Extracted {} CrySL files to {}", count, tempDir.toAbsolutePath());
+        return tempDir;
     }
-    LOGGER.info("Extracted {} CrySL files to {}", count, tempDir.toAbsolutePath());
-    return tempDir;
-  }
 }

@@ -21,7 +21,7 @@ public class CryptoSensor implements Sensor {
   @Override
   public void describe(SensorDescriptor sensorDescriptor) {
     sensorDescriptor.name("CogniCryptSensor");
-    sensorDescriptor.onlyOnLanguages("gradlegroovy", "java");
+    sensorDescriptor.onlyOnLanguages( "java");
   }
 
   @Override
@@ -34,7 +34,7 @@ public class CryptoSensor implements Sensor {
       mi = new MavenProject(mavenProjectPath);
       mi.compile();
     } catch (IOException | MavenBuildException e) {
-      LOGGER.error("Failed to build project", e);
+      LOGGER.error("Failed to build Maven project", e);
       return;
     }
 
