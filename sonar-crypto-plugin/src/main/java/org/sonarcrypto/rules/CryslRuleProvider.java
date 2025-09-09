@@ -18,11 +18,16 @@ import org.slf4j.LoggerFactory;
  */
 public class CryslRuleProvider {
   private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
-  private final URL ruleDistribution;
 
-  public CryslRuleProvider() throws MalformedURLException {
-    this.ruleDistribution =
-        new URL("https://github.com/CROSSINGTUD/Crypto-API-Rules/archive/refs/heads/master.zip");
+  private static final URL RULE_DISTRIBUTION;
+
+  static {
+    try {
+      RULE_DISTRIBUTION =
+          new URL("https://github.com/CROSSINGTUD/Crypto-API-Rules/archive/refs/heads/master.zip");
+    } catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -34,7 +39,7 @@ public class CryslRuleProvider {
    */
   public Path extractCryslFilesToTempDir(Predicate<String> filter) throws IOException {
     Path tempDir = Files.createTempDirectory("crysl_rules");
-    java.net.URLConnection connection = ruleDistribution.openConnection();
+    java.net.URLConnection connection = RULE_DISTRIBUTION.openConnection();
     int count = 0;
     try (java.io.InputStream is = connection.getInputStream();
         java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(is)) {

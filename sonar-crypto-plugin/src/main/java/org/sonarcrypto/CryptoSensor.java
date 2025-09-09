@@ -2,7 +2,6 @@ package org.sonarcrypto;
 
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class CryptoSensor implements Sensor {
   public void execute(SensorContext sensorContext) {
     FileSystem fileSystem = sensorContext.fileSystem();
 
-    String mavenProjectPath = new File(fileSystem.baseDir().getAbsolutePath()).getAbsolutePath();
+    String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
     MavenProject mi;
     try {
       mi = new MavenProject(mavenProjectPath);
