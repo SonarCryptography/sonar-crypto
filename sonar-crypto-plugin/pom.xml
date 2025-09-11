@@ -80,12 +80,11 @@
                                 <unzip src="${project.build.directory}/downloaded-rules/crypto-rules.zip" 
                                        dest="${project.build.directory}/extracted-rules"/>
                                        
-                                <!-- Copy all .crysl files to resources -->
+                                <!-- Copy all .crysl files to resources preserving directory structure -->
                                 <copy todir="${project.build.outputDirectory}/crysl-rules">
-                                    <fileset dir="${project.build.directory}/extracted-rules">
+                                    <fileset dir="${project.build.directory}/extracted-rules/Crypto-API-Rules-master">
                                         <include name="**/*.crysl"/>
                                     </fileset>
-                                    <mapper type="flatten"/>
                                 </copy>
                             </target>
                         </configuration>

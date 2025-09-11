@@ -17,9 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides a method to extract CrySL rules from bundled resources. The rules are packaged
- * as embedded resources during build time from the CROSSING repository. The repo
- * currently contains rules for three Crypto Libraries : BouncyCastle, BouncyCastle-JCA, and
+ * Provides a method to extract CrySL rules from bundled resources. The rules are packaged as
+ * embedded resources during build time from the CROSSING repository. The repo currently contains
+ * rules for three Crypto Libraries : BouncyCastle, BouncyCastle-JCA, and
  * JavaCryptographicArchitecture. The rulesets can not be used at the same time due to conflicting
  * file names. The rules are extracted to a temporary directory.
  */
@@ -43,23 +43,23 @@ public class CryslRuleProvider {
     // Get the resource URL for the crysl-rules directory
     URL resourceUrl = getClass().getResource(CRYSL_RESOURCES_PATH);
     if (resourceUrl == null) {
-      throw new IOException("CrySL rules not found in resources. Make sure the build process downloaded and packaged them.");
+      throw new IOException(
+          "CrySL rules not found in resources. Make sure the build process downloaded and packaged them.");
     }
 
     try {
-      // List all .crysl files in the resources directory
-      // Since we flattened all files during build, we need to read them directly
-      String[] ruleFiles = getRuleFileNames();
-      
-      for (String fileName : ruleFiles) {
-        if (fileName.endsWith(".crysl")) {
-          // Create a simulated path for filtering (based on original structure)
-          String simulatedPath = getSimulatedPathForFile(fileName);
-          
-          if (filter.test(simulatedPath)) {
-            try (InputStream is = getClass().getResourceAsStream(CRYSL_RESOURCES_PATH + fileName)) {
+      // List all .crysl files in the resources directory with their paths
+      String[] rulePaths = getRuleFilePaths();
+
+      for (String rulePath : rulePaths) {
+        if (rulePath.endsWith(".crysl")) {
+          // Use the actual path for filtering
+          if (filter.test(rulePath)) {
+            try (InputStream is = getClass().getResourceAsStream(CRYSL_RESOURCES_PATH + rulePath)) {
               if (is != null) {
-                Path outFile = tempDir.resolve(fileName);
+                // Create directory structure in temp dir if needed
+                Path outFile = tempDir.resolve(rulePath);
+                Files.createDirectories(outFile.getParent());
                 Files.write(outFile, is.readAllBytes());
                 count++;
               }
@@ -76,13 +76,13 @@ public class CryslRuleProvider {
   }
 
   /**
-   * Gets the list of rule file names from the resources.
-   * This implementation dynamically discovers all .crysl files in the resources directory.
+   * Gets the list of rule file paths from the resources. This implementation dynamically discovers
+   * all .crysl files in the resources directory with their relative paths.
    */
-  private String[] getRuleFileNames() throws IOException {
-    List<String> ruleFiles = new ArrayList<>();
+  private String[] getRuleFilePaths() throws IOException {
+    List<String> rulePaths = new ArrayList<>();
     URL resourceUrl = getClass().getResource(CRYSL_RESOURCES_PATH);
-    
+
     if (resourceUrl == null) {
       return new String[0];
     }
@@ -96,9 +96,11 @@ public class CryslRuleProvider {
           while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
             String name = entry.getName();
-            if (name.startsWith("crysl-rules/") && name.endsWith(".crysl") && !entry.isDirectory()) {
-              String fileName = name.substring(name.lastIndexOf('/') + 1);
-              ruleFiles.add(fileName);
+            if (name.startsWith("crysl-rules/")
+                && name.endsWith(".crysl")
+                && !entry.isDirectory()) {
+              String relativePath = name.substring("crysl-rules/".length());
+              rulePaths.add(relativePath);
             }
           }
         }
@@ -107,8 +109,12 @@ public class CryslRuleProvider {
         try {
           Path resourcePath = Paths.get(resourceUrl.toURI());
           Files.walk(resourcePath)
-               .filter(path -> path.toString().endsWith(".crysl"))
-               .forEach(path -> ruleFiles.add(path.getFileName().toString()));
+              .filter(path -> path.toString().endsWith(".crysl"))
+              .forEach(
+                  path -> {
+                    Path relativePath = resourcePath.relativize(path);
+                    rulePaths.add(relativePath.toString().replace('\\', '/'));
+                  });
         } catch (URISyntaxException e) {
           throw new IOException("Failed to convert resource URL to URI", e);
         }
@@ -117,26 +123,7 @@ public class CryslRuleProvider {
       LOGGER.warn("Failed to dynamically discover rule files, falling back to empty list", e);
     }
 
-    LOGGER.debug("Discovered {} rule files in resources", ruleFiles.size());
-    return ruleFiles.toArray(new String[0]);
+    LOGGER.debug("Discovered {} rule file paths in resources", rulePaths.size());
+    return rulePaths.toArray(new String[0]);
   }
-
-  /**
-   * Creates a simulated path based on the file name to support the existing filter logic.
-   * This maps flattened file names back to their likely original directory structure.
-   */
-  private String getSimulatedPathForFile(String fileName) {
-    // Map common files to their likely source directories based on naming patterns
-    if (fileName.toLowerCase().contains("bouncy") || 
-        fileName.matches(".*(?i)(aes|des|rsa|dsa|ecdsa|sha|md5).*\\.crysl")) {
-      return "BouncyCastle/" + fileName;
-    } else if (fileName.toLowerCase().contains("jca") || 
-               fileName.matches(".*(?i)(cipher|keygenerator|messagedigest|signature).*\\.crysl")) {
-      return "JavaCryptographicArchitecture/" + fileName;
-    } else {
-      // Default to BouncyCastle for unknown files
-      return "BouncyCastle/" + fileName;
-    }
-  }
-
 }
