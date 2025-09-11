@@ -21,7 +21,7 @@ public class CryptoSensor implements Sensor {
   @Override
   public void describe(SensorDescriptor sensorDescriptor) {
     sensorDescriptor.name("CogniCryptSensor");
-    sensorDescriptor.onlyOnLanguages( "java");
+    sensorDescriptor.onlyOnLanguages("java");
   }
 
   @Override
@@ -42,10 +42,16 @@ public class CryptoSensor implements Sensor {
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();
       ruleDir = ruleProvider.extractCryslFilesToTempDir(s -> s.contains("BouncyCastle/"));
-    } catch (Exception e) {
-      LOGGER.error("Failed to extract Crysl rules", e);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      LOGGER.warn("Extraction interrupted while filtering 'BouncyCastle/'", e);
+      return; // or rethrow if upstream should handle
+    } catch (IOException e) {
+      LOGGER.error(
+          "I/O error extracting Crysl rules for filter 'BouncyCastle/': {}", e.getMessage(), e);
       return;
     }
+
     HeadlessJavaScanner scanner =
         new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
 
