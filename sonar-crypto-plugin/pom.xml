@@ -53,6 +53,45 @@
 
     <build>
         <plugins>
+            <!-- Download and extract CrySL rules during build -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>download-crysl-rules</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.build.directory}/downloaded-rules"/>
+                                <mkdir dir="${project.build.outputDirectory}/crysl-rules"/>
+                                
+                                <!-- Download the rules zip file using PowerShell -->
+                                <exec executable="powershell" failonerror="true">
+                                    <arg value="-Command"/>
+                                    <arg value="Invoke-WebRequest -Uri 'https://github.com/CROSSINGTUD/Crypto-API-Rules/archive/refs/heads/master.zip' -OutFile '${project.build.directory}/downloaded-rules/crypto-rules.zip'"/>
+                                </exec>
+                                
+                                <!-- Extract zip file -->
+                                <unzip src="${project.build.directory}/downloaded-rules/crypto-rules.zip" 
+                                       dest="${project.build.directory}/extracted-rules"/>
+                                       
+                                <!-- Copy all .crysl files to resources -->
+                                <copy todir="${project.build.outputDirectory}/crysl-rules">
+                                    <fileset dir="${project.build.directory}/extracted-rules">
+                                        <include name="**/*.crysl"/>
+                                    </fileset>
+                                    <mapper type="flatten"/>
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
                 <artifactId>sonar-packaging-maven-plugin</artifactId>
