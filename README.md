@@ -65,6 +65,28 @@ mvn clean package
 # sonar-crypto-plugin/target/sonar-crypto-plugin-1.0-SNAPSHOT.jar
 ```
 
+## To run Sonarscanner with crysl-plugin on crypto-test-project
+- Compile the project
+```shell
+cd crypto-test-project
+mvn clean compile
+```
+
+- Start the sonarscanner depending on the OS
+- Update the sonar-project.properties file based on your settings.
+```shell
+# In sonar-project.properties, update the below three (mainly assuming you did not change default settings of other parameters) as you configured in sonarscaner webpage
+sonar.projectKey=test
+sonar.projectName=Crypto Test Project
+sonar.projectVersion=1.0
+```
+
+- Run sonarscanner on the root directory of crypto-test-project
+```shell
+# Dsonar.token is the token generated in sonarscanner webpage.
+sonar-scanner -Dsonar.token=<your token>
+```
+
 ## CrySL Rules
 
 The plugin automatically downloads CrySL rules from the [CROSSING Crypto-API-Rules repository](https://github.com/CROSSINGTUD/Crypto-API-Rules) during the build process. The rules are packaged as resources within the plugin JAR.
