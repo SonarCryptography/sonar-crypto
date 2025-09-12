@@ -20,10 +20,11 @@ A SonarQube plugin for cryptographic analysis that detects cryptographical issue
 
 ### Quick Start
 
-This project includes a development script that simplifies building, packaging, and installing the plugin for testing purposes.
+This project includes development scripts that simplify building, packaging, and installing the plugin for testing purposes. Both Windows (PowerShell) and Unix-like systems (macOS/Linux) are supported.
 
 #### Available Commands
 
+**Windows (PowerShell):**
 ```powershell
 # Install the plugin to a local SonarQube instance (builds and packages automatically)
 .\dev-script.ps1 install -SonarHome "C:\path\to\sonarqube"
@@ -35,12 +36,32 @@ This project includes a development script that simplifies building, packaging, 
 .\dev-script.ps1 help
 ```
 
+**macOS/Linux (Bash):**
+```bash
+# Install the plugin to a local SonarQube instance (builds and packages automatically)
+./dev-script.sh install /path/to/sonarqube
+
+# Clean all build artifacts
+./dev-script.sh clean
+
+# Show help and usage information
+./dev-script.sh help
+```
+
 #### Development Workflow
 
 1. **Install to SonarQube**:
+   
+   **Windows:**
    ```powershell
    .\dev-script.ps1 install -SonarHome "C:\sonarqube-10.0"
    ```
+   
+   **macOS/Linux:**
+   ```bash
+   ./dev-script.sh install /opt/sonarqube-10.0
+   ```
+   
    This will automatically:
    - Build the plugin (clean compile)
    - Package the plugin into a JAR file
