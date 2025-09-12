@@ -21,16 +21,16 @@ public class Main {
     try {
       MavenProject mi = new MavenProject(mavenProjectPath);
       mi.compile();
-      LOGGER.info("Built project to directory: {}", mi.getBuildDirectory());
+      LOGGER.info(" ----> Built project to directory: {}", mi.getBuildDirectory());
       HeadlessJavaScanner scanner =
           new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
 
       scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
       scanner.scan();
       var errors = scanner.getCollectedErrors();
-      LOGGER.info("Errors: {}", errors.size());
+      LOGGER.info(" ----> Errors: {}", errors.size());
     } catch (MavenBuildException e) {
-      LOGGER.error("Failed to build project", e);
+      LOGGER.error(" ----> Failed to build project", e);
     }
   }
 }
