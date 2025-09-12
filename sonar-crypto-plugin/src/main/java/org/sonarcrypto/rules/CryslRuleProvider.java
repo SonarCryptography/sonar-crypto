@@ -71,7 +71,7 @@ public class CryslRuleProvider {
       throw new IOException("Failed to extract CrySL rules from resources", e);
     }
 
-    LOGGER.info("Extracted {} CrySL files to {}", count, tempDir.toAbsolutePath());
+    LOGGER.info(" ----> Extracted {} CrySL files to {}", count, tempDir.toAbsolutePath());
     return tempDir;
   }
 
@@ -120,10 +120,10 @@ public class CryslRuleProvider {
         }
       }
     } catch (Exception e) {
-      LOGGER.warn("Failed to dynamically discover rule files, falling back to empty list", e);
+      LOGGER.warn(" ----> Failed to dynamically discover rule files, falling back to empty list", e);
     }
 
-    LOGGER.debug("Discovered {} rule file paths in resources", rulePaths.size());
+    LOGGER.debug(" ----> Discovered {} rule file paths in resources", rulePaths.size());
     return rulePaths.toArray(new String[0]);
   }
 }

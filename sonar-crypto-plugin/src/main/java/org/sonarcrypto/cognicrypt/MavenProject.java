@@ -93,7 +93,7 @@ public class MavenProject {
           IOUtils.toString(new FileInputStream(classPathFile), StandardCharsets.UTF_8);
       if (!classPathFile.delete()) {
         LOGGER.warn(
-            "Failed to delete temporary classpath file: {}", classPathFile.getAbsolutePath());
+            " ----> Failed to delete temporary classpath file: {}", classPathFile.getAbsolutePath());
       }
     } catch (IOException e) {
       throw new MavenBuildException(
