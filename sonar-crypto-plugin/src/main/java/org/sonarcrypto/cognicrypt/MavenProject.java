@@ -53,7 +53,7 @@ public class MavenProject {
 
     Invoker invoker = new DefaultInvoker();
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream out = new PrintStream(baos)) {
+      PrintStream out = new PrintStream(baos)) {
       request.setOutputHandler(new PrintStreamHandler(out, true));
       InvocationResult res = invoker.execute(request);
       if (res.getExitCode() != 0) {
@@ -61,8 +61,8 @@ public class MavenProject {
       }
     } catch (MavenInvocationException | IOException e) {
       throw new MavenBuildException(
-          "Was not able to invoke maven in path " + pathToProjectRoot + ". Does a pom.xml exist?",
-          e);
+        "Was not able to invoke maven in path " + pathToProjectRoot + ". Does a pom.xml exist?",
+        e);
     }
     compiled = true;
     computeClassPath();
@@ -75,36 +75,35 @@ public class MavenProject {
     goals.add("dependency:build-classpath");
     goals.add("-Dmdep.outputFile=\"classPath.temp\"");
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream out = new PrintStream(baos)) {
+      PrintStream out = new PrintStream(baos)) {
       request.setOutputHandler(new PrintStreamHandler(out, true));
       request.setGoals(goals);
       Invoker invoker = new DefaultInvoker();
       InvocationResult res = invoker.execute(request);
       if (res.getExitCode() != 0) {
         throw new MavenBuildException(
-            "Was not able to compute dependencies " + pathToProjectRoot + ".");
+          "Was not able to compute dependencies " + pathToProjectRoot + ".");
       }
     } catch (MavenInvocationException | IOException e) {
       throw new MavenBuildException("Was not able to invoke maven to compute dependencies", e);
     }
     try {
       File classPathFile = new File(pathToProjectRoot + File.separator + "classPath.temp");
-      fullProjectClassPath =
-          IOUtils.toString(new FileInputStream(classPathFile), StandardCharsets.UTF_8);
+      fullProjectClassPath = IOUtils.toString(new FileInputStream(classPathFile), StandardCharsets.UTF_8);
       if (!classPathFile.delete()) {
         LOGGER.warn(
-            "Failed to delete temporary classpath file: {}", classPathFile.getAbsolutePath());
+          "Failed to delete temporary classpath file: {}", classPathFile.getAbsolutePath());
       }
     } catch (IOException e) {
       throw new MavenBuildException(
-          "Was not able to read in class path from file classPath.temp", e);
+        "Was not able to read in class path from file classPath.temp", e);
     }
   }
 
   public String getBuildDirectory() {
     if (!compiled) {
       throw new IllegalStateException(
-          "You first have to compile the project. Use method compile()");
+        "You first have to compile the project. Use method compile()");
     }
     return pathToProjectRoot + File.separator + "target" + File.separator + "classes";
   }

@@ -48,12 +48,11 @@ public class CryptoSensor implements Sensor {
       return; // or rethrow if upstream should handle
     } catch (IOException e) {
       LOGGER.error(
-          "I/O error extracting Crysl rules for filter 'BouncyCastle/': {}", e.getMessage(), e);
+        "I/O error extracting Crysl rules for filter 'BouncyCastle/': {}", e.getMessage(), e);
       return;
     }
 
-    HeadlessJavaScanner scanner =
-        new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
+    HeadlessJavaScanner scanner = new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
 
     scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
     scanner.scan();
