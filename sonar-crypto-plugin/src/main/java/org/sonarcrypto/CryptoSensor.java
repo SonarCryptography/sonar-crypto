@@ -25,17 +25,17 @@ public class CryptoSensor implements Sensor {
     sensorDescriptor.onlyOnLanguages("java");
   }
 
-
   @Override
   public void execute(SensorContext sensorContext) {
     LOGGER.info(" ----> Executing CogniCryptSensor");
     LOGGER.info(" ----> Sensor context: {}", sensorContext);
-    
+
     FileSystem fileSystem = sensorContext.fileSystem();
     LOGGER.info(" ----> File system base directory: {}", fileSystem.baseDir().getAbsolutePath());
-    
+
     // Check if there are any Java files
-    Iterable<org.sonar.api.batch.fs.InputFile> javaFiles = fileSystem.inputFiles(fileSystem.predicates().hasLanguage("java"));
+    Iterable<org.sonar.api.batch.fs.InputFile> javaFiles =
+        fileSystem.inputFiles(fileSystem.predicates().hasLanguage("java"));
     int javaFileCount = 0;
     for (org.sonar.api.batch.fs.InputFile file : javaFiles) {
       javaFileCount++;
@@ -45,7 +45,7 @@ public class CryptoSensor implements Sensor {
 
     String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
     LOGGER.info(" ----> Maven project path: {}", mavenProjectPath);
-    
+
     MavenProject mi;
     try {
       LOGGER.info(" ----> Creating MavenProject instance");
@@ -57,9 +57,10 @@ public class CryptoSensor implements Sensor {
       LOGGER.warn(" ----> Failed to build Maven project via Maven invoker: {}", e.getMessage());
       LOGGER.info(" ----> Exception type: {}", e.getClass().getName());
       LOGGER.info(" ----> Attempting to use existing compiled classes");
-      
+
       // Check if target/classes exists and has compiled classes
-      File buildDir = new File(mavenProjectPath + File.separator + "target" + File.separator + "classes");
+      File buildDir =
+          new File(mavenProjectPath + File.separator + "target" + File.separator + "classes");
       if (buildDir.exists() && buildDir.isDirectory()) {
         LOGGER.info(" ----> Found existing compiled classes in: {}", buildDir.getAbsolutePath());
         // Use existing compiled classes without Maven compilation
@@ -69,11 +70,12 @@ public class CryptoSensor implements Sensor {
           java.lang.reflect.Field compiledField = MavenProject.class.getDeclaredField("compiled");
           compiledField.setAccessible(true);
           compiledField.setBoolean(mi, true);
-          
-          java.lang.reflect.Field classPathField = MavenProject.class.getDeclaredField("fullProjectClassPath");
+
+          java.lang.reflect.Field classPathField =
+              MavenProject.class.getDeclaredField("fullProjectClassPath");
           classPathField.setAccessible(true);
           classPathField.set(mi, ""); // Empty classpath for now
-          
+
           LOGGER.info(" ----> Using existing compiled classes");
         } catch (Exception reflectionException) {
           LOGGER.error(" ----> Failed to set compiled state via reflection", reflectionException);
@@ -97,31 +99,41 @@ public class CryptoSensor implements Sensor {
       return; // or rethrow if upstream should handle
     } catch (IOException e) {
       LOGGER.error(
-          " ----> I/O error extracting Crysl rules for filter 'BouncyCastle/': {}", e.getMessage(), e);
+          " ----> I/O error extracting Crysl rules for filter 'BouncyCastle/': {}",
+          e.getMessage(),
+          e);
       return;
     }
 
     LOGGER.info(" ----> Creating HeadlessJavaScanner");
     HeadlessJavaScanner scanner =
-        new HeadlessJavaScanner(mi.getBuildDirectory(), Path.of(ruleDir.toString(), "BouncyCastle").toAbsolutePath().toString());
+        new HeadlessJavaScanner(
+            mi.getBuildDirectory(),
+            Path.of(ruleDir.toString(), "BouncyCastle").toAbsolutePath().toString());
 
     LOGGER.info(" ----> Setting framework to SOOT");
     scanner.setFramework(ScannerSettings.Framework.SOOT);
-    
+
     LOGGER.info(" ----> Starting scan");
     scanner.scan();
-    
+
     var errors = scanner.getCollectedErrors();
     LOGGER.info(" ----> Scan completed. Errors found: {}", errors.size());
-    
+
     if (!errors.isEmpty()) {
       LOGGER.info(" ----> Error details:");
-      errors.cellSet().forEach(cell -> {
-        LOGGER.info(" ---->   - Class: {}, Method: {}, Error: {}", 
-                   cell.getRowKey(), cell.getColumnKey(), cell.getValue());
-      });
+      errors
+          .cellSet()
+          .forEach(
+              cell -> {
+                LOGGER.info(
+                    " ---->   - Class: {}, Method: {}, Error: {}",
+                    cell.getRowKey(),
+                    cell.getColumnKey(),
+                    cell.getValue());
+              });
     }
-    
+
     LOGGER.info(" ----> CogniCryptSensor execution completed");
   }
 }

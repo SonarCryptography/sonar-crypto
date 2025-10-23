@@ -91,7 +91,7 @@ public class CryslRuleProvider {
     try {
       if ("jar".equals(resourceUrl.getProtocol())) {
         // Running from JAR - need to list entries from JAR file
-          JarURLConnection conn = (JarURLConnection) resourceUrl.openConnection();
+        JarURLConnection conn = (JarURLConnection) resourceUrl.openConnection();
         try (JarFile jar = conn.getJarFile()) {
           Enumeration<JarEntry> entries = jar.entries();
           while (entries.hasMoreElements()) {
@@ -121,7 +121,8 @@ public class CryslRuleProvider {
         }
       }
     } catch (Exception e) {
-      LOGGER.warn(" ----> Failed to dynamically discover rule files, falling back to empty list", e);
+      LOGGER.warn(
+          " ----> Failed to dynamically discover rule files, falling back to empty list", e);
     }
 
     LOGGER.debug(" ----> Discovered {} rule file paths in resources", rulePaths.size());

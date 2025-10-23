@@ -16,19 +16,21 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Use direct filesystem path to CrySL rules instead of resource-based approach
-    Path ruleDir = Paths.get("sonar-crypto-plugin/target/classes/crysl-rules/JavaCryptographicArchitecture/src");
+    Path ruleDir =
+        Paths.get(
+            "sonar-crypto-plugin/target/classes/crysl-rules/JavaCryptographicArchitecture/src");
     if (!Files.exists(ruleDir)) {
       LOGGER.error("CrySL rules directory not found at: {}", ruleDir.toAbsolutePath());
       return;
     }
     LOGGER.info(" ----> Using CrySL rules from: {}", ruleDir.toAbsolutePath());
     String mavenProjectPath = new File("crypto-test-project").getAbsolutePath();
-    
+
     try {
       MavenProject mavenProject = new MavenProject(mavenProjectPath);
       mavenProject.compile();
       LOGGER.info(" ----> Built project to directory: {}", mavenProject.getBuildDirectory());
-      
+
       HeadlessJavaScanner scanner =
           new HeadlessJavaScanner(mavenProject.getBuildDirectory(), ruleDir.toString());
 
