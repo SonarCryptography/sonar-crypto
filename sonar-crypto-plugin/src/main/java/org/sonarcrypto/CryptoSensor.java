@@ -103,9 +103,9 @@ public class CryptoSensor implements Sensor {
 
     LOGGER.info(" ----> Creating HeadlessJavaScanner");
     HeadlessJavaScanner scanner =
-        new HeadlessJavaScanner(mi.getBuildDirectory(), Path.of(ruleDir.toString(), "BouncyCastle", "src").toAbsolutePath().toString());
+        new HeadlessJavaScanner(mi.getBuildDirectory(), Path.of(ruleDir.toString(), "BouncyCastle").toAbsolutePath().toString());
 
-    LOGGER.info(" ----> Setting framework to SOOT_UP");
+    LOGGER.info(" ----> Setting framework to SOOT");
     scanner.setFramework(ScannerSettings.Framework.SOOT);
     
     LOGGER.info(" ----> Starting scan");

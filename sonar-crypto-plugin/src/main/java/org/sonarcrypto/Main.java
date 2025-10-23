@@ -3,27 +3,34 @@ package org.sonarcrypto;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
-import org.sonarcrypto.rules.CryslRuleProvider;
 
 public class Main {
   private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
   public static void main(String[] args) throws Exception {
-    CryslRuleProvider ruleProvider = new CryslRuleProvider();
-    Path ruleDir =
-        ruleProvider.extractCryslFilesToTempDir(s -> s.contains("JavaCryptographicArchitecture/"));
-    String mavenProjectPath = new File(args[0]).getAbsolutePath();
+    // Use direct filesystem path to CrySL rules instead of resource-based approach
+    Path ruleDir = Paths.get("sonar-crypto-plugin/target/classes/crysl-rules/JavaCryptographicArchitecture/src");
+    if (!Files.exists(ruleDir)) {
+      LOGGER.error("CrySL rules directory not found at: {}", ruleDir.toAbsolutePath());
+      return;
+    }
+    LOGGER.info(" ----> Using CrySL rules from: {}", ruleDir.toAbsolutePath());
+    String mavenProjectPath = new File("crypto-test-project").getAbsolutePath();
+    
     try {
-      MavenProject mi = new MavenProject(mavenProjectPath);
-      mi.compile();
-      LOGGER.info(" ----> Built project to directory: {}", mi.getBuildDirectory());
+      MavenProject mavenProject = new MavenProject(mavenProjectPath);
+      mavenProject.compile();
+      LOGGER.info(" ----> Built project to directory: {}", mavenProject.getBuildDirectory());
+      
       HeadlessJavaScanner scanner =
-          new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
+          new HeadlessJavaScanner(mavenProject.getBuildDirectory(), ruleDir.toString());
 
       scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
       scanner.scan();
@@ -31,6 +38,8 @@ public class Main {
       LOGGER.info(" ----> Errors: {}", errors.size());
     } catch (MavenBuildException e) {
       LOGGER.error(" ----> Failed to build project", e);
+    } catch (Exception e) {
+      LOGGER.error(" ----> Failed to scan project", e);
     }
   }
 }
