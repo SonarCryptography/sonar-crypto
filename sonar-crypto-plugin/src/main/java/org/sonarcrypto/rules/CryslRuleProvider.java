@@ -2,6 +2,7 @@ package org.sonarcrypto.rules;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.JarURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -90,8 +91,8 @@ public class CryslRuleProvider {
     try {
       if ("jar".equals(resourceUrl.getProtocol())) {
         // Running from JAR - need to list entries from JAR file
-        String jarPath = resourceUrl.getPath().substring(5, resourceUrl.getPath().indexOf("!"));
-        try (JarFile jar = new JarFile(jarPath)) {
+          JarURLConnection conn = (JarURLConnection) resourceUrl.openConnection();
+        try (JarFile jar = conn.getJarFile()) {
           Enumeration<JarEntry> entries = jar.entries();
           while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
