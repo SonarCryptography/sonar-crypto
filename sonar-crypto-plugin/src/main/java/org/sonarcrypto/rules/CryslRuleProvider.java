@@ -80,7 +80,7 @@ public class CryslRuleProvider {
    * Gets the list of rule file paths from the resources. This implementation dynamically discovers
    * all .crysl files in the resources directory with their relative paths.
    */
-  private String[] getRuleFilePaths() throws IOException {
+  private String[] getRuleFilePaths() {
     List<String> rulePaths = new ArrayList<>();
     URL resourceUrl = getClass().getResource(CRYSL_RESOURCES_PATH);
 
@@ -91,6 +91,7 @@ public class CryslRuleProvider {
     try {
       if ("jar".equals(resourceUrl.getProtocol())) {
         // Running from JAR - need to list entries from JAR file
+        LOGGER.debug(" ----> Discovering rule file paths in JAR file");
         JarURLConnection conn = (JarURLConnection) resourceUrl.openConnection();
         try (JarFile jar = conn.getJarFile()) {
           Enumeration<JarEntry> entries = jar.entries();
@@ -107,6 +108,7 @@ public class CryslRuleProvider {
         }
       } else {
         // Running from file system (development mode)
+        LOGGER.debug(" ----> Discovering rule file paths in resources");
         try {
           Path resourcePath = Paths.get(resourceUrl.toURI());
           Files.walk(resourcePath)
