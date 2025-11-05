@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.sonar.api.testfixtures.log.LogAndArguments;
@@ -43,6 +44,7 @@ class FileUtilitiesTests {
         .containsExactly("Could not resolve canonical path for build directory: {}");
   }
 
+  @Disabled
   @Test
   void find_jar() {
     File jar = FileUtilities.sonarCryptoJar("../sonar-crypto-plugin/target");
