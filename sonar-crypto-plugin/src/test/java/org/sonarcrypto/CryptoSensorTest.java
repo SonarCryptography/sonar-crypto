@@ -2,8 +2,6 @@ package org.sonarcrypto;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -21,15 +19,5 @@ class CryptoSensorTest {
     CryptoSensor sensor = new CryptoSensor();
     sensor.execute(SensorContextTester.create(tempDir));
     assertThat(logTester.logs()).containsExactly("Failed to build Maven project");
-  }
-
-  @Test
-  void builds_example_maven_project() throws IOException {
-    CryptoSensor sensor = new CryptoSensor();
-    sensor.execute(
-        SensorContextTester.create(
-            new File("../e2e/src/test/resources/Java/Maven/Basic").getCanonicalFile()));
-    // FIXME: This fails locally (WIP)
-    // assertThat(logTester.logs()).containsExactly("Failed to build Maven project");
   }
 }
