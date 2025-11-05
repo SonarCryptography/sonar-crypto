@@ -2,6 +2,7 @@ package org.sonarcrypto.e2e;
 
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.MavenBuild;
+import com.sonar.orchestrator.container.Edition;
 import com.sonar.orchestrator.junit5.OrchestratorExtension;
 import com.sonar.orchestrator.locator.MavenLocation;
 import java.io.File;
@@ -11,13 +12,12 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 class OrchestratorTests {
-  private static final String SONAR_QUBE_VERSION = "25.10.0.114319";
-
   @RegisterExtension
   private static final OrchestratorExtension ORCHESTRATOR =
       OrchestratorExtension.builderEnv()
           .useDefaultAdminCredentialsForBuilds(true)
-          .setSonarVersion(SONAR_QUBE_VERSION)
+          .setEdition(Edition.COMMUNITY)
+          .setSonarVersion("LATEST_RELEASE")
           // TODO: Activate sonar-crypto-plugin once working
           // .addPlugin(FileLocation.of(sonarCryptoJar(BUILD_DIR_PATH)))
           // TODO: Remove sonar-java-plugin once sonar-crypto-plugin comes with a default quality
@@ -39,7 +39,6 @@ class OrchestratorTests {
       File projectLocation, String projectKey, @Nullable Map<String, String> properties) {
     MavenBuild build =
         MavenBuild.create(new File(projectLocation, "pom.xml"))
-            // TODO: Add -Dscan=false after -DskipTests?
             .setGoals(
                 "clean package -DskipTests -Dsonar.projectKey=" + projectKey + " sonar:sonar");
 
