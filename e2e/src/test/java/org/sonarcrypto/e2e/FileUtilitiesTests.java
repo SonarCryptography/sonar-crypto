@@ -1,5 +1,9 @@
 package org.sonarcrypto.e2e;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import java.io.File;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -7,21 +11,16 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.sonar.api.testfixtures.log.LogAndArguments;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
 class FileUtilitiesTests {
-  @RegisterExtension
-  LogTesterJUnit5 logTester = new LogTesterJUnit5();
+  @RegisterExtension LogTesterJUnit5 logTester = new LogTesterJUnit5();
 
   @Test
   void fails_to_find_jar_in_nonexistent_dir() {
     File jar = FileUtilities.sonarCryptoJar("../sonar-crypto-plugin/target/does/not/exist");
     assertThat(jar).isNull();
     assertThat(logTester.getLogs())
-      .extracting(LogAndArguments::getRawMsg)
-      .containsExactly("Build directory does not exist: {}");
+        .extracting(LogAndArguments::getRawMsg)
+        .containsExactly("Build directory does not exist: {}");
   }
 
   @Test
@@ -29,8 +28,8 @@ class FileUtilitiesTests {
     File jar = FileUtilities.sonarCryptoJar("../sonar-crypto-plugin");
     assertThat(jar).isNull();
     assertThat(logTester.getLogs())
-      .extracting(LogAndArguments::getRawMsg)
-      .containsExactly("Could not find sonar-crypto-plugin jar in build directory: {}");
+        .extracting(LogAndArguments::getRawMsg)
+        .containsExactly("Could not find sonar-crypto-plugin jar in build directory: {}");
   }
 
   @Test
@@ -40,8 +39,8 @@ class FileUtilitiesTests {
     File jar = FileUtilities.sonarCryptoJar(mockedFile);
     assertThat(jar).isNull();
     assertThat(logTester.getLogs())
-      .extracting(LogAndArguments::getRawMsg)
-      .containsExactly("Could not resolve canonical path for build directory: {}");
+        .extracting(LogAndArguments::getRawMsg)
+        .containsExactly("Could not resolve canonical path for build directory: {}");
   }
 
   @Test

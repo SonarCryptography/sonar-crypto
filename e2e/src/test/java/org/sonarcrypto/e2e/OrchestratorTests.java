@@ -14,14 +14,16 @@ class OrchestratorTests {
   private static final String SONAR_QUBE_VERSION = "25.10.0.114319";
 
   @RegisterExtension
-  private static final OrchestratorExtension ORCHESTRATOR = OrchestratorExtension.builderEnv()
-    .useDefaultAdminCredentialsForBuilds(true)
-    .setSonarVersion(SONAR_QUBE_VERSION)
-    // TODO: Activate sonar-crypto-plugin once working
-    // .addPlugin(FileLocation.of(sonarCryptoJar(BUILD_DIR_PATH)))
-    // TODO: Remove sonar-java-plugin once sonar-crypto-plugin comes with a default quality profile
-    .addPlugin(MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.20.0.40630"))
-    .build();
+  private static final OrchestratorExtension ORCHESTRATOR =
+      OrchestratorExtension.builderEnv()
+          .useDefaultAdminCredentialsForBuilds(true)
+          .setSonarVersion(SONAR_QUBE_VERSION)
+          // TODO: Activate sonar-crypto-plugin once working
+          // .addPlugin(FileLocation.of(sonarCryptoJar(BUILD_DIR_PATH)))
+          // TODO: Remove sonar-java-plugin once sonar-crypto-plugin comes with a default quality
+          // profile
+          .addPlugin(MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.20.0.40630"))
+          .build();
 
   @AfterAll
   static void endTest() {
@@ -33,11 +35,13 @@ class OrchestratorTests {
     return executeMavenBuild(projectLocation, projectKey, null);
   }
 
-  BuildResult executeMavenBuild(File projectLocation, String projectKey, @Nullable Map<String, String> properties) {
-    MavenBuild build = MavenBuild
-      .create(new File(projectLocation, "pom.xml"))
-      // TODO: Add -Dscan=false after -DskipTests?
-      .setGoals("clean package -DskipTests -Dsonar.projectKey=" + projectKey + " sonar:sonar");
+  BuildResult executeMavenBuild(
+      File projectLocation, String projectKey, @Nullable Map<String, String> properties) {
+    MavenBuild build =
+        MavenBuild.create(new File(projectLocation, "pom.xml"))
+            // TODO: Add -Dscan=false after -DskipTests?
+            .setGoals(
+                "clean package -DskipTests -Dsonar.projectKey=" + projectKey + " sonar:sonar");
 
     // Propagate MAVEN_OPTS to Maven Scanner for debugging purposes
     String mavenOpts = System.getenv("MAVEN_OPTS");
@@ -46,9 +50,10 @@ class OrchestratorTests {
     }
 
     // Set properties
-    build.setProperty("sonar.cpd.exclusions", "**/*")
-      .setProperty("sonar.internal.analysis.failFast", "true")
-      .setProperty("sonar.scanner.skipJreProvisioning", "true");
+    build
+        .setProperty("sonar.cpd.exclusions", "**/*")
+        .setProperty("sonar.internal.analysis.failFast", "true")
+        .setProperty("sonar.scanner.skipJreProvisioning", "true");
     if (properties != null) {
       build.setProperties(properties);
     }

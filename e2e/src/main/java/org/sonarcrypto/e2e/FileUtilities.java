@@ -22,18 +22,22 @@ public class FileUtilities {
     try {
       buildDir = buildDir.getCanonicalFile();
     } catch (IOException e) {
-      LOGGER.error("Could not resolve canonical path for build directory: {}", buildDir.getAbsolutePath());
+      LOGGER.error(
+          "Could not resolve canonical path for build directory: {}", buildDir.getAbsolutePath());
       return null;
     }
     File[] candidates = buildDir.listFiles();
     if (candidates != null) {
       for (File candidate : candidates) {
-        if (candidate.getName().startsWith("sonar-crypto-plugin") && candidate.getName().endsWith(".jar")) {
+        if (candidate.getName().startsWith("sonar-crypto-plugin")
+            && candidate.getName().endsWith(".jar")) {
           return candidate;
         }
       }
     }
-    LOGGER.error("Could not find sonar-crypto-plugin jar in build directory: {}", buildDir.getAbsolutePath());
+    LOGGER.error(
+        "Could not find sonar-crypto-plugin jar in build directory: {}",
+        buildDir.getAbsolutePath());
     return null;
   }
 }
