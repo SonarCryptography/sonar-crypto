@@ -2,7 +2,6 @@ package org.sonarcrypto.e2e;
 
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.MavenBuild;
-import com.sonar.orchestrator.container.Edition;
 import com.sonar.orchestrator.junit5.OrchestratorExtension;
 import com.sonar.orchestrator.locator.MavenLocation;
 import java.io.File;
@@ -15,9 +14,9 @@ class OrchestratorTests {
   @RegisterExtension
   private static final OrchestratorExtension ORCHESTRATOR =
       OrchestratorExtension.builderEnv()
+          // TODO: Once SQ is downloaded, adjust the path accordingly
+          .setZipFile(new File("path/to/sonarqube-25.*.zip"))
           .useDefaultAdminCredentialsForBuilds(true)
-          .setEdition(Edition.COMMUNITY)
-          .setSonarVersion("LATEST_RELEASE")
           // TODO: Activate sonar-crypto-plugin once working
           // .addPlugin(FileLocation.of(sonarCryptoJar(BUILD_DIR_PATH)))
           // TODO: Remove sonar-java-plugin once sonar-crypto-plugin comes with a default quality
