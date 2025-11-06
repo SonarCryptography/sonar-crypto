@@ -43,16 +43,44 @@
             <artifactId>maven-invoker</artifactId>
             <version>3.3.0</version>
         </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.sonarsource.sonarqube</groupId>
+            <artifactId>sonar-plugin-api-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.sonarsource.api.plugin</groupId>
+            <artifactId>sonar-plugin-api-test-fixtures</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.17</version>
-            <scope>runtime</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <proc>none</proc>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
                 <artifactId>sonar-packaging-maven-plugin</artifactId>
@@ -63,7 +91,25 @@
                     <pluginClass>org.sonarcrypto.CryptoPlugin</pluginClass>
                     <pluginDescription>Detect Cryptographical Issues</pluginDescription>
                     <skipDependenciesPackaging>true</skipDependenciesPackaging>
+                    <pluginApiMinVersion>9.14.0.375</pluginApiMinVersion>
+                    <requiredForLanguages>java</requiredForLanguages>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <minimizeJar>true</minimizeJar>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
