@@ -36,5 +36,28 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.13.0</version>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-25.11.0.114957.zip</url>
+                            <outputFileName>sq_for_orchestrator.zip</outputFileName>
+                            <outputDirectory>${project.build.directory}/SQ</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
