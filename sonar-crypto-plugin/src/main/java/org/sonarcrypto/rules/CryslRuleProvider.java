@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,12 +24,12 @@ import org.slf4j.LoggerFactory;
  * file names. The rules are extracted to a temporary directory.
  */
 public class CryslRuleProvider {
-  private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
+  private static final @NonNull Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
 
-  private static final URI RULE_DISTRIBUTION =
+  private static final @NonNull URI RULE_DISTRIBUTION =
       URI.create("https://github.com/CROSSINGTUD/Crypto-API-Rules/archive/refs/heads/master.zip");
 
-  private final HttpClient http = HttpClient.newHttpClient();
+  private final @NonNull HttpClient http = HttpClient.newHttpClient();
 
   /**
    * Downloads the zip from ruleDistribution, extracts all .crysl files to a temp directory, and
@@ -36,7 +38,7 @@ public class CryslRuleProvider {
    * @return The temp directory containing the extracted .crysl files.
    * @throws IOException if an I/O error occurs
    */
-  public Path extractCryslFilesToTempDir(Predicate<String> filter)
+  public @NonNull Path extractCryslFilesToTempDir(@NonNull Predicate<String> filter)
       throws IOException, InterruptedException {
     Path tempDir = Files.createTempDirectory("crysl_rules");
     int count = 0;
