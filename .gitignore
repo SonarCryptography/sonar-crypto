@@ -61,3 +61,7 @@ bld/
 
 # Claude Code temporary files
 .claude/
+
+# Extracted CrySL rules
+/sonar-crypto-plugin/src/main/resources/rules/*
+!/sonar-crypto-plugin/src/main/resources/rules/.gitkeep
