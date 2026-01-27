@@ -18,6 +18,8 @@
     </modules>
 
     <properties>
+        <sonar.organization>sonarcryptography</sonar.organization>
+
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
         <sonar.plugin.api.version>13.3.0.3209</sonar.plugin.api.version>
