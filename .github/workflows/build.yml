@@ -5,17 +5,15 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 jobs:
-  build-test:
-    name: Build & Test
+  build:
+    name: Build
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [ windows-latest, ubuntu-latest ]
     runs-on: ${{ matrix.os }}
-
     steps:
       - uses: actions/checkout@v6
         with:
@@ -25,5 +23,44 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Build & Test
-        run: mvn clean test
+      - name: Build
+        run: mvn clean package -DskipTests --batch-mode
+
+  unit-test:
+    name: Unit Tests
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Unit Tests
+        run: mvn test -pl '!e2e' --batch-mode
+
+  e2e-test:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACTORY_URL: https://repo1.maven.org/maven2
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build Plugin
+        run: mvn install -pl '!e2e' -DskipTests --batch-mode
+      - name: E2E Tests
+        run: mvn test -pl e2e --batch-mode

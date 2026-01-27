@@ -58,3 +58,6 @@ bld/
 # MSTest test results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
+
+# Claude Code temporary files
+.claude/

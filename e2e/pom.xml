@@ -14,20 +14,38 @@
     <name>End-to-end Tests</name>
 
     <dependencies>
-        <!-- Test dependencies -->
+        <!-- Plugin under test - ensures build order -->
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sonar-crypto-plugin</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Runtime dependencies -->
         <dependency>
-            <groupId>org.sonarsource.api.plugin</groupId>
-            <artifactId>sonar-plugin-api-test-fixtures</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.sonarsource.orchestrator</groupId>
             <artifactId>sonar-orchestrator-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.sonarsource.api.plugin</groupId>
+            <artifactId>sonar-plugin-api-test-fixtures</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -42,7 +60,6 @@
             <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
-                <version>1.13.0</version>
                 <executions>
                     <execution>
                         <phase>process-resources</phase>
@@ -50,12 +67,16 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-25.11.0.114957.zip</url>
-                            <outputFileName>sq_for_orchestrator.zip</outputFileName>
+                            <url>https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-${sonar.qube.version}.zip</url>
+                            <outputFileName>sq_for_orchestrator-${sonar.qube.version}.zip</outputFileName>
                             <outputDirectory>${project.build.directory}/SQ</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
