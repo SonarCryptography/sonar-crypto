@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build & Unit Tests
     strategy:
       fail-fast: false
       matrix:
@@ -25,24 +25,6 @@ jobs:
           distribution: 'temurin'
       - name: Build
         run: mvn clean package -DskipTests --batch-mode
-
-  unit-test:
-    name: Unit Tests
-    needs: build
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ windows-latest, ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - name: Set up JDK
-        uses: actions/setup-java@v5
-        with:
-          java-version: '17'
-          distribution: 'temurin'
       - name: Unit Tests
         run: mvn test -pl '!e2e' --batch-mode
 
