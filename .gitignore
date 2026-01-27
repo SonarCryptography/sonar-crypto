@@ -63,5 +63,5 @@ bld/
 .claude/
 
 # Extracted CrySL rules
-/sonar-crypto-plugin/src/main/resources/rules/*
-!/sonar-crypto-plugin/src/main/resources/rules/.gitkeep
+/sonar-crypto-plugin/src/main/resources/crysl_rules/*
+!/sonar-crypto-plugin/src/main/resources/crysl_rules/.gitkeep

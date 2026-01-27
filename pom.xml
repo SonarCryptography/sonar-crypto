@@ -175,7 +175,7 @@
                         <execution>
                             <id>unpack</id>
                             <goals>
-                                <goal>unpack</goal>
+                                <goal>copy</goal>
                             </goals>
                             <phase>compile</phase>
                             <configuration>
@@ -187,7 +187,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources/rules</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                     <artifactItem>
@@ -197,7 +197,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources/rules</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                     <artifactItem>
@@ -207,7 +207,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources/rules</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                     <artifactItem>
@@ -217,7 +217,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources/rules</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                 </artifactItems>
