@@ -34,7 +34,7 @@ jobs:
       - name: Build & Test (No E2E) & Analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn verify -pl '!e2e' -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=SonarCryptography_sonar-crypto
+        run: mvn verify -pl '!e2e' -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=SonarCryptography_sonar-crypto -Pcoverage
 
   build-windows:
     name: Build & Unit Tests
