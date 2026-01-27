@@ -35,14 +35,10 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Build
-        run: mvn clean package -DskipTests -B
-      - name: Unit Tests
-        run: mvn test -pl '!e2e' -B
-      - name: Analyze
+      - name: Build & Test (No E2E) & Analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=SonarCryptography_sonar-crypto
+        run: mvn verify -pl '!e2e' -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=SonarCryptography_sonar-crypto
 
   e2e-test:
     name: E2E Tests
