@@ -22,8 +22,10 @@
             <artifactId>sonar-plugin-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- Runtime dependencies -->
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+        </dependency>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>HeadlessJavaScanner</artifactId>

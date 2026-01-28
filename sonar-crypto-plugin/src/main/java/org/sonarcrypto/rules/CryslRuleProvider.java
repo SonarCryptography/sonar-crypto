@@ -17,7 +17,7 @@ import org.sonarcrypto.utils.ResourceExtractor;
 public class CryslRuleProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
 	
-	public Path extractCryslFileToTempDir(String ruleSet) throws IOException {
+	public Path extractCryslFileToTempDir(String ruleset) throws IOException {
 		final var fileEnding = ".zip";
 		final var rulesFolderName = "crysl_rules";
 		final var tempDir = Files.createTempDirectory(rulesFolderName);
@@ -25,7 +25,7 @@ public class CryslRuleProvider {
 			rulesFolderName,
 			tempDir,
 			fileEnding,
-			ruleSet::equalsIgnoreCase
+			ruleset::equalsIgnoreCase
 		);
 		
 		final var foundRules = extractedRulePaths.size();
@@ -33,7 +33,7 @@ public class CryslRuleProvider {
 		if(foundRules == 0)
 			return null;
 		if(foundRules > 1)
-			LOGGER.error("Multiple rule sets matched to {}; using first rule set.", ruleSet);
+			LOGGER.error("Multiple rule sets matched to {}; using first rule set.", ruleset);
 		
 		return extractedRulePaths.get(0);
 	}

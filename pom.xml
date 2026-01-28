@@ -71,6 +71,11 @@
                 <!-- common-lang3 version must be aligned with sonar-plugin-api-impl -->
                 <version>3.18.0</version>
             </dependency>
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli</artifactId>
+                <version>4.7.7</version>
+            </dependency>
 
             <!-- Test dependencies -->
             <dependency>
