@@ -7,13 +7,9 @@ on:
   pull_request:
 
 jobs:
-  build:
-    name: Build & Unit Tests
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ windows-latest, ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
+  build-linux:
+    name: Build & Unit Tests & SQ
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
@@ -23,10 +19,45 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Build
-        run: mvn clean package -DskipTests --batch-mode
-      - name: Unit Tests
-        run: mvn test -pl '!e2e' --batch-mode
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build & Test (No E2E) & Analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn verify -pl '!e2e' -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=SonarCryptography_sonar-crypto -Pcoverage
+
+  build-windows:
+    name: Build & Unit Tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build & Test (No E2E) & Analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn verify -pl '!e2e' -B
 
   e2e-test:
     name: E2E Tests
@@ -42,7 +73,13 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
       - name: Build Plugin
-        run: mvn install -pl '!e2e' -DskipTests --batch-mode
+        run: mvn install -pl '!e2e' -DskipTests -B
       - name: E2E Tests
-        run: mvn test -pl e2e --batch-mode
+        run: mvn test -pl e2e -B
