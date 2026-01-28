@@ -45,14 +45,10 @@ public class CryptoSensor implements Sensor {
     Path ruleDir;
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();
-      ruleDir = ruleProvider.extractCryslFilesToTempDir(s -> s.contains("BouncyCastle/"));
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      LOGGER.warn("Extraction interrupted while filtering 'BouncyCastle/'", e);
-      return; // or rethrow if upstream should handle
+      ruleDir = ruleProvider.extractCryslFileToTempDir("bc");
     } catch (IOException e) {
       LOGGER.error(
-          "I/O error extracting Crysl rules for filter 'BouncyCastle/': {}", e.getMessage(), e);
+          "I/O error extracting Crysl rules for filter 'bc': {}", e.getMessage(), e);
       return;
     }
 

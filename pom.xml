@@ -189,6 +189,7 @@
                                         <overWrite>true</overWrite>
                                         <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
+                                        <destFileName>jca.zip</destFileName>
                                     </artifactItem>
                                     <artifactItem>
                                         <groupId>de.fraunhofer.iem</groupId>
@@ -199,6 +200,7 @@
                                         <overWrite>true</overWrite>
                                         <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
+                                        <destFileName>bc.zip</destFileName>
                                     </artifactItem>
                                     <artifactItem>
                                         <groupId>de.darmstadt.tu.crossing</groupId>
@@ -209,6 +211,7 @@
                                         <overWrite>true</overWrite>
                                         <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
+                                        <destFileName>tink.zip</destFileName>
                                     </artifactItem>
                                     <artifactItem>
                                         <groupId>de.paderborn.uni</groupId>
@@ -219,6 +222,7 @@
                                         <overWrite>true</overWrite>
                                         <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
+                                        <destFileName>bc-jca.zip</destFileName>
                                     </artifactItem>
                                 </artifactItems>
                             </configuration>

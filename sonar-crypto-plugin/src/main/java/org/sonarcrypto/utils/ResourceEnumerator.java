@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Source: <a href="https://www.codestudy.net/blog/get-a-list-of-resources-from-classpath-directory/">How to Get a List of Resources from a Classpath Directory in Java (Works for Filesystem & JAR Files)</a>
@@ -18,11 +19,16 @@ public class ResourceEnumerator {
 	 * Lists all resources in a classpath directory (supports filesystem and JAR resources).
 	 *
 	 * @param directoryPath Path to the classpath directory (e.g., "configs/").
+	 * @param fileNameEndsWith File name ending to filter.
+	 * @param filter A custom filter; gets the file name without the value of {@code fileNameEndsWith}.
 	 * @return List of resource names (relative to the classpath).
-	 * @throws IOException If an I/O error occurs.
-	 * @throws URISyntaxException If the resource URL is invalid.
+	 * @throws IOException An I/O error occurred.
 	 */
-	public static List<Path> listResources(Path directoryPath, String fileNameEndsWith) throws IOException, URISyntaxException {
+	public static List<Path> listResources(
+		Path directoryPath,
+		String fileNameEndsWith,
+		Predicate<String> filter
+	) throws IOException {
 		final var resources = new ArrayList<Path>();
 		final var classLoader = ResourceEnumerator.class.getClassLoader();
 		
@@ -38,10 +44,25 @@ public class ResourceEnumerator {
 			
 			if("file".equals(protocol)) {
 				// Handle filesystem resources
-				resources.addAll(listFilesystemResources(resourceUrl.toURI(), directoryPath, fileNameEndsWith));
-				//} else if ("jar".equals(protocol)) {
-				//	// Handle JAR resources
-				//	resources.addAll(listJarResources(resourceUrl, normalizedDir));
+				try {
+					resources.addAll(
+						listFilesystemResources(
+							resourceUrl.toURI(),
+							directoryPath,
+							fileNameEndsWith,
+							filter
+						)
+					);
+				}
+				catch(URISyntaxException e) {
+					throw new RuntimeException(
+						"Failed converting resource URL into URI: Invalid URI syntax!",
+						e
+					);
+				}
+			//} else if ("jar".equals(protocol)) {
+			//	// Handle JAR resources
+			//	resources.addAll(listJarResources(resourceUrl, normalizedDir));
 			}
 			else {
 				throw new IOException("Unsupported protocol: " + protocol);
@@ -52,13 +73,17 @@ public class ResourceEnumerator {
 	}
 	
 	// List resources from a filesystem directory
-	private static List<Path> listFilesystemResources(URI dirUri, Path baseDir, String fileNameEndsWith) throws IOException {
+	private static List<Path> listFilesystemResources(URI dirUri, Path baseDir, String fileNameEndsWith, Predicate<String> filter) throws IOException {
 		final var resources = new ArrayList<Path>();
 		final var dirPath = Paths.get(dirUri);
 		
 		try(final var pathStream = Files.walk(dirPath)) {
 			pathStream.filter(Files::isRegularFile) // Skip directories
-				.filter(it -> it.getFileName().toString().endsWith(fileNameEndsWith))
+				.filter(it -> {
+					final var fileName = it.getFileName().toString();
+					final var fileNameWithoutEnding = fileName.substring(0, fileName.length() - fileNameEndsWith.length());
+					return fileName.endsWith(fileNameEndsWith) && filter.test(fileNameWithoutEnding);
+				})
 				.forEach(filePath -> {
 					// Get path relative to the base directory
 					final var relativePath = baseDir.resolve(dirPath.relativize(filePath));
