@@ -25,16 +25,15 @@ public class Main {
 		final String classPath;
 		
 		if(classPathArg != null) {
-			
 			if(mvnProject != null) {
-				System.err.println("Cannot set both args --classPath and --mvnProject");
-				LOGGER.error("Cannot set both args --classPath and --mvnProject");
+				LOGGER.error("Cannot set both class path and maven project at the same time");
 				System.exit(1);
+				throw new Error();
 			}
 			
 			classPath = classPathArg;
 			
-			System.out.println("Class path: " + classPath);
+			LOGGER.info("Class path: {}", classPath);
 		}
 		else if(mvnProject != null) {
 			String mavenProjectPath = new File(mvnProject).getAbsolutePath();
@@ -48,50 +47,42 @@ public class Main {
 			catch(MavenBuildException e) {
 				LOGGER.error("Failed to build project", e);
 				System.exit(1);
-				throw new RuntimeException();
+				throw new Error();
 			}
 			
-			System.out.println("Maven project: " + classPath);
+			LOGGER.info("Maven project: {}", classPath);
 		}
 		else {
-			System.err.println(
-				"Invalid command line arguments: class path or maven project required."
-			);
 			LOGGER.error("Invalid command line arguments: class path or maven project required.");
 			System.exit(1);
-			throw new RuntimeException();
+			throw new Error();
 		}
 		
 		final var rulesetFile =
 			new CryslRuleProvider().extractCryslFileToTempDir(ruleset);
 		
 		if(rulesetFile == null) {
-			System.err.println("CrySL ruleset not found!");
 			LOGGER.error("CrySL ruleset not found!");
 			System.exit(1);
 		}
 		
-		System.out.println("Ruleset: " + ruleset);
-		System.out.println("Framework: " + framework);
-		System.out.println();
+		LOGGER.info("Ruleset: {}", ruleset);
+		LOGGER.info("Framework: {}", framework);
 		
 		final var scanner = new HeadlessJavaScanner(classPath, rulesetFile.toString());
 		scanner.setFramework(framework);
 		
-		System.out.println("Running analysis ...");
+		LOGGER.info("Running analysis ...");
 		scanner.scan();
-		System.out.println("Done.");
-		System.out.println();
+		LOGGER.info("Done.");
 		
 		var errors = scanner.getCollectedErrors();
 		
 		if(errors.isEmpty()) {
-			System.out.println("No vulnerabilities found.");
+			LOGGER.info("No vulnerabilities found.");
 			return;
 		}
 		
-		System.out.println("Found " + errors.size() + " vulnerabilities:");
-		System.out.println();
-		System.out.println(errors);
+		LOGGER.info("Found {} vulnerabilities: {}", errors.size(), errors);
 	}
 }
