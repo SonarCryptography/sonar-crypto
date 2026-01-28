@@ -21,6 +21,7 @@
         <sonar.plugin.api.version>13.3.0.3209</sonar.plugin.api.version>
         <sonarqube.api.impl.version>25.9.0.112764</sonarqube.api.impl.version>
         <packaging.plugin.version>1.23.0.740</packaging.plugin.version>
+        <jspecify.version>1.0.0</jspecify.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

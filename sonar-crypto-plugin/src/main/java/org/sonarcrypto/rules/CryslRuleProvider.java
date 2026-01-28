@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
  * JavaCryptographicArchitecture. The rulesets can not be used at the same time due to conflicting
  * file names. The rules are extracted to a temporary directory.
  */
+@NullMarked
 public class CryslRuleProvider {
   private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
 

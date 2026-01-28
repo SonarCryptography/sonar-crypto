@@ -26,15 +26,18 @@ import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.apache.maven.shared.invoker.PrintStreamHandler;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@NullMarked
 public class MavenProject {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MavenProject.class);
   private final String pathToProjectRoot;
   private boolean compiled;
-  private String fullProjectClassPath;
+  private @Nullable String fullProjectClassPath;
 
   public MavenProject(String pathToProjectRoot) throws FileNotFoundException {
     File file = new File(pathToProjectRoot);
@@ -109,7 +112,7 @@ public class MavenProject {
     return pathToProjectRoot + File.separator + "target" + File.separator + "classes";
   }
 
-  public String getFullClassPath() {
+  public @Nullable String getFullClassPath() {
     if (!compiled) {
       throw new IllegalStateException("Project has not been compiled yet.");
     }
