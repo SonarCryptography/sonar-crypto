@@ -87,6 +87,7 @@ public class Main {
 		
 		if(errors.isEmpty()) {
 			System.out.println("No vulnerabilities found.");
+			return;
 		}
 		
 		System.out.println("Found " + errors.size() + " vulnerabilities:");
