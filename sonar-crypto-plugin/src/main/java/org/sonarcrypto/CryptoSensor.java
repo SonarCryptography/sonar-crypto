@@ -5,7 +5,7 @@ import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
@@ -16,18 +16,20 @@ import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
 
+
+@NullMarked
 public class CryptoSensor implements Sensor {
 
-  private static final @NonNull Logger LOGGER = LoggerFactory.getLogger(CryptoSensor.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CryptoSensor.class);
 
   @Override
-  public void describe(@NonNull SensorDescriptor sensorDescriptor) {
+  public void describe(SensorDescriptor sensorDescriptor) {
     sensorDescriptor.name("CogniCryptSensor");
     sensorDescriptor.onlyOnLanguages("java");
   }
 
   @Override
-  public void execute(@NonNull SensorContext sensorContext) {
+  public void execute(SensorContext sensorContext) {
     FileSystem fileSystem = sensorContext.fileSystem();
 
     String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();

@@ -5,17 +5,18 @@ import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
 import java.nio.file.Path;
 
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
 
+@NullMarked
 public class Main {
-  private static final @NonNull Logger LOGGER = LoggerFactory.getLogger(Main.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-  public static void main(@NonNull String @NonNull [] args) throws Exception {
+  public static void main(String[] args) throws Exception {
     CryslRuleProvider ruleProvider = new CryslRuleProvider();
     Path ruleDir =
         ruleProvider.extractCryslFilesToTempDir(s -> s.contains("JavaCryptographicArchitecture/"));

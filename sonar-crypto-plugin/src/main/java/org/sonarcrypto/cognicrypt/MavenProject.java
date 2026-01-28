@@ -26,19 +26,20 @@ import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.apache.maven.shared.invoker.PrintStreamHandler;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@NullMarked
 public class MavenProject {
 
-  private static final @NonNull Logger LOGGER = LoggerFactory.getLogger(MavenProject.class);
-  private final @NonNull String pathToProjectRoot;
+  private static final Logger LOGGER = LoggerFactory.getLogger(MavenProject.class);
+  private final String pathToProjectRoot;
   private boolean compiled;
   private @Nullable String fullProjectClassPath;
 
-  public MavenProject(@NonNull String pathToProjectRoot) throws FileNotFoundException {
+  public MavenProject(String pathToProjectRoot) throws FileNotFoundException {
     File file = new File(pathToProjectRoot);
     if (!file.exists())
       throw new FileNotFoundException("The path " + pathToProjectRoot + " does not exist!");
@@ -103,7 +104,7 @@ public class MavenProject {
     }
   }
 
-  public @NonNull String getBuildDirectory() {
+  public String getBuildDirectory() {
     if (!compiled) {
       throw new IllegalStateException(
           "You first have to compile the project. Use method compile()");

@@ -1,10 +1,13 @@
 package org.sonarcrypto;
 
 import java.io.File;
+
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@NullMarked
 class SqAvailabilityTest {
     @Test
     void zip_file_is_downloaded() {
