@@ -1,5 +1,6 @@
 package org.sonarcrypto.utils;
 
+import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.Main;
 
 import java.io.IOException;
@@ -11,8 +12,8 @@ import java.util.function.Predicate;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+@NullMarked
 public class ResourceExtractor {
-	
 	/**
 	 * Extracts files from resources into a target directory.
 	 * 
@@ -24,10 +25,10 @@ public class ResourceExtractor {
 	 * @throws IOException An I/O error occurred.
 	 */
 	public static List<Path> extract(
-		String resourceFolder,
-		Path targetFolder,
-		String fileEnding,
-		Predicate<String> filter
+		final String resourceFolder,
+		final Path targetFolder,
+		final String fileEnding,
+		final Predicate<String> filter
 	) throws IOException {
 		final var collectedTargetPaths = new ArrayList<Path>();
 		final var resourcePaths =

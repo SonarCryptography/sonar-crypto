@@ -1,5 +1,7 @@
 package org.sonarcrypto.utils;
 
+import org.jspecify.annotations.NullMarked;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,8 +15,8 @@ import java.util.function.Predicate;
 /**
  * Source: <a href="https://www.codestudy.net/blog/get-a-list-of-resources-from-classpath-directory/">How to Get a List of Resources from a Classpath Directory in Java (Works for Filesystem & JAR Files)</a>
  */
+@NullMarked
 public class ResourceEnumerator {
-	
 	/**
 	 * Lists all resources in a classpath directory (supports filesystem and JAR resources).
 	 *
@@ -25,9 +27,9 @@ public class ResourceEnumerator {
 	 * @throws IOException An I/O error occurred.
 	 */
 	public static List<Path> listResources(
-		Path directoryPath,
-		String fileNameEndsWith,
-		Predicate<String> filter
+		final Path directoryPath,
+		final String fileNameEndsWith,
+		final Predicate<String> filter
 	) throws IOException {
 		final var resources = new ArrayList<Path>();
 		final var classLoader = ResourceEnumerator.class.getClassLoader();
@@ -73,7 +75,12 @@ public class ResourceEnumerator {
 	}
 	
 	// List resources from a filesystem directory
-	private static List<Path> listFilesystemResources(URI dirUri, Path baseDir, String fileNameEndsWith, Predicate<String> filter) throws IOException {
+	private static List<Path> listFilesystemResources(
+		final URI dirUri,
+		final Path baseDir,
+		final String fileNameEndsWith,
+		final Predicate<String> filter
+	) throws IOException {
 		final var resources = new ArrayList<Path>();
 		final var dirPath = Paths.get(dirUri);
 		
@@ -81,8 +88,10 @@ public class ResourceEnumerator {
 			pathStream.filter(Files::isRegularFile) // Skip directories
 				.filter(it -> {
 					final var fileName = it.getFileName().toString();
-					final var fileNameWithoutEnding = fileName.substring(0, fileName.length() - fileNameEndsWith.length());
-					return fileName.endsWith(fileNameEndsWith) && filter.test(fileNameWithoutEnding);
+					final var fileNameWithoutEnding =
+						fileName.substring(0, fileName.length() - fileNameEndsWith.length());
+					return fileName.endsWith(fileNameEndsWith)
+						   && filter.test(fileNameWithoutEnding);
 				})
 				.forEach(filePath -> {
 					// Get path relative to the base directory

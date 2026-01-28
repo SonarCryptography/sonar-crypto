@@ -1,6 +1,8 @@
 package org.sonarcrypto;
 
 import de.fraunhofer.iem.scanner.ScannerSettings.Framework;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -28,19 +30,32 @@ public final class CliArgs implements Callable<Integer> {
 	
 	private CliArgs() { }
 	
-	public String getClassPath() {
+	/**
+	 * Gets the class path. This is an optional argument.
+	 */
+	public @Nullable String getClassPath() {
 		return classPath;
 	}
 	
-	public String getMvnProject() {
+	/**
+	 * Gets the Maven project path. This is an optional argument.
+	 */
+	public @Nullable String getMvnProject() {
 		return mvnProject;
 	}
 	
-	public String getRuleset() {
+	/**
+	 * Gets the ruleset name. This is a required argument.
+	 */
+	public @NonNull String getRuleset() {
 		return ruleset;
 	}
 	
-	public Framework getFramework() {
+	/**
+	 * Gets the analysis framework.
+	 * This is an optional argument with the default value {@link Framework#SOOT SOOT}.
+	 */
+	public @NonNull Framework getFramework() {
 		return switch(framework.toLowerCase(Locale.ROOT)) {
 			case "soot" -> Framework.SOOT;
 			case "sootup" -> Framework.SOOT_UP;
@@ -48,9 +63,16 @@ public final class CliArgs implements Callable<Integer> {
 		};
 	}
 	
-	public static CliArgs parse(String[] args) {
+	/**
+	 * Parses the command line arguments.
+	 * 
+	 * @param args The command line arguments to parse.
+	 * @return The parsed {@link CliArgs}.
+	 */
+	public static @NonNull CliArgs parse(@NonNull String @NonNull [] args) {
 		final var cliArgs = new CliArgs();
-		CommandLine parser = new CommandLine(cliArgs);
+		
+		final var parser = new CommandLine(cliArgs);
 		parser.setOptionsCaseInsensitive(true);
 		
 		if(parser.execute(args) != CommandLine.ExitCode.OK)
@@ -60,7 +82,7 @@ public final class CliArgs implements Callable<Integer> {
 	}
 	
 	@Override
-	public Integer call() {
+	public @NonNull Integer call() {
 		return 0;
 	}
 }

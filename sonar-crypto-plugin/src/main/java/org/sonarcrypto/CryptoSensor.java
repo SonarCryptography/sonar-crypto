@@ -16,7 +16,6 @@ import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
 
-
 @NullMarked
 public class CryptoSensor implements Sensor {
 

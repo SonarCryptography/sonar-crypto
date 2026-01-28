@@ -1,6 +1,7 @@
 package org.sonarcrypto;
 
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.cognicrypt.MavenBuildException;
@@ -9,10 +10,11 @@ import org.sonarcrypto.rules.CryslRuleProvider;
 
 import java.io.File;
 
+@NullMarked
 public class Main {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 		final var cliArgs = CliArgs.parse(args);
 		
 		final var classPathArg = cliArgs.getClassPath();

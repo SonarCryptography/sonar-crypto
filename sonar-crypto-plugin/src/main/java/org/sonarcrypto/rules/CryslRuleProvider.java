@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.utils.ResourceExtractor;
@@ -14,10 +16,11 @@ import org.sonarcrypto.utils.ResourceExtractor;
  * JavaCryptographicArchitecture. The rulesets can not be used at the same time due to conflicting
  * file names. The rules are extracted to a temporary directory.
  */
+@NullMarked
 public class CryslRuleProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
 	
-	public Path extractCryslFileToTempDir(String ruleset) throws IOException {
+	public @Nullable Path extractCryslFileToTempDir(String ruleset) throws IOException {
 		final var fileEnding = ".zip";
 		final var rulesFolderName = "crysl_rules";
 		final var tempDir = Files.createTempDirectory(rulesFolderName);
