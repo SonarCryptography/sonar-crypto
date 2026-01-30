@@ -38,4 +38,4 @@ The plugin itself can be found in the [sonar-crypto-plugin](sonar-crypto-plugin)
 
 These tests launch a SonarQube (SQ) instance, deploy the Sonar Crypto plugin, and run analysis on a sample project to verify the plugin's functionality.
 These test can be found in the [e2e](e2e) module.
-The test project can be found in the respective [resources](e2e\src\test\resources).
+The test project can be found in the respective [resources](e2e/src/test/resources).
