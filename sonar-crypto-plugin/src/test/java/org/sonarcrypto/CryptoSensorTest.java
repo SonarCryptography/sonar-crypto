@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
-import org.sonarcrypto.runner.ClassPathTestRunner;
 import org.sonarcrypto.runner.MavenProjectTestRunner;
 
 @NullMarked
@@ -39,6 +38,11 @@ class CryptoSensorTest {
 		
 		System.out.println();
 		
+		// testAsserter.contains(
+		//     "<org.sonarcrypto.test.App: void main(java.lang.String[])>",
+		//     ConstraintError.class, TypestateError.class
+		// );
+		
 		Assert.assertFalse(errors.isEmpty());
 		
 		for(final var wrappedClassMethodSetCell : errorSet) {
@@ -57,9 +61,10 @@ class CryptoSensorTest {
 			
 			for(final var setValue : wrappedClassMethodSetCell.getValue()) {
 				
-				Assert.assertTrue(
-					setValue instanceof ConstraintError || setValue instanceof TypestateError
-				);
+				final var condition =
+					setValue instanceof ConstraintError || setValue instanceof TypestateError;
+				
+				Assert.assertTrue(condition);
 			}
 			
 			System.out.println(wrappedClassMethodSetCell);

@@ -1,7 +1,6 @@
 package org.sonarcrypto.utils;
 
 import org.jspecify.annotations.NullMarked;
-import org.sonarcrypto.Main;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,15 +34,15 @@ public class ResourceExtractor {
 			ResourceEnumerator.listResources(Path.of(resourceFolder), fileEnding, filter);
 		
 		for(final var resourcePath : resourcePaths) {
-			try(var resourceStream = Main.class.getResourceAsStream(resourcePath.toString())) {
-				if(resourceStream == null) {
+			try(var stream = ResourceExtractor.class.getResourceAsStream(resourcePath.toString())) {
+				if(stream == null) {
 					throw new IOException(
 						"Failed extracting resource: The resource stream is null!"
 					);
 				}
 				
 				Path targetPath = targetFolder.resolve(resourcePath.getFileName());
-				Files.copy(resourceStream, targetPath, REPLACE_EXISTING);
+				Files.copy(stream, targetPath, REPLACE_EXISTING);
 				collectedTargetPaths.add(targetPath);
 			}
 		}
