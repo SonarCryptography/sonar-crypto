@@ -17,10 +17,10 @@ public class ResourceExtractor {
 	/**
 	 * Extracts files from resources into a target directory.
 	 * 
-	 * @param resourceFolder The resource folder
-	 * @param targetFolder The target folder
-	 * @param fileEnding The file ending (including the dot)
-	 * @param filter The filter
+	 * @param resourceFolder The resource folder.
+	 * @param targetFolder The target folder.
+	 * @param fileEnding The file ending (including the dot).
+	 * @param filter The filter. Gets the file name without the value of {@code fileEnding}.
 	 * @return The paths of the extracted files.
 	 * @throws IOException An I/O error occurred.
 	 */

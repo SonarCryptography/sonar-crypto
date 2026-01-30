@@ -17,7 +17,7 @@ public class CogniCryptTestRunner {
 
     public void run(String applicationPath, RuleSet rules) throws IOException {
         var provider = new CryslRuleProvider();
-        var scanner = new HeadlessJavaScanner(applicationPath, Objects.requireNonNull(provider.extractCryslFileToTempDir(rules.dirName)).toString());
+        var scanner = new HeadlessJavaScanner(applicationPath, Objects.requireNonNull(provider.extractRulesetToTempDir(rules.dirName)).toString());
         scanner.scan();
         errorCollection = scanner.getCollectedErrors();
     }

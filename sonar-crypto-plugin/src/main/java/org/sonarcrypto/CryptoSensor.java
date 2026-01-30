@@ -40,14 +40,15 @@ public class CryptoSensor implements Sensor {
       LOGGER.error("Failed to build Maven project", e);
       return;
     }
-
+    
+    final String ruleset = "bc";
     Path ruleDir;
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();
-      ruleDir = ruleProvider.extractCryslFileToTempDir("bc");
+      ruleDir = ruleProvider.extractRulesetToTempDir(ruleset);
     } catch (IOException e) {
       LOGGER.error(
-          "I/O error extracting Crysl rules for filter 'bc': {}", e.getMessage(), e);
+          "I/O error extracting CrySL rules for ruleset '{}': {}", ruleset, e.getMessage(), e);
       return;
     }
 
