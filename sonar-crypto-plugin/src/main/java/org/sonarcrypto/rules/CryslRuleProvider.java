@@ -5,22 +5,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.utils.ResourceExtractor;
 
 /**
- * Provides a method to download and extract CrySL rules from the CROSSING repository. The repo
- * currently contains rules for three Crypto Libraries : BouncyCastle, BouncyCastle-JCA, and
- * JavaCryptographicArchitecture. The rulesets can not be used at the same time due to conflicting
- * file names. The rules are extracted to a temporary directory.
+ * Provides a method to extract a CrySL ruleset from the resources into a temporary directory.
  */
 @NullMarked
 public class CryslRuleProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
 	
-	public @Nullable Path extractCryslFileToTempDir(String ruleset) throws IOException {
+	/**
+	 * Extracts a CrySL ruleset ZIP file into a temporary directory.
+	 * 
+	 * @param ruleset The ruleset name, i.e., "bc", "bc-jca", "jca", or "tink".
+	 * @return The path to the extracted ruleset ZIP file;
+	 *         or {@code null}, if the given ruleset name was not found.
+	 * @throws IOException An I/O error occurred.
+	 */
+	public Path extractRulesetToTempDir(String ruleset) throws IOException {
 		final var fileEnding = ".zip";
 		final var rulesFolderName = "crysl_rules";
 		final var tempDir = Files.createTempDirectory(rulesFolderName);
@@ -34,7 +38,7 @@ public class CryslRuleProvider {
 		final var foundRules = extractedRulePaths.size();
 		
 		if(foundRules == 0)
-			return null;
+			throw new IOException("CrySL ruleset name not found");
 		if(foundRules > 1)
 			LOGGER.error("Multiple rule sets matched to {}; using first rule set.", ruleset);
 		

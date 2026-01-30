@@ -19,12 +19,13 @@ import java.util.function.Predicate;
 @NullMarked
 public class ResourceEnumerator {
 	/**
-	 * Lists all resources in a classpath directory (supports filesystem and JAR resources).
+	 * Lists all resources in a classpath directory.
 	 *
 	 * @param resourceFolder Path to the classpath directory.
 	 * @param fileNameEndsWith File name ending to filter.
-	 * @param filter A custom filter; gets the file name without the value of {@code fileNameEndsWith}.
-	 * @return List of resource names (relative to the classpath).
+	 * @param filter A custom filter. Gets the file name without the value of
+	 *               {@code fileNameEndsWith}.
+	 * @return List of matched resource files.
 	 * @throws IOException An I/O error occurred.
 	 */
 	public static List<Path> listResources(

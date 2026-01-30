@@ -9,6 +9,8 @@ import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 
 @NullMarked
 public class Main {
@@ -58,12 +60,15 @@ public class Main {
 			throw new Error();
 		}
 		
-		final var rulesetFile =
-			new CryslRuleProvider().extractCryslFileToTempDir(ruleset);
+		final Path rulesetFile;
 		
-		if(rulesetFile == null) {
-			LOGGER.error("CrySL ruleset not found!");
+		try {
+			rulesetFile = new CryslRuleProvider().extractRulesetToTempDir(ruleset);
+		}
+		catch(final IOException exception) {
+			LOGGER.error("Failed extracting CrySL ruleset: {}", exception.getMessage());
 			System.exit(1);
+			throw new Error();
 		}
 		
 		LOGGER.info("Ruleset: {}", ruleset);
