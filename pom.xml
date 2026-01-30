@@ -22,10 +22,10 @@
 
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
-        <sonar.plugin.api.version>13.3.0.3209</sonar.plugin.api.version>
-        <sonarqube.api.impl.version>25.9.0.112764</sonarqube.api.impl.version>
-        <packaging.plugin.version>1.23.0.740</packaging.plugin.version>
-        <slf4j.version>1.7.36</slf4j.version>
+        <sonar.plugin.api.version>13.4.3.4290</sonar.plugin.api.version>
+        <sonarqube.api.impl.version>26.1.0.118079</sonarqube.api.impl.version>
+        <packaging.plugin.version>1.25.1.3002</packaging.plugin.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <jspecify.version>1.0.0</jspecify.version>
 
         <maven.compiler.source>17</maven.compiler.source>
@@ -58,7 +58,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.2.13</version>
+                <version>1.5.26</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -69,7 +69,7 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <!-- common-lang3 version must be aligned with sonar-plugin-api-impl -->
-                <version>3.18.0</version>
+                <version>3.20.0</version>
             </dependency>
             <dependency>
                 <groupId>info.picocli</groupId>
@@ -99,13 +99,13 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>6.0.1</version>
+                <version>6.0.2</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>3.24.1</version>
+                <version>3.27.7</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -163,7 +163,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.9.0</version>
                     <configuration>
                         <ignoredUnusedDeclaredDependencies>
                             <!-- The logger api requires a concrete provider that is not explicitly used by this project: https://www.slf4j.org/manual.html -->
