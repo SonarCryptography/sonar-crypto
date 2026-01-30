@@ -16,7 +16,6 @@ import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
 
-
 @NullMarked
 public class CryptoSensor implements Sensor {
 
@@ -41,18 +40,15 @@ public class CryptoSensor implements Sensor {
       LOGGER.error("Failed to build Maven project", e);
       return;
     }
-
+    
+    final String ruleset = "bc";
     Path ruleDir;
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();
-      ruleDir = ruleProvider.extractCryslFilesToTempDir(s -> s.contains("BouncyCastle/"));
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      LOGGER.warn("Extraction interrupted while filtering 'BouncyCastle/'", e);
-      return; // or rethrow if upstream should handle
+      ruleDir = ruleProvider.extractRulesetToTempDir(ruleset);
     } catch (IOException e) {
       LOGGER.error(
-          "I/O error extracting Crysl rules for filter 'BouncyCastle/': {}", e.getMessage(), e);
+          "I/O error extracting CrySL rules for ruleset '{}': {}", ruleset, e.getMessage(), e);
       return;
     }
 

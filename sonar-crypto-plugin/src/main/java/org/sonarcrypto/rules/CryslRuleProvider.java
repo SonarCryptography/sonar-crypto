@@ -1,72 +1,47 @@
 package org.sonarcrypto.rules;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.function.Predicate;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonarcrypto.utils.ResourceExtractor;
 
 /**
- * Provides a method to download and extract CrySL rules from the CROSSING repository. The repo
- * currently contains rules for three Crypto Libraries : BouncyCastle, BouncyCastle-JCA, and
- * JavaCryptographicArchitecture. The rulesets can not be used at the same time due to conflicting
- * file names. The rules are extracted to a temporary directory.
+ * Provides a method to extract a CrySL ruleset from the resources into a temporary directory.
  */
 @NullMarked
 public class CryslRuleProvider {
-  private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
-
-  private static final URI RULE_DISTRIBUTION =
-      URI.create("https://github.com/CROSSINGTUD/Crypto-API-Rules/archive/refs/heads/master.zip");
-
-  private final HttpClient http = HttpClient.newHttpClient();
-
-  /**
-   * Downloads the zip from ruleDistribution, extracts all .crysl files to a temp directory, and
-   * returns the directory.
-   *
-   * @return The temp directory containing the extracted .crysl files.
-   * @throws IOException if an I/O error occurs
-   */
-  public Path extractCryslFilesToTempDir(Predicate<String> filter)
-      throws IOException, InterruptedException {
-    Path tempDir = Files.createTempDirectory("crysl_rules");
-    int count = 0;
-
-    HttpRequest req = HttpRequest.newBuilder(RULE_DISTRIBUTION).GET().build();
-    HttpResponse<InputStream> resp = http.send(req, HttpResponse.BodyHandlers.ofInputStream());
-
-    if (resp.statusCode() != 200) {
-      throw new IOException("Failed to download rules: HTTP " + resp.statusCode());
-    }
-
-    try (InputStream is = resp.body();
-        ZipInputStream zis = new ZipInputStream(is)) {
-      ZipEntry entry;
-
-      while ((entry = zis.getNextEntry()) != null) {
-        if (!entry.isDirectory()
-            && entry.getName().endsWith(".crysl")
-            && filter.test(entry.getName())) {
-          Path outFile = tempDir.resolve(Paths.get(entry.getName()).getFileName());
-          Files.write(outFile, zis.readAllBytes());
-          count++;
-        }
-        zis.closeEntry();
-      }
-    }
-    LOGGER.info("Extracted {} CrySL files to {}", count, tempDir.toAbsolutePath());
-    return tempDir;
-  }
+	private static final Logger LOGGER = LoggerFactory.getLogger(CryslRuleProvider.class);
+	
+	/**
+	 * Extracts a CrySL ruleset ZIP file into a temporary directory.
+	 * 
+	 * @param ruleset The ruleset name, i.e., "bc", "bc-jca", "jca", or "tink".
+	 * @return The path to the extracted ruleset ZIP file;
+	 *         or {@code null}, if the given ruleset name was not found.
+	 * @throws IOException An I/O error occurred.
+	 */
+	public Path extractRulesetToTempDir(String ruleset) throws IOException {
+		final var fileEnding = ".zip";
+		final var rulesFolderName = "crysl_rules";
+		final var tempDir = Files.createTempDirectory(rulesFolderName);
+		final var extractedRulePaths = ResourceExtractor.extract(
+			rulesFolderName,
+			tempDir,
+			fileEnding,
+			ruleset::equalsIgnoreCase
+		);
+		
+		final var foundRules = extractedRulePaths.size();
+		
+		if(foundRules == 0)
+			throw new IOException("CrySL ruleset name not found");
+		if(foundRules > 1)
+			LOGGER.error("Multiple rule sets matched to {}; using first rule set.", ruleset);
+		
+		return extractedRulePaths.get(0);
+	}
 }

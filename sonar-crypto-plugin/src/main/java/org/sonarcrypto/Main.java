@@ -1,10 +1,6 @@
 package org.sonarcrypto;
 
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
-import de.fraunhofer.iem.scanner.ScannerSettings;
-import java.io.File;
-import java.nio.file.Path;
-
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,28 +8,86 @@ import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+
 @NullMarked
 public class Main {
-  private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
-
-  public static void main(String[] args) throws Exception {
-    CryslRuleProvider ruleProvider = new CryslRuleProvider();
-    Path ruleDir =
-        ruleProvider.extractCryslFilesToTempDir(s -> s.contains("JavaCryptographicArchitecture/"));
-    String mavenProjectPath = new File(args[0]).getAbsolutePath();
-    try {
-      MavenProject mi = new MavenProject(mavenProjectPath);
-      mi.compile();
-      LOGGER.info("Built project to directory: {}", mi.getBuildDirectory());
-      HeadlessJavaScanner scanner =
-          new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
-
-      scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
-      scanner.scan();
-      var errors = scanner.getCollectedErrors();
-      LOGGER.info("Errors: {}", errors.size());
-    } catch (MavenBuildException e) {
-      LOGGER.error("Failed to build project", e);
-    }
-  }
+	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+	
+	public static void main(final String[] args) throws Exception {
+		final var cliArgs = CliArgs.parse(args);
+		
+		final var classPathArg = cliArgs.getClassPath();
+		final var mvnProject = cliArgs.getMvnProject();
+		final var ruleset = cliArgs.getRuleset();
+		final var framework = cliArgs.getFramework();
+		
+		final String classPath;
+		
+		if(classPathArg != null) {
+			if(mvnProject != null) {
+				LOGGER.error("Cannot set both class path and maven project at the same time");
+				System.exit(1);
+				throw new Error();
+			}
+			
+			classPath = classPathArg;
+			
+			LOGGER.info("Class path: {}", classPath);
+		}
+		else if(mvnProject != null) {
+			String mavenProjectPath = new File(mvnProject).getAbsolutePath();
+			
+			try {
+				MavenProject mi = new MavenProject(mavenProjectPath);
+				mi.compile();
+				classPath = mi.getBuildDirectory();
+				LOGGER.info("Built project to directory: {}", classPath);
+			}
+			catch(MavenBuildException e) {
+				LOGGER.error("Failed to build project", e);
+				System.exit(1);
+				throw new Error();
+			}
+			
+			LOGGER.info("Maven project: {}", classPath);
+		}
+		else {
+			LOGGER.error("Invalid command line arguments: class path or maven project required.");
+			System.exit(1);
+			throw new Error();
+		}
+		
+		final Path rulesetFile;
+		
+		try {
+			rulesetFile = new CryslRuleProvider().extractRulesetToTempDir(ruleset);
+		}
+		catch(final IOException exception) {
+			LOGGER.error("Failed extracting CrySL ruleset: {}", exception.getMessage());
+			System.exit(1);
+			throw new Error();
+		}
+		
+		LOGGER.info("Ruleset: {}", ruleset);
+		LOGGER.info("Framework: {}", framework);
+		
+		final var scanner = new HeadlessJavaScanner(classPath, rulesetFile.toString());
+		scanner.setFramework(framework);
+		
+		LOGGER.info("Running analysis ...");
+		scanner.scan();
+		LOGGER.info("Done.");
+		
+		var errors = scanner.getCollectedErrors();
+		
+		if(errors.isEmpty()) {
+			LOGGER.info("No vulnerabilities found.");
+			return;
+		}
+		
+		LOGGER.info("Found {} vulnerabilities: {}", errors.size(), errors);
+	}
 }
