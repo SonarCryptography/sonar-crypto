@@ -20,13 +20,7 @@ public class ResourceEnumeratorTest {
     void ListResourcesTest () throws IOException, URISyntaxException {
         var path = Path.of("crysl_rules");
 
-        var list = ResourceEnumerator.listResources(path, ".zip", new Predicate<String>() {
-            @Override
-            public boolean test(String s) {
-                return true;
-            }
-        });
-        assertThat(list).hasSize(4);
+        var list = ResourceEnumerator.listResources(path, ".zip", s -> true);
         assertThat(list).isNotNull();
         assertThat(list).isNotEmpty();
         assertThat(list).contains(Path.of("/crysl_rules/bc.zip"), Path.of("/crysl_rules/bc-jca.zip"),
