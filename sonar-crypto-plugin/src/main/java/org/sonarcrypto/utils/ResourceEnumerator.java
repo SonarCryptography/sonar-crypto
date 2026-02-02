@@ -80,6 +80,7 @@ public class ResourceEnumerator {
 			pathStream.filter(Files::isRegularFile) // Skip directories
 				.filter(it -> {
 					final var fileName = it.getFileName().toString();
+
 					final var fileNameWithoutEnding =
 						fileName.substring(0, fileName.length() - fileNameEndsWith.length());
 					return fileName.endsWith(fileNameEndsWith)
