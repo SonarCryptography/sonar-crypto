@@ -7,7 +7,6 @@ import org.sonarcrypto.utils.ResourceExtractor;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class ResourceExtractorTest {
 
@@ -17,18 +16,16 @@ public class ResourceExtractorTest {
         final var fileEnding = ".zip";
         final var rulesFolderName = "crysl_rules";
         final var tempDir = Files.createTempDirectory(rulesFolderName);
+        
         final var extractedRulePaths = ResourceExtractor.extract(
                 rulesFolderName,
                 tempDir,
                 fileEnding,
                 ruleset::equalsIgnoreCase
         );
-
-        final var foundRules = extractedRulePaths.size();
-        final var entry = extractedRulePaths.get(0).getFileName();
-
-        assertThat(foundRules).isNotZero();
         assertThat(extractedRulePaths).isNotEmpty();
+
+        final var entry = extractedRulePaths.get(0).getFileName();
         assertThat(entry.toString()).endsWith("bc-jca.zip");
     }
 }
