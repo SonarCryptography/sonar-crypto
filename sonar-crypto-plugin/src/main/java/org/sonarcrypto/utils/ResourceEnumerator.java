@@ -79,12 +79,17 @@ public class ResourceEnumerator {
 		try(final var pathStream = Files.walk(dirPath)) {
 			pathStream.filter(Files::isRegularFile) // Skip directories
 				.filter(it -> {
-					final var fileName = it.getFileName().toString();
+                    final var fileName = it.getFileName().toString();
 
-					final var fileNameWithoutEnding =
-						fileName.substring(0, fileName.length() - fileNameEndsWith.length());
-					return fileName.endsWith(fileNameEndsWith)
-						   && filter.test(fileNameWithoutEnding);
+                    // Check the suffix first
+                    if (!fileName.endsWith(fileNameEndsWith)) {
+                        return false;
+                    }
+
+                    final var fileNameWithoutEnding =
+                            fileName.substring(0, fileName.length() - fileNameEndsWith.length());
+
+                    return filter.test(fileNameWithoutEnding);
 				})
 				.forEach(filePath -> {
 					final var relativePath = baseDir.resolve(dirPath.relativize(filePath));
