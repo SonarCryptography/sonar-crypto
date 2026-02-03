@@ -182,7 +182,7 @@
                             <goals>
                                 <goal>copy</goal>
                             </goals>
-                            <phase>compile</phase>
+                            <phase>validate</phase>
                             <configuration>
                                 <artifactItems>
                                     <artifactItem>
