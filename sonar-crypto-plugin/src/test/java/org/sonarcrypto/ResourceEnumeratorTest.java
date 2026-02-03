@@ -15,10 +15,10 @@ public class ResourceEnumeratorTest {
         var list = ResourceEnumerator.listResources(Path.of("crysl_rules"), ".zip", s -> true);
         assertThat(list).isNotEmpty();
         assertThat(list).contains(
-            Path.of("/crysl_rules/bc.zip"),
-            Path.of("/crysl_rules/bc-jca.zip"),
-            Path.of("/crysl_rules/jca.zip"),
-            Path.of("/crysl_rules/tink.zip")
+            Path.of("crysl_rules/bc.zip"),
+            Path.of("crysl_rules/bc-jca.zip"),
+            Path.of("crysl_rules/jca.zip"),
+            Path.of("crysl_rules/tink.zip")
         );
     }
 }

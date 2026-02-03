@@ -91,23 +91,19 @@ public class ResourceEnumerator {
 				.filter(it -> {
                     final var fileName = it.getFileName().toString();
 					
-					System.out.println("RE/LIST_FILES // fileName: " + fileName);
-
                     // Check the suffix first
-                    if (!fileName.endsWith(fileNameEndsWith)) {
+                    if (!fileName.endsWith(fileNameEndsWith) || fileName.endsWith(".gitkeep")) {
                         return false;
                     }
 
                     final var fileNameWithoutEnding =
                             fileName.substring(0, fileName.length() - fileNameEndsWith.length());
 					
-					System.out.println("RE/LIST_FILES // fileNameWithoutEnding: " + fileName);
-					
                     return filter.test(fileNameWithoutEnding);
 				})
 				.forEach(filePath -> {
 					final var relativePath = baseDir.resolve(dirPath.relativize(filePath));
-					resources.add(Path.of("/").resolve(relativePath));
+					resources.add(relativePath);
 				});
 		}
 		return resources;
@@ -137,7 +133,7 @@ public class ResourceEnumerator {
 				// Filter entries under the base directory (and skip directories)
 				if (entryName.startsWith(baseDir)
 					&& !entry.isDirectory() 
-					&& !entryName.endsWith(fileNameEndsWith)
+					&& (entryName.endsWith(fileNameEndsWith) || !entryName.endsWith(".gitkeep"))
 				) {
 					resources.add(entryName);
 				}

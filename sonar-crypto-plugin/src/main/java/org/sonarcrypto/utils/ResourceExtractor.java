@@ -35,7 +35,11 @@ public class ResourceExtractor {
 			ResourceEnumerator.listResources(Path.of(resourceFolder), fileEnding, filter);
 		
 		for(final var resourcePath : resourcePaths) {
-			try(var resourceStream = Main.class.getResourceAsStream(resourcePath.toString())) {
+			// Use class loader to access resources, because it does not need absolute paths; see
+			// <https://stackoverflow.com/questions/51645295/how-to-specify-the-path-for-getresourceasstream-method-in-java>
+			final var classLoader = ResourceExtractor.class.getClassLoader();
+			
+			try(var resourceStream = classLoader.getResourceAsStream(resourcePath.toString())) {
 				if(resourceStream == null) {
 					throw new IOException(
 						"Failed extracting resource: The resource stream is null!"
