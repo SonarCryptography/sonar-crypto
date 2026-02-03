@@ -113,7 +113,8 @@ public class ResourceEnumerator {
 		return resources;
 	}
 	
-	private static List<Path> listJarResources(
+	// This function is package private for test coverage
+	static List<Path> listJarResources(
 		final URL jarUrl,
 		final Path baseDir,
 		final String fileNameEndsWith,

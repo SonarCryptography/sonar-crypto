@@ -1,10 +1,9 @@
-package org.sonarcrypto;
+package org.sonarcrypto.rules;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
-import org.sonarcrypto.rules.CryslRuleProvider;
 
 import java.io.File;
 import java.io.IOException;
