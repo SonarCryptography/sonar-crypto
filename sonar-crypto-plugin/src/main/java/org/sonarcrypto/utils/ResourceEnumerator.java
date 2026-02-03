@@ -5,12 +5,18 @@ import org.jspecify.annotations.NullMarked;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * Source:
@@ -59,10 +65,14 @@ public class ResourceEnumerator {
 					);
 				}
 			}
+			//else if("jar".equals(protocol)) {
+			//	// Handle JAR resources
+			//	resources.addAll(listJarResources(resourceUrl, resourceFolder));
+			//}
 			else {
 				throw new IOException("Unsupported protocol: " + protocol);
 			}
-		}
+		} 
 		
 		return resources;
 	}
@@ -80,6 +90,8 @@ public class ResourceEnumerator {
 			pathStream.filter(Files::isRegularFile) // Skip directories
 				.filter(it -> {
                     final var fileName = it.getFileName().toString();
+					
+					System.out.println("RE/LIST_FILES // fileName: " + fileName);
 
                     // Check the suffix first
                     if (!fileName.endsWith(fileNameEndsWith)) {
@@ -88,13 +100,48 @@ public class ResourceEnumerator {
 
                     final var fileNameWithoutEnding =
                             fileName.substring(0, fileName.length() - fileNameEndsWith.length());
-
+					
+					System.out.println("RE/LIST_FILES // fileNameWithoutEnding: " + fileName);
+					
                     return filter.test(fileNameWithoutEnding);
 				})
 				.forEach(filePath -> {
 					final var relativePath = baseDir.resolve(dirPath.relativize(filePath));
 					resources.add(Path.of("/").resolve(relativePath));
 				});
+		}
+		return resources;
+	}
+	
+	private static List<String> listJarResources(
+		URL jarUrl,
+		String baseDir,
+		final String fileNameEndsWith
+	) throws IOException {
+		List<String> resources = new ArrayList<>();
+		String jarUrlString = jarUrl.toString();
+		
+		// Parse JAR URL: format is "jar:file:/path/to/jar.jar!/{entry}"
+		String jarPath = jarUrlString.substring(4, jarUrlString.indexOf("!"));
+		//String entryPath = jarUrlString.substring(jarUrlString.indexOf("!") + 2); // Skip "!/"
+		
+		// Decode URL-encoded characters (e.g., spaces as %20)
+		jarPath = URLDecoder.decode(jarPath, StandardCharsets.UTF_8);
+		
+		try (JarFile jarFile = new JarFile(jarPath)) {
+			Enumeration<JarEntry> entries = jarFile.entries();
+			while (entries.hasMoreElements()) {
+				JarEntry entry = entries.nextElement();
+				String entryName = entry.getName();
+				
+				// Filter entries under the base directory (and skip directories)
+				if (entryName.startsWith(baseDir)
+					&& !entry.isDirectory() 
+					&& !entryName.endsWith(fileNameEndsWith)
+				) {
+					resources.add(entryName);
+				}
+			}
 		}
 		return resources;
 	}

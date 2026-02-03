@@ -60,6 +60,9 @@ public class Main {
 			throw new Error();
 		}
 		
+		LOGGER.info("Ruleset: {}", ruleset);
+		LOGGER.info("Framework: {}", framework);
+		
 		final Path rulesetFile;
 		
 		try {
@@ -70,9 +73,6 @@ public class Main {
 			System.exit(1);
 			throw new Error();
 		}
-		
-		LOGGER.info("Ruleset: {}", ruleset);
-		LOGGER.info("Framework: {}", framework);
 		
 		final var scanner = new HeadlessJavaScanner(classPath, rulesetFile.toString());
 		scanner.setFramework(framework);

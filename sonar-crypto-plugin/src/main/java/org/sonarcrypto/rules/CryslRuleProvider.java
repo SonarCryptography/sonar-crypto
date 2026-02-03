@@ -42,6 +42,8 @@ public class CryslRuleProvider {
 		if(foundRules > 1)
 			LOGGER.error("Multiple rule sets matched to {}; using first rule set.", ruleset);
 		
+		System.out.println("CRP // extractedRulePaths: " + extractedRulePaths.get(0));
+		
 		return extractedRulePaths.get(0);
 	}
 }
