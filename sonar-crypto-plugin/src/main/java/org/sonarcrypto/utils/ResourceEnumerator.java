@@ -62,14 +62,14 @@ public class ResourceEnumerator {
 					);
 				}
 				catch(URISyntaxException e) {
+					// This exception should never happen, because the resource URL
+					// is guaranteed to be in a valid format.
 					throw new IOException(
-						"Failed converting resource URL into URI: Invalid URI syntax!",
-						e
+						"Failed converting resource URL into URI: Invalid URI syntax!", e
 					);
 				}
 			}
 			else if("jar".equals(protocol)) {
-				// Handle JAR resources
 				resources.addAll(
 					listJarResources(resourceUrl, resourceFolder, fileNameEndsWith, filter)
 				);
@@ -97,9 +97,8 @@ public class ResourceEnumerator {
 					final var fileName = it.getFileName().toString();
 					
 					// Check the suffix first
-					if(!fileName.endsWith(fileNameEndsWith) || fileName.endsWith(".gitkeep")) {
+					if(!fileName.endsWith(fileNameEndsWith) || fileName.endsWith(".gitkeep"))
 						return false;
-					}
 					
 					final var fileNameWithoutEnding =
 						fileName.substring(0, fileName.length() - fileNameEndsWith.length());
@@ -146,9 +145,8 @@ public class ResourceEnumerator {
 				
 				if(processedEntries > ENTRIES_THRESHOLD) {
 					LOGGER.error(
-						"Too many entries in JAR file: Stopped after "
-						+ ENTRIES_THRESHOLD
-						+ " entries!"
+						"Too many entries in JAR file: Stopped after {} entries!",
+						ENTRIES_THRESHOLD
 					);
 					
 					break;
@@ -177,6 +175,7 @@ public class ResourceEnumerator {
 				resources.add(Path.of(entryName));
 			}
 		}
+		
 		return resources;
 	}
 }

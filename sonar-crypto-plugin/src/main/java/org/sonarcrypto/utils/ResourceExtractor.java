@@ -1,7 +1,6 @@
 package org.sonarcrypto.utils;
 
 import org.jspecify.annotations.NullMarked;
-import org.sonarcrypto.Main;
 
 import java.io.IOException;
 import java.nio.file.Files;
