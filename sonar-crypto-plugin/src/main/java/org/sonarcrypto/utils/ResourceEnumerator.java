@@ -142,9 +142,7 @@ public class ResourceEnumerator {
 			var processedEntries = 0;
 			
 			while(entries.hasMoreElements()) {
-				processedEntries++;
-				
-				if(processedEntries > ENTRIES_THRESHOLD) {
+				if(processedEntries++ > ENTRIES_THRESHOLD) {
 					LOGGER.error(
 						"Too many entries in JAR file: Stopped after {} entries!",
 						ENTRIES_THRESHOLD
