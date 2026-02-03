@@ -1,9 +1,14 @@
 package org.sonarcrypto;
 
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
+import java.io.File;
+import java.nio.file.Path;
+
+
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonarcrypto.cognicrypt.JimpleScanner;
 import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
@@ -25,7 +30,8 @@ public class Main {
 		final var framework = cliArgs.getFramework();
 		
 		final String classPath;
-		
+		String jimpledir;
+
 		if(classPathArg != null) {
 			if(mvnProject != null) {
 				LOGGER.error("Cannot set both class path and maven project at the same time");
@@ -34,7 +40,6 @@ public class Main {
 			}
 			
 			classPath = classPathArg;
-			
 			LOGGER.info("Class path: {}", classPath);
 		}
 		else if(mvnProject != null) {
@@ -44,6 +49,7 @@ public class Main {
 				MavenProject mi = new MavenProject(mavenProjectPath);
 				mi.compile();
 				classPath = mi.getBuildDirectory();
+				jimpledir = mi.getJimpleDirectory();
 				LOGGER.info("Built project to directory: {}", classPath);
 			}
 			catch(MavenBuildException e) {
@@ -88,6 +94,14 @@ public class Main {
 			return;
 		}
 		
+		LOGGER.info("Found {} vulnerabilities: {}", errors.size(), errors);
+	}
+
+	private static void runJimpleAnalysis(String jimpledir, String ruleset) {
+		JimpleScanner js = new JimpleScanner(jimpledir, ruleset);
+
+		js.scan();
+		var errors = js.getCollectedErrors();
 		LOGGER.info("Found {} vulnerabilities: {}", errors.size(), errors);
 	}
 }
