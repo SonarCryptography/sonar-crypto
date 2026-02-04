@@ -3,6 +3,7 @@ package org.sonarcrypto;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 
 import org.jspecify.annotations.NullMarked;
@@ -46,7 +47,7 @@ public class CryptoSensor implements Sensor {
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();
       ruleDir = ruleProvider.extractRulesetToTempDir(ruleset);
-    } catch (IOException e) {
+    } catch (IOException | URISyntaxException e) {
       LOGGER.error(
           "I/O error extracting CrySL rules for ruleset '{}': {}", ruleset, e.getMessage(), e);
       return;

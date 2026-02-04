@@ -1,18 +1,18 @@
 package org.sonarcrypto.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 
 public class ResourceEnumeratorTest {
 	
 	@Test
-	void testEnumerateResourcesFromFiles() throws IOException {
-		final var list = ResourceEnumerator.listResources(
+	void testEnumerateResourcesFromFiles() throws Exception {
+		final var list = new ResourceEnumerator().listResources(
 			Path.of("crysl_rules"),
 			".zip",
 			s -> "jca".equals(s) || "bc".equals(s)
@@ -26,11 +26,11 @@ public class ResourceEnumeratorTest {
 	}
 	
 	@Test
-	void testEnumerateResourcesWithinAJar() throws IOException {
+	void testEnumerateResourcesWithinAJar() throws Exception {
 		final var classLoader = ResourceEnumeratorTest.class.getClassLoader();
 		final var resourceUrl = classLoader.getResource("testResourceEnumeration.jar");
 		
-		final var list = ResourceEnumerator.listJarResources(
+		final var list = new ResourceEnumerator().listJarResources(
 			URI.create("jar:" + resourceUrl + "!/crysl_rules").toURL(),
 			Path.of("crysl_rules"), ".zip",
 			"jca"::equals
@@ -38,5 +38,25 @@ public class ResourceEnumeratorTest {
 		
 		assertThat(list).isNotEmpty();
 		assertThat(list).contains(Path.of("crysl_rules/jca.zip"));
+	}
+	
+	@Test
+	void testInvalidEntitiesThreshold() {
+		assertThatThrownBy(() -> new ResourceEnumerator(0))
+			.isInstanceOf(IllegalArgumentException.class);
+	}
+	
+	@Test
+	void testExhaustedEntitiesThreshold() throws Exception {
+		final var classLoader = ResourceEnumeratorTest.class.getClassLoader();
+		final var resourceUrl = classLoader.getResource("testResourceEnumeration.jar");
+		
+		final var list = new ResourceEnumerator(1).listJarResources(
+			URI.create("jar:" + resourceUrl + "!/crysl_rules").toURL(),
+			Path.of("crysl_rules"), ".zip",
+			s -> true
+		);
+		
+		assertThat(list.size()).isLessThanOrEqualTo(1);
 	}
 }

@@ -12,7 +12,7 @@ import java.util.zip.ZipFile;
 public class CryslRuleProviderTest {
 
     @Test
-    void testRulesFound() throws IOException {
+    void testRulesFound() throws Exception {
         var provider = new CryslRuleProvider();
         var path = provider.extractRulesetToTempDir("bc");
         var myZip = new File(path.toUri());

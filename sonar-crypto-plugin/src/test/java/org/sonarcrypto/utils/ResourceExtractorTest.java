@@ -4,13 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.nio.file.Files;
 
 public class ResourceExtractorTest {
 	
 	@Test
-	void extractTest() throws IOException {
+	void extractTest() throws Exception {
 		final var ruleset = "bc-jca";
 		final var fileEnding = ".zip";
 		final var rulesFolderName = "crysl_rules";

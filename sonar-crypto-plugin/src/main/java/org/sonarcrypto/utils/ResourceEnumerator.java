@@ -27,6 +27,27 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ResourceEnumerator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceEnumerator.class);
 	
+	private final int jarEntitiesThreshold;
+	
+	/**
+	 * Creates a new instance with a default JAR entity threshold of {@code 1,000} entities.
+	 */
+	public ResourceEnumerator() {
+		this(1000);
+	}
+	
+	/**
+	 * Creates a new instance.
+	 * 
+	 * @param jarEntitiesThreshold The entities threshold for JAR files.
+	 */
+	public ResourceEnumerator(int jarEntitiesThreshold) {
+		if(jarEntitiesThreshold < 1)
+			throw new IllegalArgumentException("Invalid entities threshold.");
+		
+		this.jarEntitiesThreshold = jarEntitiesThreshold;
+	}
+	
 	/**
 	 * Lists all resources in a classpath directory.
 	 *
@@ -36,14 +57,15 @@ public class ResourceEnumerator {
 	 * {@code fileNameEndsWith}.
 	 * @return List of matched resource files.
 	 * @throws IOException An I/O error occurred.
+	 * @throws URISyntaxException Should never occur, because the URI should always be well-defined.
 	 */
-	public static List<Path> listResources(
+	public List<Path> listResources(
 		final Path resourceFolder,
 		final String fileNameEndsWith,
 		final Predicate<String> filter
-	) throws IOException {
+	) throws IOException, URISyntaxException {
 		final var resources = new ArrayList<Path>();
-		final var classLoader = ResourceEnumerator.class.getClassLoader();
+		final var classLoader = this.getClass().getClassLoader();
 		final var resourceUrls = classLoader.getResources(resourceFolder.toString());
 		
 		while(resourceUrls.hasMoreElements()) {
@@ -51,23 +73,14 @@ public class ResourceEnumerator {
 			final var protocol = resourceUrl.getProtocol();
 			
 			if("file".equals(protocol)) {
-				try {
-					resources.addAll(
-						listFilesystemResources(
-							resourceUrl.toURI(),
-							resourceFolder,
-							fileNameEndsWith,
-							filter
-						)
-					);
-				}
-				catch(URISyntaxException e) {
-					// This exception should never happen, because the resource URL
-					// is guaranteed to be in a valid format.
-					throw new IOException(
-						"Failed converting resource URL into URI: Invalid URI syntax!", e
-					);
-				}
+				resources.addAll(
+					listFilesystemResources(
+						resourceUrl.toURI(),
+						resourceFolder,
+						fileNameEndsWith,
+						filter
+					)
+				);
 			}
 			else if("jar".equals(protocol)) {
 				resources.addAll(
@@ -82,7 +95,7 @@ public class ResourceEnumerator {
 		return resources;
 	}
 	
-	private static List<Path> listFilesystemResources(
+	private List<Path> listFilesystemResources(
 		final URI dirUri,
 		final Path baseDir,
 		final String fileNameEndsWith,
@@ -114,13 +127,12 @@ public class ResourceEnumerator {
 	}
 	
 	// This function is package private for test coverage
-	static List<Path> listJarResources(
+	List<Path> listJarResources(
 		final URL jarUrl,
 		final Path baseDir,
 		final String fileNameEndsWith,
 		final Predicate<String> filter
 	) throws IOException {
-		final var ENTRIES_THRESHOLD = 1000;
 		final var resources = new ArrayList<Path>();
 		final var jarUrlString = jarUrl.getPath();
 		
@@ -136,16 +148,15 @@ public class ResourceEnumerator {
 		// Decode URL-encoded characters (e.g., spaces as %20)
 		jarPath = URLDecoder.decode(jarPath, UTF_8);
 		
-		try(JarFile jarFile = new JarFile(jarPath)) {
-			
+		try(final var jarFile = new JarFile(jarPath)) {
 			final var entries = jarFile.entries();
 			var processedEntries = 0;
 			
 			while(entries.hasMoreElements()) {
-				if(processedEntries++ > ENTRIES_THRESHOLD) {
+				if(++processedEntries > jarEntitiesThreshold) {
 					LOGGER.error(
 						"Too many entries in JAR file: Stopped after {} entries!",
-						ENTRIES_THRESHOLD
+						jarEntitiesThreshold
 					);
 					
 					break;
