@@ -1,6 +1,7 @@
 package org.sonarcrypto.rules;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -23,8 +24,9 @@ public class CryslRuleProvider {
 	 * @return The path to the extracted ruleset ZIP file;
 	 *         or {@code null}, if the given ruleset name was not found.
 	 * @throws IOException An I/O error occurred.
+	 * @throws URISyntaxException Should never occur, because the URI should always be well-defined.
 	 */
-	public Path extractRulesetToTempDir(String ruleset) throws IOException {
+	public Path extractRulesetToTempDir(String ruleset) throws IOException, URISyntaxException {
 		final var fileEnding = ".zip";
 		final var rulesFolderName = "crysl_rules";
 		final var tempDir = Files.createTempDirectory(rulesFolderName);

@@ -1,9 +1,9 @@
 package org.sonarcrypto.utils;
 
 import org.jspecify.annotations.NullMarked;
-import org.sonarcrypto.Main;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -23,19 +23,24 @@ public class ResourceExtractor {
 	 * @param filter The filter. Gets the file name without the value of {@code fileEnding}.
 	 * @return The paths of the extracted files.
 	 * @throws IOException An I/O error occurred.
+	 * @throws URISyntaxException Should never occur, because the URI should always be well-defined.
 	 */
 	public static List<Path> extract(
 		final String resourceFolder,
 		final Path targetFolder,
 		final String fileEnding,
 		final Predicate<String> filter
-	) throws IOException {
+	) throws IOException, URISyntaxException {
 		final var collectedTargetPaths = new ArrayList<Path>();
 		final var resourcePaths =
-			ResourceEnumerator.listResources(Path.of(resourceFolder), fileEnding, filter);
+			new ResourceEnumerator().listResources(Path.of(resourceFolder), fileEnding, filter);
 		
 		for(final var resourcePath : resourcePaths) {
-			try(var resourceStream = Main.class.getResourceAsStream(resourcePath.toString())) {
+			// Use class loader to access resources, because it does not need absolute paths; see
+			// <https://stackoverflow.com/questions/51645295/how-to-specify-the-path-for-getresourceasstream-method-in-java>
+			final var classLoader = ResourceExtractor.class.getClassLoader();
+			
+			try(var resourceStream = classLoader.getResourceAsStream(resourcePath.toString())) {
 				if(resourceStream == null) {
 					throw new IOException(
 						"Failed extracting resource: The resource stream is null!"
