@@ -1,6 +1,5 @@
 package org.sonarcrypto;
 
-import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -16,6 +15,7 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
+import org.sonarcrypto.scanner.CryptoAnalysisScanner;
 
 @NullMarked
 public class CryptoSensor implements Sensor {
@@ -52,9 +52,9 @@ public class CryptoSensor implements Sensor {
           "I/O error extracting CrySL rules for ruleset '{}': {}", ruleset, e.getMessage(), e);
       return;
     }
-
-    HeadlessJavaScanner scanner =
-        new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
+    
+    CryptoAnalysisScanner scanner =
+        new CryptoAnalysisScanner(mi.getBuildDirectory(), ruleDir.toString());
 
     scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
     scanner.scan();

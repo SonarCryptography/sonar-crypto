@@ -1,12 +1,12 @@
 package org.sonarcrypto;
 
-import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
+import org.sonarcrypto.scanner.CryptoAnalysisScanner;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,7 +74,7 @@ public class Main {
 		LOGGER.info("Ruleset: {}", ruleset);
 		LOGGER.info("Framework: {}", framework);
 		
-		final var scanner = new HeadlessJavaScanner(classPath, rulesetFile.toString());
+		final var scanner = new CryptoAnalysisScanner(classPath, rulesetFile.toString());
 		scanner.setFramework(framework);
 		
 		LOGGER.info("Running analysis ...");
