@@ -58,7 +58,7 @@ public class CryptoSensor implements Sensor {
     CogniCryptScanner scanner =
         new CogniCryptScanner(JAVA_CLASS_PATH, mi.getBuildDirectory(), ruleDir.toString());
 
-    scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
+    scanner.getSettings().setFramework(ScannerSettings.Framework.SOOT_UP);
     scanner.scan();
     var errors = scanner.getCollectedErrors();
     LOGGER.info("Errors: {}", errors.size());

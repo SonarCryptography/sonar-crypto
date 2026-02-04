@@ -1,4 +1,5 @@
-/********************************************************************************
+/*
+ ********************************************************************************
  * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
  * <p>
  * This program and the accompanying materials are made available under the
@@ -6,7 +7,8 @@
  * http://www.eclipse.org/legal/epl-2.0.
  * <p>
  * SPDX-License-Identifier: EPL-2.0
- ********************************************************************************/
+ ********************************************************************************
+ */
 package org.sonarcrypto.scanner.utils;
 
 import boomerang.scope.DataFlowScope;
@@ -20,11 +22,13 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import sootup.callgraph.CallGraph;
 import sootup.callgraph.CallGraphAlgorithm;
 import sootup.callgraph.ClassHierarchyAnalysisAlgorithm;
 import sootup.callgraph.RapidTypeAnalysisAlgorithm;
-import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.model.SootClass;
 import sootup.core.model.SootClassMember;
 import sootup.core.model.SootMethod;
@@ -36,23 +40,36 @@ import sootup.java.core.views.JavaView;
 import sootup.jimple.frontend.JimpleAnalysisInputLocation;
 import sootup.jimple.frontend.JimpleView;
 
+@NullMarked
 public class CogniCryptSootUpSetup extends FrameworkSetup {
-
+    
+    /**
+     * Input location type
+     */
     public enum InputLocationType {
+        /**
+         * Java class path
+         */
         JAVA_CLASS_PATH,
+        
+        /**
+         * Jimple files
+         */
         JIMPLE
     }
     
     private final InputLocationType inputLocationType;
     
-    private View view;
+    private @Nullable View view;
     
     public CogniCryptSootUpSetup(
         InputLocationType inputLocationType,
         String applicationPath,
         ScannerSettings.CallGraphAlgorithm algorithm,
-        DataFlowScope dataFlowScope) {
+        DataFlowScope dataFlowScope
+    ) {
         super(applicationPath, algorithm, dataFlowScope);
+        
         this.inputLocationType = inputLocationType;
     }
 
@@ -84,7 +101,9 @@ public class CogniCryptSootUpSetup extends FrameworkSetup {
     @Override
     public CryptoAnalysisScope createFrameworkScope() {
         Collection<SootMethod> entryPoints = new HashSet<>();
-        view.getClasses()
+		
+        //noinspection DataFlowIssue The `view` is expected to be initialized.
+		view.getClasses()
                 .filter(SootClass::isApplicationClass)
                 .forEach(
                         c -> {
@@ -96,9 +115,9 @@ public class CogniCryptSootUpSetup extends FrameworkSetup {
                         });
 
         CallGraphAlgorithm algorithm = getCallGraphAlgorithm(view);
-        CallGraph callGraph =
-                algorithm.initialize(
-                        entryPoints.stream().map(SootClassMember::getSignature).toList());
+        CallGraph callGraph = algorithm.initialize(
+            entryPoints.stream().map(SootClassMember::getSignature).toList()
+        );
 
         return new CogniCryptSootUpScope(view, callGraph, entryPoints, dataFlowScope);
     }

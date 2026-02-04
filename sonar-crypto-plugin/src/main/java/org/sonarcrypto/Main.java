@@ -82,7 +82,7 @@ public class Main {
 			rulesetFile.toString()
 		);
 		
-		scanner.setFramework(framework);
+		scanner.getSettings().setFramework(framework);
 		
 		LOGGER.info("Running analysis ...");
 		scanner.scan();
