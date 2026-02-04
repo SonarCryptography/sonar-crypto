@@ -33,7 +33,6 @@ import sootup.core.model.SootClass;
 import sootup.core.model.SootClassMember;
 import sootup.core.model.SootMethod;
 import sootup.core.model.SourceType;
-import sootup.core.transform.BodyInterceptor;
 import sootup.core.views.View;
 import sootup.java.bytecode.frontend.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.views.JavaView;
@@ -42,18 +41,22 @@ import sootup.jimple.frontend.JimpleView;
 
 @NullMarked
 public class CogniCryptSootUpSetup extends FrameworkSetup {
-    
     /**
      * Input location type
      */
     public enum InputLocationType {
         /**
-         * Java class path
+         * Java class path.
+         * <p>
+         * Applies the {@link BoomerangPreInterceptor} when loading the code.
          */
         JAVA_CLASS_PATH,
         
         /**
-         * Jimple files
+         * Jimple files.
+         * <p>
+         * Does NOT apply the {@link BoomerangPreInterceptor} due to certain limitations.
+         * Expects the Jimple code to contain the required changes for Boomerang.
          */
         JIMPLE
     }
@@ -78,19 +81,17 @@ public class CogniCryptSootUpSetup extends FrameworkSetup {
         LOGGER.info("Setting up SootUp...");
         Stopwatch watch = Stopwatch.createStarted();
 
-        List<BodyInterceptor> interceptors = List.of(new BoomerangPreInterceptor());
-        
         view = switch(inputLocationType) {
             case JAVA_CLASS_PATH -> new JavaView(new JavaClassPathAnalysisInputLocation(
                 applicationPath,
                 SourceType.Application,
-                interceptors
+                List.of(new BoomerangPreInterceptor())
             ));
             
             case JIMPLE -> new JimpleView(new JimpleAnalysisInputLocation(
                 Path.of(applicationPath),
                 SourceType.Application,
-                interceptors
+                List.of()
             ));
         };
 
