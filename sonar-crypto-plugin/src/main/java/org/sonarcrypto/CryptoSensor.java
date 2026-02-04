@@ -15,7 +15,9 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
-import org.sonarcrypto.scanner.CryptoAnalysisScanner;
+import org.sonarcrypto.scanner.CogniCryptScanner;
+
+import static org.sonarcrypto.scanner.utils.CogniCryptSootUpSetup.InputLocationType.*;
 
 @NullMarked
 public class CryptoSensor implements Sensor {
@@ -53,8 +55,8 @@ public class CryptoSensor implements Sensor {
       return;
     }
     
-    CryptoAnalysisScanner scanner =
-        new CryptoAnalysisScanner(mi.getBuildDirectory(), ruleDir.toString());
+    CogniCryptScanner scanner =
+        new CogniCryptScanner(JAVA_CLASS_PATH, mi.getBuildDirectory(), ruleDir.toString());
 
     scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
     scanner.scan();

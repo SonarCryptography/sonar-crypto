@@ -25,7 +25,6 @@ import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import de.fraunhofer.iem.framework.FrameworkSetup;
 import de.fraunhofer.iem.framework.OpalSetup;
 import de.fraunhofer.iem.framework.SootSetup;
-import de.fraunhofer.iem.framework.SootUpSetup;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import de.fraunhofer.iem.scanner.ScannerSettings.CallGraphAlgorithm;
 import java.io.IOException;
@@ -34,33 +33,45 @@ import java.util.Collection;
 import java.util.HashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonarcrypto.scanner.utils.CogniCryptSootUpSetup;
+import org.sonarcrypto.scanner.utils.CogniCryptSootUpSetup.InputLocationType;
 import sparse.SparsificationStrategy;
 
-public class CryptoAnalysisScanner extends CryptoScanner {
+public class CogniCryptScanner extends CryptoScanner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CryptoAnalysisScanner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CogniCryptScanner.class);
 
+    private final InputLocationType inputLocationType;
     private final ScannerSettings settings;
 
-    public CryptoAnalysisScanner(String applicationPath, String rulesetDirectory) {
+    public CogniCryptScanner(
+        InputLocationType inputLocationType,
+        String applicationPath,
+        String rulesetDirectory
+    ) {
+        this.inputLocationType = inputLocationType;
+        
         settings = new ScannerSettings();
-
         settings.setApplicationPath(applicationPath);
         settings.setRulesetPath(rulesetDirectory);
         settings.setReportFormats(new HashSet<>());
     }
 
-    private CryptoAnalysisScanner(ScannerSettings settings) {
+    private CogniCryptScanner(
+        InputLocationType inputLocationType,
+        ScannerSettings settings
+    ) {
         this.settings = settings;
+        this.inputLocationType = inputLocationType;
     }
 
-    public static CryptoAnalysisScanner createFromCLISettings(String[] args)
-            throws CryptoAnalysisParserException {
-        ScannerSettings scannerSettings = new ScannerSettings();
-        scannerSettings.parseSettingsFromCLI(args);
-
-        return new CryptoAnalysisScanner(scannerSettings);
-    }
+    //public static CogniCryptScanner createFromCLISettings(String[] args)
+    //        throws CryptoAnalysisParserException {
+    //    ScannerSettings scannerSettings = new ScannerSettings();
+    //    scannerSettings.parseSettingsFromCLI(args);
+    //
+    //    return new CogniCryptScanner(scannerSettings);
+    //}
 
     @Override
     public SparsificationStrategy<?, ?> getSparsificationStrategy() {
@@ -142,9 +153,12 @@ public class CryptoAnalysisScanner extends CryptoScanner {
                             settings.getCallGraph(),
                             settings.getAddClassPath(),
                             dataFlowScope);
-            case SOOT_UP ->
-                    new SootUpSetup(
-                            settings.getApplicationPath(), settings.getCallGraph(), dataFlowScope);
+            case SOOT_UP -> new CogniCryptSootUpSetup(
+                inputLocationType,
+                settings.getApplicationPath(),
+                settings.getCallGraph(),
+                dataFlowScope
+            );
             case OPAL ->
                     new OpalSetup(
                             settings.getApplicationPath(), settings.getCallGraph(), dataFlowScope);

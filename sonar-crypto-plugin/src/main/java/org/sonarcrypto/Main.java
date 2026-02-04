@@ -6,11 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
-import org.sonarcrypto.scanner.CryptoAnalysisScanner;
+import org.sonarcrypto.scanner.CogniCryptScanner;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+
+import static org.sonarcrypto.scanner.utils.CogniCryptSootUpSetup.InputLocationType.*;
 
 @NullMarked
 public class Main {
@@ -74,7 +76,12 @@ public class Main {
 		LOGGER.info("Ruleset: {}", ruleset);
 		LOGGER.info("Framework: {}", framework);
 		
-		final var scanner = new CryptoAnalysisScanner(classPath, rulesetFile.toString());
+		final var scanner = new CogniCryptScanner(
+			JAVA_CLASS_PATH,
+			classPath,
+			rulesetFile.toString()
+		);
+		
 		scanner.setFramework(framework);
 		
 		LOGGER.info("Running analysis ...");
