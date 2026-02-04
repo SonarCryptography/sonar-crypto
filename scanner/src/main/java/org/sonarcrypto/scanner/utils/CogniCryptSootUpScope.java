@@ -5,12 +5,12 @@ import boomerang.scope.CallGraph;
 import boomerang.scope.DataFlowScope;
 import boomerang.scope.FrameworkScope;
 import de.fraunhofer.iem.cryptoanalysis.handler.FrameworkHandler;
-import de.fraunhofer.iem.cryptoanalysis.handler.SootUpFrameworkHandler;
 import java.util.Collection;
 
 import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import org.jspecify.annotations.NonNull;
 import org.sonarcrypto.scanner.boomerang.scope.sootup.SootUpCallGraph;
+import org.sonarcrypto.scanner.boomerang.scope.sootup.SootUpFrameworkHandler;
 import sootup.core.model.SootMethod;
 import sootup.core.views.View;
 
