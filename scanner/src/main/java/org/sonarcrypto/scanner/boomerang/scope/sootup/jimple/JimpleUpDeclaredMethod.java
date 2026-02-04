@@ -12,12 +12,12 @@
  *   Johannes Spaeth - initial API and implementation
  * *****************************************************************************
  */
-package org.sonarcrypt.boomerang.scope.sootup.jimple;
+package org.sonarcrypto.scanner.boomerang.scope.sootup.jimple;
 
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.Type;
 import boomerang.scope.WrappedClass;
-import org.sonarcrypt.boomerang.scope.sootup.SootUpFrameworkScope;
+import org.sonarcrypto.scanner.boomerang.scope.sootup.SootUpFrameworkScope;
 import boomerang.utils.MethodWrapper;
 import java.util.List;
 import java.util.Objects;

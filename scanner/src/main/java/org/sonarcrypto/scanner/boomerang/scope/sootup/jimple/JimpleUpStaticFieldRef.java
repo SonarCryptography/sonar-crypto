@@ -12,40 +12,39 @@
  *   Johannes Spaeth - initial API and implementation
  * *****************************************************************************
  */
-package org.sonarcrypt.boomerang.scope.sootup.jimple;
+package org.sonarcrypto.scanner.boomerang.scope.sootup.jimple;
 
 import boomerang.scope.ControlFlowGraph;
 import boomerang.scope.Field;
-import boomerang.scope.InstanceFieldVal;
+import boomerang.scope.Method;
+import boomerang.scope.StaticFieldVal;
 import boomerang.scope.Type;
 import boomerang.scope.Val;
+import boomerang.scope.WrappedClass;
 import java.util.Objects;
-import sootup.core.jimple.common.ref.JInstanceFieldRef;
+import sootup.core.jimple.common.ref.JStaticFieldRef;
 
-public class JimpleUpInstanceFieldRef extends InstanceFieldVal {
+public class JimpleUpStaticFieldRef extends StaticFieldVal {
 
-  private final JInstanceFieldRef delegate;
+  private final JStaticFieldRef delegate;
   private final JimpleUpMethod method;
 
-  public JimpleUpInstanceFieldRef(JInstanceFieldRef delegate, JimpleUpMethod method) {
+  public JimpleUpStaticFieldRef(JStaticFieldRef delegate, JimpleUpMethod method) {
     this(delegate, method, null);
   }
 
-  private JimpleUpInstanceFieldRef(
-      JInstanceFieldRef delegate, JimpleUpMethod method, ControlFlowGraph.Edge unbalanced) {
+  private JimpleUpStaticFieldRef(
+      JStaticFieldRef delegate, JimpleUpMethod method, ControlFlowGraph.Edge unbalanced) {
     super(method, unbalanced);
 
     this.delegate = delegate;
     this.method = method;
   }
 
-  public JInstanceFieldRef getDelegate() {
-    return delegate;
-  }
-
   @Override
-  public Val getBase() {
-    return new JimpleUpVal(delegate.getBase(), method);
+  public WrappedClass getDeclaringClass() {
+    return new JimpleUpWrappedClass(
+        delegate.getFieldSignature().getDeclClassType(), method.getView());
   }
 
   @Override
@@ -60,7 +59,16 @@ public class JimpleUpInstanceFieldRef extends InstanceFieldVal {
 
   @Override
   public Val asUnbalanced(ControlFlowGraph.Edge stmt) {
-    return new JimpleUpInstanceFieldRef(delegate, method, stmt);
+    return new JimpleUpStaticFieldRef(delegate, method, stmt);
+  }
+
+  @Override
+  public Val withNewMethod(Method callee) {
+    if (callee instanceof JimpleUpMethod) {
+      return new JimpleUpStaticFieldRef(delegate, (JimpleUpMethod) callee);
+    }
+
+    throw new RuntimeException("Cannot apply method that is not a JimpleUpMethod");
   }
 
   @Override
@@ -73,8 +81,12 @@ public class JimpleUpInstanceFieldRef extends InstanceFieldVal {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
-    JimpleUpInstanceFieldRef that = (JimpleUpInstanceFieldRef) o;
-    return Objects.equals(delegate, that.delegate);
+    JimpleUpStaticFieldRef that = (JimpleUpStaticFieldRef) o;
+    // TODO
+    //  Wrong equals implementation in SootUp. Once fixed, replace this with
+    //  the commented line
+    return (delegate != null && delegate.equals(that.delegate));
+    // return Objects.equals(delegate, that.delegate);
   }
 
   @Override

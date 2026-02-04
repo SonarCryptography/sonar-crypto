@@ -12,7 +12,7 @@
  *   Johannes Spaeth - initial API and implementation
  * *****************************************************************************
  */
-package org.sonarcrypt.boomerang.scope.sootup.jimple;
+package org.sonarcrypto.scanner.boomerang.scope.sootup.jimple;
 
 import boomerang.scope.ArrayVal;
 import boomerang.scope.ControlFlowGraph;

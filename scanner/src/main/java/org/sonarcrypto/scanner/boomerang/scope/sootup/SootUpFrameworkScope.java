@@ -12,7 +12,7 @@
  *   Johannes Spaeth - initial API and implementation
  * *****************************************************************************
  */
-package org.sonarcrypt.boomerang.scope.sootup;
+package org.sonarcrypto.scanner.boomerang.scope.sootup;
 
 import boomerang.scope.CallGraph;
 import boomerang.scope.DataFlowScope;
