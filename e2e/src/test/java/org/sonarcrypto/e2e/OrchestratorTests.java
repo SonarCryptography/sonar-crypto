@@ -3,6 +3,7 @@ package org.sonarcrypto.e2e;
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.MavenBuild;
 import com.sonar.orchestrator.junit5.OrchestratorExtension;
+import com.sonar.orchestrator.locator.FileLocation;
 import com.sonar.orchestrator.locator.MavenLocation;
 import java.io.File;
 import java.util.Map;
@@ -20,10 +21,8 @@ class OrchestratorTests {
             .builderEnv()
             .setZipFile(FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip"))
             .useDefaultAdminCredentialsForBuilds(true)
-            // TODO: Activate sonar-crypto-plugin once working
-            // .addPlugin(FileLocation.of(FileUtilities.findFile("../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar")))
-            // TODO: Remove sonar-java-plugin once sonar-crypto-plugin comes with a default quality profile
             .addPlugin(MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.22.0.41895"))
+            .addPlugin(FileLocation.of(FileUtilities.findFile("../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar")))
             .build();
 
     @AfterAll
