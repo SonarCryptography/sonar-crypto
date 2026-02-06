@@ -28,6 +28,25 @@ This command will compile the source code, run unit tests, and package the proje
 > Add `-DskipTests` to skip unit tests.
 >
 
+## Code Style
+
+This project uses [Spotless](https://github.com/diffplug/spotless) with Google Java Format to ensure consistent code formatting across the codebase.
+
+To check if your code follows the formatting standards:
+
+```bash
+mvn spotless:check
+```
+
+To automatically format your code:
+
+```bash
+mvn spotless:apply
+```
+
+> [!IMPORTANT]
+> Code formatting is enforced in the CI pipeline.
+
 ## Modules / Repository Contents
 
 ### Sonar Crypto Plugin

@@ -5,7 +5,6 @@ import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,7 @@ public class CryptoSensor implements Sensor {
       LOGGER.error("Failed to build Maven project", e);
       return;
     }
-    
+
     final String ruleset = "bc";
     Path ruleDir;
     try {
