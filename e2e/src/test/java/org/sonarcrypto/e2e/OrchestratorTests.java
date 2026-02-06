@@ -21,8 +21,8 @@ class OrchestratorTests {
             .builderEnv()
             .setZipFile(FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip"))
             .useDefaultAdminCredentialsForBuilds(true)
-            .addPlugin(FileLocation.of(FileUtilities.findFile("../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar")))
             .addPlugin(MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.22.0.41895"))
+            .addPlugin(FileLocation.of(FileUtilities.findFile("../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar")))
             .build();
 
     @AfterAll

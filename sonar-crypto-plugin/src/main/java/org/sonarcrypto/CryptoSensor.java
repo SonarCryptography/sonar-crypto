@@ -1,11 +1,15 @@
 package org.sonarcrypto;
 
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
+import com.google.common.collect.Table;
+import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-
+import java.util.Set;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +17,8 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.batch.sensor.issue.NewIssue;
+import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonarcrypto.cognicrypt.MavenBuildException;
 import org.sonarcrypto.cognicrypt.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
@@ -20,45 +26,60 @@ import org.sonarcrypto.rules.CryslRuleProvider;
 @NullMarked
 public class CryptoSensor implements Sensor {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CryptoSensor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CryptoSensor.class);
 
-  @Override
-  public void describe(SensorDescriptor sensorDescriptor) {
-    sensorDescriptor.name("CogniCryptSensor");
-    sensorDescriptor.onlyOnLanguages("java");
-  }
-
-  @Override
-  public void execute(SensorContext sensorContext) {
-    FileSystem fileSystem = sensorContext.fileSystem();
-
-    String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
-    MavenProject mi;
-    try {
-      mi = new MavenProject(mavenProjectPath);
-      mi.compile();
-    } catch (IOException | MavenBuildException e) {
-      LOGGER.error("Failed to build Maven project", e);
-      return;
-    }
-    
-    final String ruleset = "bc";
-    Path ruleDir;
-    try {
-      CryslRuleProvider ruleProvider = new CryslRuleProvider();
-      ruleDir = ruleProvider.extractRulesetToTempDir(ruleset);
-    } catch (IOException | URISyntaxException e) {
-      LOGGER.error(
-          "I/O error extracting CrySL rules for ruleset '{}': {}", ruleset, e.getMessage(), e);
-      return;
+    @Override
+    public void describe(SensorDescriptor sensorDescriptor) {
+        sensorDescriptor.name("CogniCryptSensor");
+        sensorDescriptor.onlyOnLanguages("java");
     }
 
-    HeadlessJavaScanner scanner =
-        new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
+    @Override
+    public void execute(SensorContext sensorContext) {
+        FileSystem fileSystem = sensorContext.fileSystem();
 
-    scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
-    scanner.scan();
-    var errors = scanner.getCollectedErrors();
-    LOGGER.info("Errors: {}", errors.size());
-  }
+        String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
+        MavenProject mi;
+        try {
+            mi = new MavenProject(mavenProjectPath);
+            mi.compile();
+        } catch (IOException | MavenBuildException e) {
+            LOGGER.error("Failed to build Maven project", e);
+            return;
+        }
+
+        final String ruleset = "bc";
+        Path ruleDir;
+        try {
+            CryslRuleProvider ruleProvider = new CryslRuleProvider();
+            ruleDir = ruleProvider.extractRulesetToTempDir(ruleset);
+        } catch (IOException | URISyntaxException e) {
+            LOGGER.error(
+                "I/O error extracting CrySL rules for ruleset '{}': {}", ruleset, e.getMessage(), e);
+            return;
+        }
+
+        HeadlessJavaScanner scanner =
+            new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
+
+        scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
+        scanner.scan();
+        var errors = scanner.getCollectedErrors();
+        LOGGER.info("Errors: {}", errors.size());
+    }
+
+    private void reportAllIssues(SensorContext context, Table<WrappedClass, Method, Set<AbstractError>> issuesFromCC) {
+
+    }
+
+    private void reportIssue(SensorContext context, int line) {
+        NewIssue issue = context.newIssue().forRule(CryptoRulesDefinition.CC_RULE);
+        NewIssueLocation location = issue.newLocation()
+                                         .on(currentFile)
+                                         .at(currentFile.selectLine(line))
+                                         .message("Cryptographic API misuse detected by CogniCrypt. Please review the code for potential security vulnerabilities.");
+        issue
+            .at(location)
+            .save();
+    }
 }
