@@ -1,32 +1,20 @@
 package org.sonarcrypto.cognicrypt;
 
+import boomerang.scope.sootup.BoomerangPreInterceptor;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.NonNull;
-import sootup.core.cache.provider.ClassCacheProvider;
 import sootup.core.frontend.AbstractClassSource;
+import sootup.core.frontend.OverridingBodySource;
 import sootup.core.frontend.ResolveException;
 import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.model.*;
 import sootup.core.types.ClassType;
 import sootup.java.core.*;
 import sootup.java.core.views.JavaView;
-import sootup.jimple.frontend.JimpleAnalysisInputLocation;
 
 public class JimpleConvertingView extends JavaView {
-  protected JimpleConvertingView(
-      @NonNull List<AnalysisInputLocation> inputLocations,
-      @NonNull ClassCacheProvider cacheProvider,
-      @NonNull JavaIdentifierFactory idf) {
-    super(inputLocations, cacheProvider, idf);
-  }
-
-  public JimpleConvertingView(
-      @NonNull List<AnalysisInputLocation> inputLocations,
-      @NonNull ClassCacheProvider cacheProvider) {
-    super(inputLocations, cacheProvider);
-  }
 
   public JimpleConvertingView(@NonNull List<AnalysisInputLocation> inputLocations) {
     super(inputLocations);
@@ -60,22 +48,19 @@ public class JimpleConvertingView extends JavaView {
 
   private JavaSootClass wrapAsJavaSootClass(SootClass sootClass, AbstractClassSource classSource) {
     // Create a JavaSootClassSource with default Java-specific metadata
-
-    var sc =
+    WrappingSootClassSource wrappingSootClassSource =
         new WrappingSootClassSource(
-            sootClass,
-            (JimpleAnalysisInputLocation) classSource.getAnalysisInputLocation(),
-            sootClass.getType());
+            sootClass, classSource.getAnalysisInputLocation(), sootClass.getType());
 
-    return sc.buildClass(classSource.getAnalysisInputLocation().getSourceType());
+    return wrappingSootClassSource.buildClass(
+        classSource.getAnalysisInputLocation().getSourceType());
   }
 
-  private static class WrappingSootClassSource extends JavaSootClassSource {
-
+  private class WrappingSootClassSource extends JavaSootClassSource {
     private final SootClass resolvedClass;
 
     private WrappingSootClassSource(
-        SootClass sootClass, JimpleAnalysisInputLocation srcNamespace, ClassType classSignature) {
+        SootClass sootClass, AnalysisInputLocation srcNamespace, ClassType classSignature) {
       super(srcNamespace, classSignature, Path.of(""));
       this.resolvedClass = sootClass;
     }
@@ -87,16 +72,27 @@ public class JimpleConvertingView extends JavaView {
 
     @Override
     public @NonNull Collection<? extends SootMethod> resolveMethods() throws ResolveException {
+
       return resolvedClass.getMethods().stream()
           .map(
-              m ->
-                  new JavaSootMethod(
-                      m.getBodySource(),
+              m -> {
+                if (m.getBodySource() instanceof OverridingBodySource preInterceptedBodySource) {
+                  final BoomerangPreInterceptor interceptor = new BoomerangPreInterceptor();
+                  Body.BodyBuilder builder = Body.builder(m.getBody(), m.getModifiers());
+                  interceptor.interceptBody(builder, JimpleConvertingView.this);
+                  OverridingBodySource interceptedBodySource =
+                      preInterceptedBodySource.withBody(builder.build());
+                  return new JavaSootMethod(
+                      interceptedBodySource,
                       m.getSignature(),
                       m.getModifiers(),
                       m.getExceptionSignatures(),
                       Collections.emptyList(),
-                      m.getPosition()))
+                      m.getPosition());
+                } else {
+                  throw new RuntimeException("");
+                }
+              })
           .collect(Collectors.toSet());
     }
 
