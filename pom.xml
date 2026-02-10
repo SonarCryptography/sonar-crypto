@@ -14,7 +14,7 @@
 
     <modules>
         <module>e2e</module>
-        <module>jbc2jimple</module>
+        <module>utils/jbc2jimple</module>
         <module>sonar-crypto-plugin</module>
     </modules>
 
