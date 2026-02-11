@@ -2,7 +2,6 @@ package org.sonarcrypto.utils.jbc2jimple;
 
 import static java.nio.file.StandardOpenOption.*;
 
-import boomerang.scope.sootup.BoomerangPreInterceptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -19,55 +18,8 @@ import sootup.core.util.printer.JimplePrinter;
 import sootup.java.bytecode.frontend.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.views.JavaView;
 
-@SuppressWarnings("ClassCanBeRecord")
 @NullMarked
 public class Jbc2JimpleConverter {
-
-  private final boolean isBoomerangPreInterceptorEnabled;
-
-  /**
-   * Creates a new instance with <i>disabled</i> BoomerangPreInterceptor.
-   *
-   * <p>To enable the BoomerangPreInterceptor, use the overloaded constructor {@link
-   * #Jbc2JimpleConverter(boolean)}.
-   *
-   * <p>Example:
-   *
-   * <p>
-   *
-   * <pre><code>
-   * new Jbc2JimpleConverter().convert("/java/class/path", "/jimple/output/directory");
-   * </code></pre>
-   */
-  public Jbc2JimpleConverter() {
-    this(false);
-  }
-
-  /**
-   * Creates a new instance.
-   *
-   * <p>To use the default setting for the BoomerangPreInterceptor, use the parameterless
-   * constructor {@link #Jbc2JimpleConverter()}.
-   *
-   * <p>Example:
-   *
-   * <p>
-   *
-   * <pre><code>
-   * new Jbc2JimpleConverter(true).convert("/java/class/path", "/jimple/output/directory");
-   * </code></pre>
-   *
-   * @param enableBoomerangPreInterceptor Set to `true` to enable the BoomerangPreInterceptor.
-   */
-  public Jbc2JimpleConverter(final boolean enableBoomerangPreInterceptor) {
-    isBoomerangPreInterceptorEnabled = enableBoomerangPreInterceptor;
-  }
-
-  /** Gets a value indicating whether the BoomerangPreInterceptor is enabled. */
-  public boolean isBoomerangPreInterceptorEnabled() {
-    return isBoomerangPreInterceptorEnabled;
-  }
-
   /**
    * Converts Java classes of the given class path into Jimple files that are written into the given
    * output directory.
@@ -95,11 +47,7 @@ public class Jbc2JimpleConverter {
     final var javaView =
         new JavaView(
             new JavaClassPathAnalysisInputLocation(
-                javaClassPath,
-                SourceType.Application,
-                isBoomerangPreInterceptorEnabled()
-                    ? List.of(new BoomerangPreInterceptor())
-                    : List.of()));
+                javaClassPath, SourceType.Application, List.of()));
 
     final var jimplePrinter = new JimplePrinter();
     final var sootClassesIterator = javaView.getClasses().iterator();
@@ -127,12 +75,6 @@ public class Jbc2JimpleConverter {
   @SuppressWarnings("DataFlowIssue")
   @Command(mixinStandardHelpOptions = true)
   private static class CliArgs implements Callable<Integer> {
-
-    @Option(
-        names = {"-bpi", "--enableBoomerangPreInterceptor"},
-        description = "Enables the BoomerangPreInterceptor.")
-    private boolean enableBoomerangPreInterceptor = false;
-
     @Option(
         names = {"-cp", "--classPath"},
         description = "Sets the class path",
@@ -159,9 +101,9 @@ public class Jbc2JimpleConverter {
    * <p>
    *
    * <pre>
-   * -classPath /java/class/path -jimpleOutput /jimple/output/directory -enableBoomerangPreInterceptor
+   * -classPath /java/class/path -jimpleOutput /jimple/output/directory
    *
-   * -cp /java/class/path        -jo /jimple/output/directory           -bpi
+   * -cp /java/class/path        -jo /jimple/output/directory
    * </pre>
    */
   public static void main(String[] args) throws IOException {
@@ -177,17 +119,10 @@ public class Jbc2JimpleConverter {
     System.out.println("Java class path:         " + cliArgs.classPath);
     System.out.println("Jimple output directory: " + cliArgs.outputPath);
 
-    if (cliArgs.enableBoomerangPreInterceptor) {
-      System.out.println();
-      System.out.println("BoomerangPreInterceptor enabled");
-    }
-
     System.out.println();
     System.out.println("Converting classes ...");
 
-    final var count =
-        new Jbc2JimpleConverter(cliArgs.enableBoomerangPreInterceptor)
-            .convert(cliArgs.classPath, cliArgs.outputPath);
+    final var count = new Jbc2JimpleConverter().convert(cliArgs.classPath, cliArgs.outputPath);
 
     System.out.println();
     System.out.println("Done. " + count + " class file(s) converted.");
