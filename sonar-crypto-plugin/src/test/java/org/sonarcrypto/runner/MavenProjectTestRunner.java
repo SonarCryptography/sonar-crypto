@@ -14,6 +14,7 @@ import org.sonarcrypto.cognicrypt.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Set;
 
 @NullMarked
@@ -40,7 +41,7 @@ public non-sealed class MavenProjectTestRunner extends TestRunner {
 	public Table<WrappedClass, Method, Set<AbstractError>> run(
 		final String path,
 		final Ruleset ruleset
-	) throws IOException {
+	) throws IOException, URISyntaxException {
 		final var mavenProjectPath = new File(path).getAbsolutePath();
 		final String classPath;
 		

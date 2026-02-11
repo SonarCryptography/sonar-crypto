@@ -12,49 +12,57 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.sonarcrypto.e2e.utility.FileUtilities;
 
 class OrchestratorTests {
-    private static final String SONAR_MAVEN_PLUGIN_VERSION = "5.5.0.6356";
+  private static final String SONAR_MAVEN_PLUGIN_VERSION = "5.5.0.6356";
 
-    @RegisterExtension
-    private static final OrchestratorExtension ORCHESTRATOR =
-        OrchestratorExtension
-            .builderEnv()
-            .setZipFile(FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip"))
-            .useDefaultAdminCredentialsForBuilds(true)
-            // TODO: Activate sonar-crypto-plugin once working
-            // .addPlugin(FileLocation.of(FileUtilities.findFile("../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar")))
-            // TODO: Remove sonar-java-plugin once sonar-crypto-plugin comes with a default quality profile
-            .addPlugin(MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.22.0.41895"))
-            .build();
+  @RegisterExtension
+  private static final OrchestratorExtension ORCHESTRATOR =
+      OrchestratorExtension.builderEnv()
+          .setZipFile(FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip"))
+          .useDefaultAdminCredentialsForBuilds(true)
+          // TODO: Activate sonar-crypto-plugin once working
+          // .addPlugin(FileLocation.of(FileUtilities.findFile("../sonar-crypto-plugin/target",
+          // "sonar-crypto-plugin", ".jar")))
+          // TODO: Remove sonar-java-plugin once sonar-crypto-plugin comes with a default quality
+          // profile
+          .addPlugin(MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.22.0.41895"))
+          .build();
 
-    @AfterAll
-    static void endTest() {
-        // Put breakpoint here for debugging purposes
-        ORCHESTRATOR.stop();
+  @AfterAll
+  static void endTest() {
+    // Put breakpoint here for debugging purposes
+    ORCHESTRATOR.stop();
+  }
+
+  BuildResult executeMavenBuild(File projectLocation, String projectKey) {
+    return executeMavenBuild(projectLocation, projectKey, null);
+  }
+
+  BuildResult executeMavenBuild(
+      File projectLocation, String projectKey, @Nullable Map<String, String> properties) {
+    MavenBuild build =
+        MavenBuild.create(new File(projectLocation, "pom.xml"))
+            .setGoals(
+                "clean package -DskipTests -Dsonar.projectKey="
+                    + projectKey
+                    + " org.sonarsource.scanner.maven:sonar-maven-plugin:"
+                    + SONAR_MAVEN_PLUGIN_VERSION
+                    + ":sonar");
+
+    // Propagate MAVEN_OPTS to Maven Scanner for debugging purposes
+    String mavenOpts = System.getenv("MAVEN_OPTS");
+    if (mavenOpts != null) {
+      build.setEnvironmentVariable("MAVEN_OPTS", mavenOpts);
     }
 
-    BuildResult executeMavenBuild(File projectLocation, String projectKey) {
-        return executeMavenBuild(projectLocation, projectKey, null);
+    // Set properties
+    build
+        .setProperty("sonar.cpd.exclusions", "**/*")
+        .setProperty("sonar.internal.analysis.failFast", "true")
+        .setProperty("sonar.scanner.skipJreProvisioning", "true");
+    if (properties != null) {
+      build.setProperties(properties);
     }
 
-    BuildResult executeMavenBuild(File projectLocation, String projectKey, @Nullable Map<String, String> properties) {
-        MavenBuild build = MavenBuild
-            .create(new File(projectLocation, "pom.xml"))
-            .setGoals("clean package -DskipTests -Dsonar.projectKey=" + projectKey + " org.sonarsource.scanner.maven:sonar-maven-plugin:" + SONAR_MAVEN_PLUGIN_VERSION + ":sonar");
-
-        // Propagate MAVEN_OPTS to Maven Scanner for debugging purposes
-        String mavenOpts = System.getenv("MAVEN_OPTS");
-        if (mavenOpts != null) {
-            build.setEnvironmentVariable("MAVEN_OPTS", mavenOpts);
-        }
-
-        // Set properties
-        build.setProperty("sonar.cpd.exclusions", "**/*")
-             .setProperty("sonar.internal.analysis.failFast", "true")
-             .setProperty("sonar.scanner.skipJreProvisioning", "true");
-        if (properties != null) {
-            build.setProperties(properties);
-        }
-
-        return ORCHESTRATOR.executeBuild(build);
-    }
+    return ORCHESTRATOR.executeBuild(build);
+  }
 }

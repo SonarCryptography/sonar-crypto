@@ -11,6 +11,7 @@ import org.sonarcrypto.Ruleset;
 import org.sonarcrypto.rules.CryslRuleProvider;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Set;
 
 @NullMarked
@@ -35,7 +36,7 @@ public sealed abstract class TestRunner permits ClassPathTestRunner, MavenProjec
 	public Table<WrappedClass, Method, Set<AbstractError>> run(
 		final String path,
 		final Ruleset ruleset
-	) throws IOException {
+	) throws IOException, URISyntaxException {
 		final var provider = new CryslRuleProvider();
 		final var scanner = new HeadlessJavaScanner(
 			path,

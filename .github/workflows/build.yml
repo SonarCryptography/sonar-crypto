@@ -7,9 +7,29 @@ on:
   pull_request:
 
 jobs:
+  spotless-check:
+    name: Code Formatting Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Maven packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Run Spotless Check
+        run: mvn spotless:check -B
+
   build-linux:
     name: Build & Unit Tests & SQ
     runs-on: ubuntu-latest
+    needs: spotless-check
     steps:
       - uses: actions/checkout@v6
         with:
@@ -39,6 +59,7 @@ jobs:
   build-windows:
     name: Build & Unit Tests
     runs-on: windows-latest
+    needs: spotless-check
     steps:
       - uses: actions/checkout@v6
         with:
@@ -62,6 +83,7 @@ jobs:
   e2e-test:
     name: E2E Tests
     runs-on: ubuntu-latest
+    needs: spotless-check
     env:
       ARTIFACTORY_URL: https://repo1.maven.org/maven2
     steps:

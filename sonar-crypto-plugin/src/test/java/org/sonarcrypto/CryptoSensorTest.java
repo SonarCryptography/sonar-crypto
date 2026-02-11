@@ -3,6 +3,7 @@ package org.sonarcrypto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 
 import crypto.analysis.errors.ConstraintError;
@@ -31,7 +32,7 @@ class CryptoSensorTest {
 	}
 	
 	@Test
-	void mavenProjectTest() throws IOException {
+	void mavenProjectTest() throws IOException, URISyntaxException {
 		final var runner = new MavenProjectTestRunner(Framework.SOOT_UP);
 		final var errors = runner.run("../testProjects/test", Ruleset.JCA);
 		final var errorSet = errors.cellSet();

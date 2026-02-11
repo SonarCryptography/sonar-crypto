@@ -9,6 +9,7 @@ import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.Ruleset;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Set;
 
 @NullMarked
@@ -33,7 +34,7 @@ public non-sealed class ClassPathTestRunner extends TestRunner {
 	public Table<WrappedClass, Method, Set<AbstractError>> run(
 		final String path,
 		final Ruleset ruleset
-	) throws IOException {
+	) throws IOException, URISyntaxException {
 		return super.run(path, ruleset);
 	}
 }
