@@ -2,13 +2,22 @@ package org.sonarcrypto.utils.jbc2jimple;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+
+import org.apache.commons.io.FileUtils;
+import org.jspecify.annotations.NullMarked;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+@NullMarked
 public class Jcb2JimpleConverterTest {
+  
+  private static final Logger LOGGER = LoggerFactory.getLogger(Jcb2JimpleConverterTest.class);
+  
   @SuppressWarnings("DataFlowIssue")
   private void convert(boolean enableBoomerangPreInterceptor)
       throws IOException, URISyntaxException {
@@ -18,8 +27,12 @@ public class Jcb2JimpleConverterTest {
 
     new Jbc2JimpleConverter(enableBoomerangPreInterceptor)
         .convert(classPath.toString(), outputDir.toString());
-
-    Assert.assertTrue(Files.exists(outputDir.resolve("org.sonarcrypto.test.App.jimple")));
+    
+    final var fileExists = Files.exists(outputDir.resolve("org.sonarcrypto.test.App.jimple"));
+    
+    FileUtils.deleteDirectory(outputDir.toFile());
+    
+    Assert.assertTrue(fileExists);
   }
 
   @SuppressWarnings("DataFlowIssue")
@@ -39,8 +52,12 @@ public class Jcb2JimpleConverterTest {
     args.add(outputDir.toString());
 
     Jbc2JimpleConverter.main(args.toArray(String[]::new));
-
-    Assert.assertTrue(Files.exists(outputDir.resolve("org.sonarcrypto.test.App.jimple")));
+    
+    final var fileExists = Files.exists(outputDir.resolve("org.sonarcrypto.test.App.jimple"));
+    
+    FileUtils.deleteDirectory(outputDir.toFile());
+    
+    Assert.assertTrue(fileExists);
   }
 
   @Test
