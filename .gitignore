@@ -8,8 +8,11 @@ dependency-reduced-pom.xml
 *.ipr
 .idea/
 
-# ---- VC Code
+# ---- VS Code
 .vscode
+.metals/
+.bloop/
+project/**/metals.sbt
 
 # ---- Eclipse
 .classpath
