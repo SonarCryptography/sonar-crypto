@@ -12,7 +12,6 @@ package org.sonarcrypto.maven;
 import com.google.common.collect.Lists;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
@@ -26,12 +25,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sootup.core.inputlocation.AnalysisInputLocation;
-import sootup.core.model.SourceType;
-import sootup.core.util.printer.JimplePrinter;
-import sootup.core.views.View;
-import sootup.java.bytecode.frontend.inputlocation.PathBasedAnalysisInputLocation;
-import sootup.java.core.views.JavaView;
+import org.sonarcrypto.utils.jbc2jimple.Jbc2JimpleConverter;
 
 @NullMarked
 public class MavenProject {
@@ -130,29 +124,12 @@ public class MavenProject {
     return pathToProjectRoot + File.separator + "target" + File.separator + "jimple";
   }
 
-  private void buildJimple() {
-    Path classes = Path.of(getBuildDirectory());
-    AnalysisInputLocation inputLocation =
-        PathBasedAnalysisInputLocation.create(classes, SourceType.Application);
-    View view = new JavaView(inputLocation);
-    Path jimpleDir = Path.of(getJimpleDirectory());
-    view.getClasses()
-        .forEach(
-            clazz -> {
-              Path outputFile = jimpleDir.resolve(clazz.toString().concat(".jimple"));
-              File outputParentDir = outputFile.getParent().toFile();
-              if (!outputParentDir.exists() && !outputParentDir.mkdirs()) {
-                LOGGER.warn("Failed to create directory: {}", outputParentDir.getAbsolutePath());
-              }
-              try (BufferedWriter writer =
-                  new BufferedWriter(new FileWriter(outputFile.toFile()))) {
-
-                JimplePrinter jimplePrinter = new JimplePrinter();
-                var pw = new PrintWriter(writer);
-                jimplePrinter.printTo(clazz, pw);
-              } catch (IOException e) {
-                LOGGER.error("Failed to write Jimple file: {}", outputFile.toString(), e);
-              }
-            });
+  private void buildJimple() throws MavenBuildException {
+    Jbc2JimpleConverter converter = new Jbc2JimpleConverter();
+    try {
+      converter.convert(getBuildDirectory(), getJimpleDirectory());
+    } catch (IOException e) {
+      throw new MavenBuildException("Was not able to convert class files to Jimple", e);
+    }
   }
 }
