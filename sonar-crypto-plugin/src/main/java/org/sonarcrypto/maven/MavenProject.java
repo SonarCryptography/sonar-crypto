@@ -7,7 +7,7 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package org.sonarcrypto.cognicrypt;
+package org.sonarcrypto.maven;
 
 import com.google.common.collect.Lists;
 import java.io.*;
@@ -134,7 +134,6 @@ public class MavenProject {
     Path classes = Path.of(getBuildDirectory());
     AnalysisInputLocation inputLocation =
         PathBasedAnalysisInputLocation.create(classes, SourceType.Application);
-    // TODO: Do we need to add all dependencies here?
     View view = new JavaView(inputLocation);
     Path jimpleDir = Path.of(getJimpleDirectory());
     view.getClasses()
