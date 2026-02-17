@@ -38,8 +38,6 @@ class CcToSonarIssuesTest {
     issueReporter = new CcToSonarIssues();
   }
 
-  // --- findInputFile tests ---
-
   @Test
   void find_input_file_returns_file_for_matching_class() throws IOException {
     addJavaFile("com/example/MyClass.java", "package com.example;\npublic class MyClass {}");
@@ -99,8 +97,6 @@ class CcToSonarIssuesTest {
 
     assertThat(result).isNull();
   }
-
-  // --- reportAllIssues tests ---
 
   @Test
   void report_all_issues_creates_issues_for_found_files() throws IOException {
@@ -168,8 +164,6 @@ class CcToSonarIssuesTest {
     assertThat(sensorContext.allIssues()).isEmpty();
   }
 
-  // --- reportIssue tests ---
-
   @Test
   void report_issue_should_create_issue_with_correct_details() throws IOException {
     InputFile inputFile =
@@ -228,8 +222,6 @@ class CcToSonarIssuesTest {
         .startsWith("Cryptographic API misuse:")
         .contains(customMessage);
   }
-
-  // --- Test helpers ---
 
   private InputFile addJavaFile(String relativePath, String content) throws IOException {
     Path srcDir = tempDir.resolve("src/main/java");
