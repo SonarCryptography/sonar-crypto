@@ -19,7 +19,7 @@ class CryptoSensorTest {
   @TempDir Path tempDir;
 
   @Test
-  void describe_sets_sensor_name() {
+  void describe() {
     CryptoSensor sensor = new CryptoSensor();
     SensorDescriptor descriptor = mock(SensorDescriptor.class);
     when(descriptor.name("CogniCryptSensor")).thenReturn(descriptor);
@@ -27,16 +27,6 @@ class CryptoSensorTest {
     sensor.describe(descriptor);
 
     verify(descriptor).name("CogniCryptSensor");
-  }
-
-  @Test
-  void describe_registers_java_language() {
-    CryptoSensor sensor = new CryptoSensor();
-    SensorDescriptor descriptor = mock(SensorDescriptor.class);
-    when(descriptor.name("CogniCryptSensor")).thenReturn(descriptor);
-
-    sensor.describe(descriptor);
-
     verify(descriptor).onlyOnLanguages("java");
   }
 

@@ -15,43 +15,18 @@ import org.sonar.api.utils.Version;
 class CryptoPluginTest {
 
   @Test
-  void define_registers_rules_definition() {
-    Plugin.Context context = newContext();
-    new CryptoPlugin().define(context);
-
-    assertThat(context.getExtensions()).contains(CryptoRulesDefinition.class);
-  }
-
-  @Test
-  void define_registers_quality_profile() {
-    Plugin.Context context = newContext();
-    new CryptoPlugin().define(context);
-
-    assertThat(context.getExtensions()).contains(CryptoQualityProfile.class);
-  }
-
-  @Test
-  void define_registers_sensor() {
-    Plugin.Context context = newContext();
-    new CryptoPlugin().define(context);
-
-    assertThat(context.getExtensions()).contains(CryptoSensor.class);
-  }
-
-  @Test
-  void define_registers_exactly_three_extensions() {
-    Plugin.Context context = newContext();
-    new CryptoPlugin().define(context);
-
-    assertThat(context.getExtensions()).hasSize(3);
-  }
-
-  private static Plugin.Context newContext() {
+  void define() {
     SonarRuntime runtime = mock(SonarRuntime.class);
     when(runtime.getApiVersion()).thenReturn(Version.create(13, 4));
     when(runtime.getProduct()).thenReturn(SonarProduct.SONARQUBE);
     when(runtime.getSonarQubeSide()).thenReturn(SonarQubeSide.SCANNER);
     when(runtime.getEdition()).thenReturn(SonarEdition.COMMUNITY);
-    return new Plugin.Context(runtime);
+    Plugin.Context context = new Plugin.Context(runtime);
+
+    new CryptoPlugin().define(context);
+
+    assertThat(context.getExtensions())
+        .containsExactly(
+            CryptoRulesDefinition.class, CryptoQualityProfile.class, CryptoSensor.class);
   }
 }
