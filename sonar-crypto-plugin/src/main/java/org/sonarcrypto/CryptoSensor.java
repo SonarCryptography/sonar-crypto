@@ -12,8 +12,8 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonarcrypto.cognicrypt.MavenBuildException;
-import org.sonarcrypto.cognicrypt.MavenProject;
+import org.sonarcrypto.maven.MavenBuildException;
+import org.sonarcrypto.maven.MavenProject;
 import org.sonarcrypto.rules.CryslRuleProvider;
 
 @NullMarked
