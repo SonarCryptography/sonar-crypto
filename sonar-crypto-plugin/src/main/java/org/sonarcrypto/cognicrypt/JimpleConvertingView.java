@@ -61,7 +61,7 @@ public class JimpleConvertingView extends JavaView {
 
     private WrappingSootClassSource(
         SootClass sootClass, AnalysisInputLocation srcNamespace, ClassType classSignature) {
-      super(srcNamespace, classSignature, Path.of(""));
+      super(srcNamespace, classSignature, Path.of("ClassSourceWrapper"));
       this.resolvedClass = sootClass;
     }
 
@@ -90,7 +90,8 @@ public class JimpleConvertingView extends JavaView {
                       Collections.emptyList(),
                       m.getPosition());
                 } else {
-                  throw new RuntimeException("");
+                  throw new RuntimeException(
+                      "Wrapped body source is not an OverridingBodySource, cannot apply BoomerangPreInterceptor.");
                 }
               })
           .collect(Collectors.toSet());
