@@ -20,6 +20,7 @@ import org.sonarcrypto.rules.CryslRuleProvider;
 public class CryptoSensor implements Sensor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CryptoSensor.class);
+  private final CcToSonarIssues issueReporter = new CcToSonarIssues();
 
   @Override
   public void describe(SensorDescriptor sensorDescriptor) {
@@ -58,6 +59,8 @@ public class CryptoSensor implements Sensor {
     scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
     scanner.scan();
     var errors = scanner.getCollectedErrors();
-    LOGGER.info("Errors: {}", errors.size());
+    LOGGER.info("Found {} cryptographic errors", errors.size());
+
+    issueReporter.reportAllIssues(sensorContext, errors);
   }
 }
