@@ -1,11 +1,9 @@
 package org.sonarcrypto;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import boomerang.scope.ControlFlowGraph;
-import boomerang.scope.Statement;
-import boomerang.scope.Type;
-import boomerang.scope.Val;
 import boomerang.scope.WrappedClass;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -14,9 +12,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,10 +38,11 @@ class CcToSonarIssuesTest {
     issueReporter = new CcToSonarIssues();
   }
 
+  // --- findInputFile tests ---
+
   @Test
   void find_input_file_returns_file_for_matching_class() throws IOException {
-    InputFile inputFile =
-        addJavaFile("com/example/MyClass.java", "package com.example;\npublic class MyClass {}");
+    addJavaFile("com/example/MyClass.java", "package com.example;\npublic class MyClass {}");
 
     InputFile result =
         issueReporter.findInputFile(
@@ -67,10 +63,9 @@ class CcToSonarIssuesTest {
 
   @Test
   void find_input_file_handles_deeply_nested_packages() throws IOException {
-    InputFile inputFile =
-        addJavaFile(
-            "com/example/crypto/utils/Helper.java",
-            "package com.example.crypto.utils;\npublic class Helper {}");
+    addJavaFile(
+        "com/example/crypto/utils/Helper.java",
+        "package com.example.crypto.utils;\npublic class Helper {}");
 
     InputFile result =
         issueReporter.findInputFile(
@@ -105,14 +100,16 @@ class CcToSonarIssuesTest {
     assertThat(result).isNull();
   }
 
+  // --- reportAllIssues tests ---
+
   @Test
   void report_all_issues_creates_issues_for_found_files() throws IOException {
     addJavaFile("com/example/ClassA.java", "package com.example;\npublic class ClassA {}");
     addJavaFile("com/example/ClassB.java", "package com.example;\npublic class ClassB {}");
 
     Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
-    table.put(wrappedClass("com.example.ClassA"), method("doStuff"), Set.of(error()));
-    table.put(wrappedClass("com.example.ClassB"), method("encrypt"), Set.of(error()));
+    table.put(wrappedClass("com.example.ClassA"), method("doStuff"), Set.of(mock(AbstractError.class)));
+    table.put(wrappedClass("com.example.ClassB"), method("encrypt"), Set.of(mock(AbstractError.class)));
 
     issueReporter.reportAllIssues(sensorContext, table);
 
@@ -122,7 +119,7 @@ class CcToSonarIssuesTest {
   @Test
   void report_all_issues_skips_classes_without_source_files() {
     Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
-    table.put(wrappedClass("com.example.Missing"), method("m"), Set.of(error()));
+    table.put(wrappedClass("com.example.Missing"), method("m"), Set.of(mock(AbstractError.class)));
 
     issueReporter.reportAllIssues(sensorContext, table);
 
@@ -137,9 +134,9 @@ class CcToSonarIssuesTest {
 
     Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
     WrappedClass clazz = wrappedClass("com.example.Buggy");
-    table.put(clazz, method("init"), Set.of(error()));
-    table.put(clazz, method("encrypt"), Set.of(error()));
-    table.put(clazz, method("decrypt"), Set.of(error()));
+    table.put(clazz, method("init"), Set.of(mock(AbstractError.class)));
+    table.put(clazz, method("encrypt"), Set.of(mock(AbstractError.class)));
+    table.put(clazz, method("decrypt"), Set.of(mock(AbstractError.class)));
 
     issueReporter.reportAllIssues(sensorContext, table);
 
@@ -151,7 +148,7 @@ class CcToSonarIssuesTest {
     addJavaFile("com/example/Foo.java", "package com.example;\npublic class Foo {}");
 
     Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
-    table.put(wrappedClass("com.example.Foo"), method("encrypt"), Set.of(error()));
+    table.put(wrappedClass("com.example.Foo"), method("encrypt"), Set.of(mock(AbstractError.class)));
 
     issueReporter.reportAllIssues(sensorContext, table);
 
@@ -167,6 +164,8 @@ class CcToSonarIssuesTest {
 
     assertThat(sensorContext.allIssues()).isEmpty();
   }
+
+  // --- reportIssue tests ---
 
   @Test
   void report_issue_should_create_issue_with_correct_details() throws IOException {
@@ -227,6 +226,8 @@ class CcToSonarIssuesTest {
         .contains(customMessage);
   }
 
+  // --- Test helpers ---
+
   private InputFile addJavaFile(String relativePath, String content) throws IOException {
     Path srcDir = tempDir.resolve("src/main/java");
     Files.createDirectories(srcDir);
@@ -246,151 +247,15 @@ class CcToSonarIssuesTest {
   }
 
   private static WrappedClass wrappedClass(String fqn) {
-    return new WrappedClass() {
-      @Override
-      public String getFullyQualifiedName() {
-        return fqn;
-      }
-
-      @Override
-      public boolean isPhantom() {
-        return false;
-      }
-
-      @Override
-      public boolean isDefined() {
-        return true;
-      }
-
-      @Override
-      public boolean isApplicationClass() {
-        return true;
-      }
-
-      @Override
-      public Collection<boomerang.scope.Method> getMethods() {
-        return Collections.emptyList();
-      }
-
-      @Override
-      public boolean hasSuperclass() {
-        return false;
-      }
-
-      @Override
-      public WrappedClass getSuperclass() {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public Type getType() {
-        throw new UnsupportedOperationException();
-      }
-    };
+    WrappedClass wc = mock(WrappedClass.class);
+    when(wc.getFullyQualifiedName()).thenReturn(fqn);
+    return wc;
   }
 
-  @SuppressWarnings("NullAway")
   private static boomerang.scope.Method method(String name) {
-    return new boomerang.scope.Method() {
-      @Override
-      public String getName() {
-        return name;
-      }
-
-      @Override
-      public String getSubSignature() {
-        return "void " + name + "()";
-      }
-
-      @Override
-      public WrappedClass getDeclaringClass() {
-        return wrappedClass("Test");
-      }
-
-      @Override
-      public boolean isStatic() {
-        return false;
-      }
-
-      @Override
-      public boolean isDefined() {
-        return true;
-      }
-
-      @Override
-      public boolean isPhantom() {
-        return false;
-      }
-
-      @Override
-      public boolean isStaticInitializer() {
-        return false;
-      }
-
-      @Override
-      public boolean isConstructor() {
-        return false;
-      }
-
-      @Override
-      public boolean isParameterLocal(Val v) {
-        return false;
-      }
-
-      @Override
-      public boolean isThisLocal(Val v) {
-        return false;
-      }
-
-      @Override
-      public List<Type> getParameterTypes() {
-        return Collections.emptyList();
-      }
-
-      @Override
-      public Type getParameterType(int i) {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public Type getReturnType() {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public Collection<Val> getLocals() {
-        return Collections.emptyList();
-      }
-
-      @Override
-      public Val getThisLocal() {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public List<Val> getParameterLocals() {
-        return Collections.emptyList();
-      }
-
-      @Override
-      public List<Statement> getStatements() {
-        return Collections.emptyList();
-      }
-
-      @Override
-      public ControlFlowGraph getControlFlowGraph() {
-        throw new UnsupportedOperationException();
-      }
-    };
+    boomerang.scope.Method m = mock(boomerang.scope.Method.class);
+    when(m.getName()).thenReturn(name);
+    return m;
   }
 
-  @SuppressWarnings("NullAway")
-  private static AbstractError error() {
-    return new AbstractError(null, null, null) {
-      @Override
-      public String toErrorMarkerString() {
-        return "test error";
-      }
-    };
-  }
 }

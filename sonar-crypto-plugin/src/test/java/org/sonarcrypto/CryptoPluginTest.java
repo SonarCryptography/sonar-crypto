@@ -1,6 +1,8 @@
 package org.sonarcrypto;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.sonar.api.Plugin;
@@ -45,28 +47,11 @@ class CryptoPluginTest {
   }
 
   private static Plugin.Context newContext() {
-    SonarRuntime runtime =
-        new SonarRuntime() {
-          @Override
-          public Version getApiVersion() {
-            return Version.create(13, 4);
-          }
-
-          @Override
-          public SonarProduct getProduct() {
-            return SonarProduct.SONARQUBE;
-          }
-
-          @Override
-          public SonarQubeSide getSonarQubeSide() {
-            return SonarQubeSide.SCANNER;
-          }
-
-          @Override
-          public SonarEdition getEdition() {
-            return SonarEdition.COMMUNITY;
-          }
-        };
+    SonarRuntime runtime = mock(SonarRuntime.class);
+    when(runtime.getApiVersion()).thenReturn(Version.create(13, 4));
+    when(runtime.getProduct()).thenReturn(SonarProduct.SONARQUBE);
+    when(runtime.getSonarQubeSide()).thenReturn(SonarQubeSide.SCANNER);
+    when(runtime.getEdition()).thenReturn(SonarEdition.COMMUNITY);
     return new Plugin.Context(runtime);
   }
 }
