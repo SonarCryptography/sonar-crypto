@@ -1,0 +1,50 @@
+public class JimpleTest extends java.lang.Object {
+    private int value;
+
+    public void <init>() {
+        JimpleTest this;
+        this := @this: JimpleTest;
+        specialinvoke this.<java.lang.Object: void <init>()>();
+        this.<JimpleTest: int value> = 0;
+        return;
+    }
+
+    public void <init>(int) {
+        JimpleTest this;
+        int i0;
+        this := @this: JimpleTest;
+        i0 := @parameter0: int;
+        specialinvoke this.<java.lang.Object: void <init>()>();
+        this.<JimpleTest: int value> = i0;
+        return;
+    }
+
+    public int getValue() {
+        JimpleTest this;
+        int $i0;
+        this := @this: JimpleTest;
+        $i0 = this.<JimpleTest: int value>;
+        return $i0;
+    }
+
+    public void setValue(int) {
+        JimpleTest this;
+        int i0;
+        this := @this: JimpleTest;
+        i0 := @parameter0: int;
+        this.<JimpleTest: int value> = i0;
+        return;
+    }
+
+    public static void main(java.lang.String[]) {
+        java.lang.String[] r0;
+        JimpleTest $r1;
+        int $i0;
+        r0 := @parameter0: java.lang.String[];
+        $r1 = new JimpleTest;
+        specialinvoke $r1.<JimpleTest: void <init>(int)>(42);
+        $i0 = virtualinvoke $r1.<JimpleTest: int getValue()>();
+        return;
+    }
+}
+
