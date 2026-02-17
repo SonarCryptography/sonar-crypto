@@ -7,15 +7,10 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package org.sonarcrypto.cognicrypt;
+package org.sonarcrypto.maven;
 
 import com.google.common.collect.Lists;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import org.apache.commons.io.IOUtils;
@@ -30,6 +25,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonarcrypto.utils.jbc2jimple.Jbc2JimpleConverter;
 
 @NullMarked
 public class MavenProject {
@@ -69,6 +65,7 @@ public class MavenProject {
     }
     compiled = true;
     computeClassPath();
+    buildJimple();
   }
 
   private void computeClassPath() throws MavenBuildException {
@@ -117,5 +114,22 @@ public class MavenProject {
       throw new IllegalStateException("Project has not been compiled yet.");
     }
     return fullProjectClassPath;
+  }
+
+  public String getJimpleDirectory() {
+    if (!compiled) {
+      throw new IllegalStateException(
+          "You first have to compile the project. Use method compile()");
+    }
+    return pathToProjectRoot + File.separator + "target" + File.separator + "jimple";
+  }
+
+  private void buildJimple() throws MavenBuildException {
+    Jbc2JimpleConverter converter = new Jbc2JimpleConverter();
+    try {
+      converter.convert(getBuildDirectory(), getJimpleDirectory());
+    } catch (IOException e) {
+      throw new MavenBuildException("Was not able to convert class files to Jimple", e);
+    }
   }
 }

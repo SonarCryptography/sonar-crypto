@@ -1,4 +1,4 @@
-package org.sonarcrypto.cognicrypt;
+package org.sonarcrypto.maven;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
