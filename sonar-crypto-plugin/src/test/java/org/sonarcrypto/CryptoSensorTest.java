@@ -72,9 +72,12 @@ class CryptoSensorTest {
   void execute_logs_error_count_and_reports_issues() throws IOException {
     Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> fakeErrors =
         HashBasedTable.create();
-    fakeErrors.put(wrappedClass("com.example.Foo"), method("encrypt"), Set.of(mock(AbstractError.class)));
-    fakeErrors.put(wrappedClass("com.example.Bar"), method("decrypt"), Set.of(mock(AbstractError.class)));
-    fakeErrors.put(wrappedClass("com.example.Foo"), method("hash"), Set.of(mock(AbstractError.class)));
+    fakeErrors.put(
+        wrappedClass("com.example.Foo"), method("encrypt"), Set.of(mock(AbstractError.class)));
+    fakeErrors.put(
+        wrappedClass("com.example.Bar"), method("decrypt"), Set.of(mock(AbstractError.class)));
+    fakeErrors.put(
+        wrappedClass("com.example.Foo"), method("hash"), Set.of(mock(AbstractError.class)));
 
     CryptoSensor sensor = new CryptoSensor(new CcToSonarIssues(), projectPath -> fakeErrors);
 
@@ -117,5 +120,4 @@ class CryptoSensorTest {
     when(m.getName()).thenReturn(name);
     return m;
   }
-
 }

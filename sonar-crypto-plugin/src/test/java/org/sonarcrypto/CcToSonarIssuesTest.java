@@ -108,8 +108,10 @@ class CcToSonarIssuesTest {
     addJavaFile("com/example/ClassB.java", "package com.example;\npublic class ClassB {}");
 
     Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
-    table.put(wrappedClass("com.example.ClassA"), method("doStuff"), Set.of(mock(AbstractError.class)));
-    table.put(wrappedClass("com.example.ClassB"), method("encrypt"), Set.of(mock(AbstractError.class)));
+    table.put(
+        wrappedClass("com.example.ClassA"), method("doStuff"), Set.of(mock(AbstractError.class)));
+    table.put(
+        wrappedClass("com.example.ClassB"), method("encrypt"), Set.of(mock(AbstractError.class)));
 
     issueReporter.reportAllIssues(sensorContext, table);
 
@@ -148,7 +150,8 @@ class CcToSonarIssuesTest {
     addJavaFile("com/example/Foo.java", "package com.example;\npublic class Foo {}");
 
     Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
-    table.put(wrappedClass("com.example.Foo"), method("encrypt"), Set.of(mock(AbstractError.class)));
+    table.put(
+        wrappedClass("com.example.Foo"), method("encrypt"), Set.of(mock(AbstractError.class)));
 
     issueReporter.reportAllIssues(sensorContext, table);
 
@@ -257,5 +260,4 @@ class CcToSonarIssuesTest {
     when(m.getName()).thenReturn(name);
     return m;
   }
-
 }
