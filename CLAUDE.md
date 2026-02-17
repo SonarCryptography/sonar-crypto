@@ -45,10 +45,20 @@ mvn spotless:apply
 
 ## Code style
 
-- Formatting enforced by Spotless with Google Java Format
+- Formatting enforced by Spotless with Google Java Format; a pre-commit hook runs `mvn spotless:apply` automatically
 - Null safety annotations via JSpecify (`@NullMarked`, `@Nullable`)
+- Use `var` for local variable type inference where the type is obvious from context
+- Keep production code simple; avoid unnecessary abstractions or refactoring just for testability
+
+## Test conventions
+
 - Tests use JUnit 5, AssertJ, and Mockito
 - SonarQube test fixtures: `SensorContextTester`, `TestInputFileBuilder`, `LogTesterJUnit5`
+- Use Mockito mocks instead of anonymous class implementations
+- Inline one-liner test helpers; only extract helpers that have multiple statements
+- Prefer fewer comprehensive tests over many granular ones — consolidate related assertions into a single test
+- Name test methods after the method under test (e.g., `define()`, `describe()`) rather than verbose scenario descriptions
+- Exception: tests for distinct behaviors of the same method get descriptive names (e.g., `find_input_file_returns_null_when_no_match`)
 
 ## CI
 
