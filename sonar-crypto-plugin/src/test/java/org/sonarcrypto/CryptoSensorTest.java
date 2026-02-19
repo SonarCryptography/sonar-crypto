@@ -18,8 +18,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
-import org.sonarcrypto.runner.CollectedErrorsAsserter;
-import org.sonarcrypto.runner.MavenProjectTestRunner;
+import org.sonarcrypto.utils.cognicrypt.crysl.Ruleset;
+import org.sonarcrypto.utils.test.asserter.CollectedErrorsAsserter;
+import org.sonarcrypto.utils.test.runner.MavenProjectTestRunner;
 
 @NullMarked
 class CryptoSensorTest {

@@ -9,32 +9,23 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jbc2jimple</artifactId>
+    <artifactId>resource</artifactId>
 
-    <name>JBC-to-Jimple converter</name>
+    <name>Resource Utilities</name>
 
     <dependencies>
         <dependency>
-            <groupId>de.fraunhofer.iem</groupId>
-            <artifactId>HeadlessJavaScanner</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
+            <groupId>org.sonarcrypto</groupId>
+            <artifactId>jbc2jimple</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-invoker</artifactId>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
