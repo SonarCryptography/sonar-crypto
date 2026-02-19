@@ -11,11 +11,10 @@ import org.junit.Test;
 
 @NullMarked
 public class Jcb2JimpleConverterTest {
-
   @SuppressWarnings("DataFlowIssue")
-  private void convert() throws IOException, URISyntaxException {
+  @Test
+  public void testConvert() throws IOException, URISyntaxException {
     final var classPath = Path.of(this.getClass().getClassLoader().getResource("classes").toURI());
-
     final var outputDir = Files.createTempDirectory("jbc2jimple");
 
     new Jbc2JimpleConverter().convert(classPath.toString(), outputDir.toString());
@@ -28,11 +27,10 @@ public class Jcb2JimpleConverterTest {
   }
 
   @SuppressWarnings("DataFlowIssue")
-  private void convertCli() throws IOException, URISyntaxException {
+  @Test
+  public void testCli() throws IOException, URISyntaxException {
     final var classPath = Path.of(this.getClass().getClassLoader().getResource("classes").toURI());
-
     final var outputDir = Files.createTempDirectory("jbc2jimple");
-
     final var args = new ArrayList<String>();
 
     args.add("-cp");
@@ -47,25 +45,5 @@ public class Jcb2JimpleConverterTest {
     FileUtils.deleteDirectory(outputDir.toFile());
 
     Assert.assertTrue(fileExists);
-  }
-
-  @Test
-  public void testWithoutBoomerangPreInterceptor() throws IOException, URISyntaxException {
-    convert();
-  }
-
-  @Test
-  public void testWithBoomerangPreInterceptor() throws IOException, URISyntaxException {
-    convert();
-  }
-
-  @Test
-  public void testCliWithoutBoomerangPreInterceptor() throws IOException, URISyntaxException {
-    convertCli();
-  }
-
-  @Test
-  public void testCliWithBoomerangPreInterceptor() throws IOException, URISyntaxException {
-    convertCli();
   }
 }
