@@ -4,13 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.sonarcrypto.utils.test.asserts.CcErrorsAssert.assertOnFilteredCcErrorsThat;
 
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.TypestateError;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -19,7 +19,6 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 import org.sonarcrypto.utils.cognicrypt.crysl.Ruleset;
-import org.sonarcrypto.utils.test.asserter.CollectedErrorsAsserter;
 import org.sonarcrypto.utils.test.runner.MavenProjectTestRunner;
 
 @NullMarked
@@ -58,10 +57,12 @@ class CryptoSensorTest {
     final var collectedErrors =
         runner.run("../e2e/src/test/resources/Java/Maven/Basic", Ruleset.JCA).collectedErrors();
 
-    new CollectedErrorsAsserter(collectedErrors)
-        .assertContainsAny(
+    assertOnFilteredCcErrorsThat(
+            collectedErrors,
             "com.example.crypto.WeakCryptoExamples",
-            "byte[] encryptWithDES(byte[])",
-            List.of(ConstraintError.class, TypestateError.class));
+            "byte[] encryptWithDES(byte[])")
+        .anySatisfy(
+            error ->
+                assertThat(error).isInstanceOfAny(ConstraintError.class, TypestateError.class));
   }
 }

@@ -1,52 +1,56 @@
-package org.sonarcrypto.utils.test.asserter;
+package org.sonarcrypto.utils.test.asserts;
+
+import static java.util.function.Predicate.not;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import java.util.*;
+import org.assertj.core.api.AbstractCollectionAssert;
+import org.assertj.core.api.ObjectAssert;
 import org.jspecify.annotations.NullMarked;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @NullMarked
-public class CollectedErrorsAsserter {
-  private final Table<WrappedClass, Method, Set<AbstractError>> collectedErrors;
+public class CcErrorsAssert {
+  private static final Logger LOGGER = LoggerFactory.getLogger(CcErrorsAssert.class);
 
-  public CollectedErrorsAsserter(Table<WrappedClass, Method, Set<AbstractError>> collectedErrors) {
-    this.collectedErrors = collectedErrors;
-  }
-
-  public void assertContainsAny(
-      String className,
-      String methodSubSignature,
-      Collection<Class<? extends AbstractError>> errors) {
-    final var hasAny =
+  /**
+   * Example:
+   *
+   * <pre><code>
+   * assertOnFilteredCcErrorsThat(
+   *     collectedErrors,
+   *     "com.example.crypto.SomeClass",
+   *     "byte[] encryptWithDES(byte[])"
+   * )
+   * .hasSize(5)
+   * .anySatisfy(error -> assertThat(error).isInstanceOf(ConstraintError.class))
+   * .noneSatisfy(error -> assertThat(error).isInstanceOf(TypestateError.class))
+   * .extracting(AbstractError::getLineNumber)
+   * .containsExactlyInAnyOrder(31, 34, 34, 34, 35);
+   * </code></pre>
+   */
+  public static AbstractCollectionAssert<
+          ?, Collection<? extends AbstractError>, AbstractError, ObjectAssert<AbstractError>>
+      assertOnFilteredCcErrorsThat(
+          Table<WrappedClass, Method, Set<AbstractError>> collectedErrors,
+          String className,
+          String methodSubSignature) {
+    return assertThat(
         collectedErrors.cellSet().stream()
-            .anyMatch(
-                cell -> {
-                  final var cellClassName = cell.getRowKey().getFullyQualifiedName();
-                  final var cellMethodSubSignature = cell.getColumnKey().getSubSignature();
-                  final var cellErrors = cell.getValue();
-
-                  return className.equals(cellClassName)
-                      && methodSubSignature.equals(cellMethodSubSignature)
-                      && cellErrors.stream()
-                          .anyMatch(
-                              cellError ->
-                                  errors.isEmpty()
-                                      || errors.stream().anyMatch(it -> it.isInstance(cellError)));
-                });
-
-    Assert.assertTrue(hasAny);
-  }
-
-  public static void assertEquals(
-      Table<WrappedClass, Method, Set<AbstractError>> collectedErrors1,
-      Table<WrappedClass, Method, Set<AbstractError>> collectedErrors2) {
-    assertEquals(
-        "The collected errors of both executions are not equal!",
-        collectedErrors1,
-        collectedErrors2);
+            .filter(
+                cell ->
+                    cell.getRowKey().getFullyQualifiedName().equals(className)
+                        && cell.getColumnKey().getSubSignature().equals(methodSubSignature))
+            .map(Table.Cell::getValue)
+            .filter(not(Objects::isNull))
+            .findFirst()
+            .orElse(Set.of()));
   }
 
   public static void assertEquals(
@@ -83,10 +87,12 @@ public class CollectedErrorsAsserter {
       diffMap.put(otherMethodSignature, new Diff(new HashSet<>(otherErrors), Set.of()));
     }
 
+    final var stringBuilder = new StringBuilder();
+
     if (!diffMap.isEmpty()) {
 
-      System.err.println("#### Diff Results #########################################");
-      System.err.println();
+      stringBuilder.append("#### Diff Results #########################################");
+      stringBuilder.append(System.lineSeparator());
 
       var printSeparator = false;
 
@@ -95,38 +101,42 @@ public class CollectedErrorsAsserter {
         final var diff = entry.getValue();
 
         if (printSeparator) {
-          System.err.println("-----------------------------------------------------------");
+          stringBuilder.append("-----------------------------------------------------------");
+          stringBuilder.append(System.lineSeparator());
         } else {
           printSeparator = true;
         }
 
-        System.err.println("Method: " + methodSignature);
-        System.err.println();
-        System.err.println("    - Missing in first result:");
+        stringBuilder.append("Method: ").append(methodSignature);
+        stringBuilder.append(System.lineSeparator());
+        stringBuilder.append("    - Missing in first result:");
 
         if (diff.missingInFirst.isEmpty()) {
-          System.err.println("        <empty>");
+          stringBuilder.append("        <empty>");
         }
 
         for (final var error : diff.missingInFirst) {
-          System.err.println("        - " + error);
+          stringBuilder.append("        - ").append(error);
         }
 
-        System.err.println();
-        System.err.println("    - Missing in second result:");
+        stringBuilder.append(System.lineSeparator());
+        stringBuilder.append("    - Missing in second result:");
 
         if (diff.missingInSecond.isEmpty()) {
-          System.err.println("        <empty>");
+          stringBuilder.append("        <empty>");
         }
 
         for (final var error : diff.missingInSecond) {
-          System.err.println("        - " + error);
+          stringBuilder.append("        - ").append(error);
         }
       }
 
-      System.err.println();
-      System.err.println("###########################################################");
+      stringBuilder.append(System.lineSeparator());
+      stringBuilder.append("###########################################################");
+      stringBuilder.append(System.lineSeparator());
     }
+
+    LOGGER.error(stringBuilder.toString());
 
     Assert.assertEquals(message, 0, diffMap.size());
   }

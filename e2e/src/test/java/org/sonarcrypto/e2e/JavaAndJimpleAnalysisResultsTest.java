@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import org.junit.jupiter.api.Test;
 import org.sonarcrypto.utils.cognicrypt.crysl.Ruleset;
-import org.sonarcrypto.utils.test.asserter.CollectedErrorsAsserter;
+import org.sonarcrypto.utils.test.asserts.CcErrorsAssert;
 import org.sonarcrypto.utils.test.runner.JimpleTestRunner;
 import org.sonarcrypto.utils.test.runner.MavenProjectTestRunner;
 
@@ -20,7 +20,7 @@ public class JavaAndJimpleAnalysisResultsTest {
       final var jimpleAnalysisResult =
           new JimpleTestRunner().run(mavenProject.getJimpleDirectory(), ruleset);
 
-      CollectedErrorsAsserter.assertEquals(
+      CcErrorsAssert.assertEquals(
           "Different results with ruleset " + ruleset + "!",
           javaAnalysisResult,
           jimpleAnalysisResult);
