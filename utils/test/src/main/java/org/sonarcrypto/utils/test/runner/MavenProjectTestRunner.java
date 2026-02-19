@@ -16,8 +16,10 @@ import org.sonarcrypto.utils.maven.MavenBuildException;
 import org.sonarcrypto.utils.maven.MavenProject;
 
 @NullMarked
-public non-sealed class MavenProjectTestRunner extends TestRunner {
+public non-sealed class MavenProjectTestRunner extends TestRunner<MavenProjectTestRunner.Result> {
   private static final Logger LOGGER = LoggerFactory.getLogger(MavenProjectTestRunner.class);
+
+  private final ClassPathTestRunner classPathTestRunner = new ClassPathTestRunner();
 
   /**
    * Runs the analysis.
@@ -28,13 +30,15 @@ public non-sealed class MavenProjectTestRunner extends TestRunner {
    * @throws IOException An I/O error is occurred.
    */
   @Override
-  public Table<WrappedClass, Method, Set<AbstractError>> run(
-      final String path, final Ruleset ruleset) throws IOException, URISyntaxException {
+  public Result run(final String path, final Ruleset ruleset)
+      throws IOException, URISyntaxException {
     final var mavenProjectPath = new File(path).getAbsolutePath();
     final String classPath;
 
+    MavenProject mavenProject;
+
     try {
-      MavenProject mavenProject = new MavenProject(mavenProjectPath);
+      mavenProject = new MavenProject(mavenProjectPath);
       mavenProject.compile();
       classPath = mavenProject.getBuildDirectory();
       LOGGER.info("Built project to directory: {}", classPath);
@@ -46,6 +50,11 @@ public non-sealed class MavenProjectTestRunner extends TestRunner {
 
     LOGGER.info("Maven project: {}", classPath);
 
-    return super.run(classPath, ruleset);
+    final var analysisResult = classPathTestRunner.run(classPath, ruleset);
+
+    return new Result(mavenProject, analysisResult);
   }
+
+  public record Result(
+      MavenProject mavenProject, Table<WrappedClass, Method, Set<AbstractError>> collectedErrors) {}
 }

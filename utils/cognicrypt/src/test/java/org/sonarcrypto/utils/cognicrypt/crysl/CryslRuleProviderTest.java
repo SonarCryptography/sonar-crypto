@@ -13,7 +13,7 @@ public class CryslRuleProviderTest {
   @Test
   void testRulesFound() throws Exception {
     var provider = new CryslRuleProvider();
-    var path = provider.extractRulesetToTempDir("bc");
+    var path = provider.extractRulesetToTempDir(Ruleset.BC);
     var myZip = new File(path.toUri());
     assertThat(myZip.exists());
     assertThat(myZip.isFile());

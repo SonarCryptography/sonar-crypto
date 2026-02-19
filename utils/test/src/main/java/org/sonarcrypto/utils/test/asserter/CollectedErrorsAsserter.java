@@ -43,6 +43,16 @@ public class CollectedErrorsAsserter {
   public static void assertEquals(
       Table<WrappedClass, Method, Set<AbstractError>> collectedErrors1,
       Table<WrappedClass, Method, Set<AbstractError>> collectedErrors2) {
+    assertEquals(
+        "The collected errors of both executions are not equal!",
+        collectedErrors1,
+        collectedErrors2);
+  }
+
+  public static void assertEquals(
+      String message,
+      Table<WrappedClass, Method, Set<AbstractError>> collectedErrors1,
+      Table<WrappedClass, Method, Set<AbstractError>> collectedErrors2) {
     final var errorMap = makeComparable(collectedErrors1);
     final var otherErrorMap = makeComparable(collectedErrors2);
     final var diffMap = new HashMap<String, Diff>();
@@ -118,8 +128,7 @@ public class CollectedErrorsAsserter {
       System.err.println("###########################################################");
     }
 
-    Assert.assertEquals(
-        "The collected errors of both executions are not equal!", 0, diffMap.size());
+    Assert.assertEquals(message, 0, diffMap.size());
   }
 
   private static HashMap<String, Set<AbstractError>> makeComparable(

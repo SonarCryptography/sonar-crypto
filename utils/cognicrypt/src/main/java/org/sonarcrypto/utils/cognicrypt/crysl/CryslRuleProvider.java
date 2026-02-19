@@ -17,13 +17,17 @@ public class CryslRuleProvider {
   /**
    * Extracts a CrySL ruleset ZIP file into a temporary directory.
    *
-   * @param ruleset The ruleset name, i.e., "bc", "bc-jca", "jca", or "tink".
+   * @param ruleset The ruleset.
    * @return The path to the extracted ruleset ZIP file; or {@code null}, if the given ruleset name
    *     was not found.
    * @throws IOException An I/O error occurred.
    * @throws URISyntaxException Should never occur, because the URI should always be well-defined.
    */
-  public Path extractRulesetToTempDir(String ruleset) throws IOException, URISyntaxException {
+  public Path extractRulesetToTempDir(Ruleset ruleset) throws IOException, URISyntaxException {
+    return extractRulesetToTempDir(ruleset.getRulesetName());
+  }
+
+  Path extractRulesetToTempDir(String ruleset) throws IOException, URISyntaxException {
     final var fileEnding = ".zip";
     final var rulesFolderName = "crysl_rules";
     final var tempDir = Files.createTempDirectory(rulesFolderName);

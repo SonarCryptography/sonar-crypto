@@ -56,7 +56,7 @@ class CryptoSensorTest {
     final var runner = new MavenProjectTestRunner();
 
     final var collectedErrors =
-        runner.run("../e2e/src/test/resources/Java/Maven/Basic", Ruleset.JCA);
+        runner.run("../e2e/src/test/resources/Java/Maven/Basic", Ruleset.JCA).collectedErrors();
 
     new CollectedErrorsAsserter(collectedErrors)
         .assertContainsAny(
