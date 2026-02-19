@@ -3,12 +3,14 @@ package org.sonarcrypto.e2e;
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.MavenBuild;
 import com.sonar.orchestrator.junit5.OrchestratorExtension;
+import com.sonar.orchestrator.locator.FileLocation;
 import com.sonar.orchestrator.locator.MavenLocation;
 import java.io.File;
 import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 import org.sonarcrypto.e2e.utility.FileUtilities;
 
 class OrchestratorTests {
@@ -19,13 +21,14 @@ class OrchestratorTests {
       OrchestratorExtension.builderEnv()
           .setZipFile(FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip"))
           .useDefaultAdminCredentialsForBuilds(true)
-          // TODO: Activate sonar-crypto-plugin once working
-          // .addPlugin(FileLocation.of(FileUtilities.findFile("../sonar-crypto-plugin/target",
-          // "sonar-crypto-plugin", ".jar")))
-          // TODO: Remove sonar-java-plugin once sonar-crypto-plugin comes with a default quality
-          // profile
           .addPlugin(MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.22.0.41895"))
+          .addPlugin(
+              FileLocation.of(
+                  FileUtilities.findFile(
+                      "../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar")))
           .build();
+
+  @TempDir File tempDir;
 
   @AfterAll
   static void endTest() {
@@ -58,7 +61,8 @@ class OrchestratorTests {
     build
         .setProperty("sonar.cpd.exclusions", "**/*")
         .setProperty("sonar.internal.analysis.failFast", "true")
-        .setProperty("sonar.scanner.skipJreProvisioning", "true");
+        .setProperty("sonar.scanner.skipJreProvisioning", "true")
+        .setProperty("sonar.working.directory", tempDir.getAbsolutePath());
     if (properties != null) {
       build.setProperties(properties);
     }

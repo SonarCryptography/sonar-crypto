@@ -1,12 +1,12 @@
 package org.sonarcrypto.cognicrypt;
 
 import boomerang.scope.sootup.BoomerangPreInterceptor;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.NonNull;
 import sootup.core.frontend.AbstractClassSource;
 import sootup.core.frontend.OverridingBodySource;
+import sootup.core.frontend.OverridingClassSource;
 import sootup.core.frontend.ResolveException;
 import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.model.*;
@@ -31,38 +31,54 @@ public class JimpleConvertingView extends JavaView {
     if (cache.hasClass(classType)) {
       theClass = (JavaSootClass) cache.getClass(classType);
     } else {
-      var sc = classSource.buildClass(classSource.getAnalysisInputLocation().getSourceType());
-
-      // Convert SootClass to JavaSootClass wrapper
-      if (sc instanceof JavaSootClass) {
-        theClass = (JavaSootClass) sc;
+      if (classSource instanceof JavaSootClassSource) {
+        theClass = (JavaSootClass) classSource.buildClass(SourceType.Application);
+      } else if (classSource instanceof OverridingClassSource) {
+        WrappingSootClassSource wrappingSootClassSource =
+            new WrappingSootClassSource((OverridingClassSource) classSource);
+        theClass = wrappingSootClassSource.buildClass(SourceType.Application);
       } else {
-        // Wrap plain SootClass as JavaSootClass with default values
-        theClass = wrapAsJavaSootClass(sc, classSource);
+        throw new RuntimeException(
+            "Unsupported class source type: " + classSource.getClass().getName());
       }
-
       cache.putClass(classType, theClass);
     }
     return theClass;
   }
 
-  private JavaSootClass wrapAsJavaSootClass(SootClass sootClass, AbstractClassSource classSource) {
-    // Create a JavaSootClassSource with default Java-specific metadata
-    WrappingSootClassSource wrappingSootClassSource =
-        new WrappingSootClassSource(
-            sootClass, classSource.getAnalysisInputLocation(), sootClass.getType());
-
-    return wrappingSootClassSource.buildClass(
-        classSource.getAnalysisInputLocation().getSourceType());
+  @Override
+  protected @NonNull Optional<JavaSootClassSource> getClassSource(@NonNull ClassType type) {
+    return inputLocations.parallelStream()
+        .map(location -> location.getClassSource(type, this))
+        .filter(Optional::isPresent)
+        // like javas behaviour: if multiple matching Classes(ClassTypes) are found on the
+        // classpath the first is returned (see splitpackage)
+        .limit(1)
+        .map(Optional::get)
+        .map(
+            classSource -> {
+              if (classSource instanceof JavaSootClassSource) {
+                return (JavaSootClassSource) classSource;
+              } else if (classSource instanceof OverridingClassSource) {
+                return new WrappingSootClassSource((OverridingClassSource) classSource);
+              } else {
+                return null;
+              }
+            })
+        .filter(Objects::nonNull)
+        .findAny();
   }
 
   private class WrappingSootClassSource extends JavaSootClassSource {
     private final SootClass resolvedClass;
 
-    private WrappingSootClassSource(
-        SootClass sootClass, AnalysisInputLocation srcNamespace, ClassType classSignature) {
-      super(srcNamespace, classSignature, Path.of("ClassSourceWrapper"));
-      this.resolvedClass = sootClass;
+    private WrappingSootClassSource(OverridingClassSource classSource) {
+      super(
+          classSource.getAnalysisInputLocation(),
+          classSource.getClassType(),
+          classSource.getSourcePath());
+      resolvedClass =
+          classSource.buildClass(classSource.getAnalysisInputLocation().getSourceType());
     }
 
     @Override
