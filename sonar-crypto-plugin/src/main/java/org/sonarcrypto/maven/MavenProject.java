@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -48,11 +49,32 @@ public class MavenProject {
     if (mavenHome == null) {
       mavenHome = System.getenv("MAVEN_HOME");
     }
-    if (mavenHome == null) {
-      throw new MavenBuildException(
-          "Cannot find Maven installation. Set maven.home system property or MAVEN_HOME environment variable.");
+    if (mavenHome != null) {
+      return Paths.get(mavenHome);
     }
-    return Paths.get(mavenHome);
+    return findMvnOnPath();
+  }
+
+  private static Path findMvnOnPath() throws MavenBuildException {
+    boolean isWindows = System.getProperty("os.name", "").toLowerCase().contains("windows");
+    String[] mvnNames = isWindows ? new String[] {"mvn.cmd", "mvn"} : new String[] {"mvn"};
+    String pathEnv = System.getenv("PATH");
+    if (pathEnv != null) {
+      for (String dir : pathEnv.split(File.pathSeparator)) {
+        for (String mvnName : mvnNames) {
+          Path candidate = Paths.get(dir, mvnName);
+          if (Files.isExecutable(candidate)) {
+            try {
+              return candidate.toRealPath().getParent().getParent();
+            } catch (IOException e) {
+              // Skip candidates that can't be resolved
+            }
+          }
+        }
+      }
+    }
+    throw new MavenBuildException(
+        "Cannot find Maven installation. Set maven.home system property, MAVEN_HOME environment variable, or ensure mvn is on the PATH.");
   }
 
   public void compile() throws MavenBuildException {
