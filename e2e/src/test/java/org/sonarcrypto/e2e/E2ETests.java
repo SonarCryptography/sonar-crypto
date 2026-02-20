@@ -12,6 +12,7 @@ class E2ETests extends OrchestratorTests {
   @Test
   void java_maven_basic() {
     BuildResult result = executeMavenBuild(new File(JAVA_MAVEN_BASIC_PATH), "java-maven-basic");
-    assertThat(result.getLogs()).contains("Sensor CogniCryptSensor [crypto]");
+    assertThat(result.getLogs())
+        .contains("Sensor CogniCryptSensor [crypto]", "Found 3 cryptographic errors");
   }
 }

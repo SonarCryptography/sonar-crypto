@@ -37,9 +37,12 @@ public class ResourceExtractor {
     for (final var resourcePath : resourcePaths) {
       // Use class loader to access resources, because it does not need absolute paths; see
       // <https://stackoverflow.com/questions/51645295/how-to-specify-the-path-for-getresourceasstream-method-in-java>
+      // ClassLoader.getResourceAsStream() requires forward slashes on all platforms, but
+      // Path.toString() uses the OS separator (backslash on Windows), so we normalize here.
       final var classLoader = ResourceExtractor.class.getClassLoader();
+      final var resourceAsString = resourcePath.toString().replace('\\', '/');
 
-      try (var resourceStream = classLoader.getResourceAsStream(resourcePath.toString())) {
+      try (var resourceStream = classLoader.getResourceAsStream(resourceAsString)) {
         if (resourceStream == null) {
           throw new IOException("Failed extracting resource: The resource stream is null!");
         }
