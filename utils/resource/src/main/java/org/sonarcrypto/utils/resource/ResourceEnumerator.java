@@ -32,7 +32,7 @@ public class ResourceEnumerator {
 
   /** Creates a new instance with a default JAR entity threshold of {@code 1,000} entities. */
   public ResourceEnumerator() {
-    this(1000);
+    this(1_000_000);
   }
 
   /**
