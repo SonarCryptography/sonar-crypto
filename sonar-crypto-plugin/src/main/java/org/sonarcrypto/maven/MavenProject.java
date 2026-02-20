@@ -9,18 +9,19 @@
  ********************************************************************************/
 package org.sonarcrypto.maven;
 
-import com.google.common.collect.Lists;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import org.apache.commons.io.IOUtils;
-import org.apache.maven.shared.invoker.DefaultInvocationRequest;
-import org.apache.maven.shared.invoker.DefaultInvoker;
-import org.apache.maven.shared.invoker.InvocationRequest;
-import org.apache.maven.shared.invoker.InvocationResult;
-import org.apache.maven.shared.invoker.Invoker;
-import org.apache.maven.shared.invoker.MavenInvocationException;
-import org.apache.maven.shared.invoker.PrintStreamHandler;
+import org.apache.maven.api.cli.ExecutorException;
+import org.apache.maven.api.cli.ExecutorRequest;
+import org.apache.maven.cling.executor.forked.ForkedMavenExecutor;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -37,28 +38,58 @@ public class MavenProject {
 
   public MavenProject(String pathToProjectRoot) throws FileNotFoundException {
     File file = new File(pathToProjectRoot);
-    if (!file.exists())
+    if (!file.exists()) {
       throw new FileNotFoundException("The path " + pathToProjectRoot + " does not exist!");
+    }
     this.pathToProjectRoot = new File(pathToProjectRoot).getAbsolutePath();
   }
 
-  public void compile() throws MavenBuildException {
-    InvocationRequest request = new DefaultInvocationRequest();
-    request.setPomFile(new File(pathToProjectRoot + File.separator + "pom.xml"));
-    ArrayList<String> goals = Lists.newArrayList();
-    goals.add("clean");
-    goals.add("compile");
-    request.setGoals(goals);
+  private static Path resolveMavenHome() throws MavenBuildException {
+    String mavenHome = System.getProperty("maven.home");
+    if (mavenHome == null) {
+      mavenHome = System.getenv("MAVEN_HOME");
+    }
+    if (mavenHome != null) {
+      return Paths.get(mavenHome);
+    }
+    return findMvnOnPath();
+  }
 
-    Invoker invoker = new DefaultInvoker();
-    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream out = new PrintStream(baos)) {
-      request.setOutputHandler(new PrintStreamHandler(out, true));
-      InvocationResult res = invoker.execute(request);
-      if (res.getExitCode() != 0) {
+  private static Path findMvnOnPath() throws MavenBuildException {
+    boolean isWindows = System.getProperty("os.name", "").toLowerCase().contains("windows");
+    String[] mvnNames = isWindows ? new String[] {"mvn.cmd", "mvn"} : new String[] {"mvn"};
+    String pathEnv = System.getenv("PATH");
+    if (pathEnv != null) {
+      for (String dir : pathEnv.split(File.pathSeparator)) {
+        for (String mvnName : mvnNames) {
+          Path candidate = Paths.get(dir, mvnName);
+          if (Files.isExecutable(candidate)) {
+            try {
+              return candidate.toRealPath().getParent().getParent();
+            } catch (IOException e) {
+              // Skip candidates that can't be resolved
+            }
+          }
+        }
+      }
+    }
+    throw new MavenBuildException(
+        "Cannot find Maven installation. Set maven.home system property, MAVEN_HOME environment variable, or ensure mvn is on the PATH.");
+  }
+
+  public void compile() throws MavenBuildException {
+    var request =
+        ExecutorRequest.mavenBuilder(resolveMavenHome())
+            .cwd(Paths.get(pathToProjectRoot))
+            .arguments(List.of("clean", "compile"))
+            .build();
+
+    try (ForkedMavenExecutor executor = new ForkedMavenExecutor()) {
+      int exitCode = executor.execute(request);
+      if (exitCode != 0) {
         throw new MavenBuildException("Was not able to compile project " + pathToProjectRoot + ".");
       }
-    } catch (MavenInvocationException | IOException e) {
+    } catch (ExecutorException e) {
       throw new MavenBuildException(
           "Was not able to invoke maven in path " + pathToProjectRoot + ". Does a pom.xml exist?",
           e);
@@ -69,28 +100,26 @@ public class MavenProject {
   }
 
   private void computeClassPath() throws MavenBuildException {
-    InvocationRequest request = new DefaultInvocationRequest();
-    request.setPomFile(new File(pathToProjectRoot + File.separator + "pom.xml"));
-    ArrayList<String> goals = Lists.newArrayList();
-    goals.add("dependency:build-classpath");
-    goals.add("-Dmdep.outputFile=\"classPath.temp\"");
-    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream out = new PrintStream(baos)) {
-      request.setOutputHandler(new PrintStreamHandler(out, true));
-      request.setGoals(goals);
-      Invoker invoker = new DefaultInvoker();
-      InvocationResult res = invoker.execute(request);
-      if (res.getExitCode() != 0) {
+    var request =
+        ExecutorRequest.mavenBuilder(resolveMavenHome())
+            .cwd(Paths.get(pathToProjectRoot))
+            .arguments(List.of("dependency:build-classpath", "-Dmdep.outputFile=classPath.temp"))
+            .build();
+
+    try (ForkedMavenExecutor executor = new ForkedMavenExecutor()) {
+      int exitCode = executor.execute(request);
+      if (exitCode != 0) {
         throw new MavenBuildException(
             "Was not able to compute dependencies " + pathToProjectRoot + ".");
       }
-    } catch (MavenInvocationException | IOException e) {
+    } catch (ExecutorException e) {
       throw new MavenBuildException("Was not able to invoke maven to compute dependencies", e);
     }
     try {
       File classPathFile = new File(pathToProjectRoot + File.separator + "classPath.temp");
-      fullProjectClassPath =
-          IOUtils.toString(new FileInputStream(classPathFile), StandardCharsets.UTF_8);
+      try (var in = new FileInputStream(classPathFile)) {
+        fullProjectClassPath = IOUtils.toString(in, StandardCharsets.UTF_8);
+      }
       if (!classPathFile.delete()) {
         LOGGER.warn(
             "Failed to delete temporary classpath file: {}", classPathFile.getAbsolutePath());
