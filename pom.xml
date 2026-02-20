@@ -14,8 +14,12 @@
 
     <modules>
         <module>e2e</module>
-        <module>utils/jbc2jimple</module>
         <module>sonar-crypto-plugin</module>
+        <module>utils/cognicrypt</module>
+        <module>utils/jbc2jimple</module>
+        <module>utils/maven</module>
+        <module>utils/resource</module>
+        <module>utils/test</module>
     </modules>
 
     <properties>

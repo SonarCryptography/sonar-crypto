@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
+import org.sonarcrypto.utils.maven.MavenProject;
 
 class MavenProjectTest {
 
