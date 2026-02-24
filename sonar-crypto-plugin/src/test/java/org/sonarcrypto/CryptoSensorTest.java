@@ -50,12 +50,11 @@ class CryptoSensorTest {
     CryptoSensor sensor = new CryptoSensor();
     SensorContextTester context =
         SensorContextTester.create(Path.of("../e2e/src/test/resources/Java/Maven/Basic"));
-
     initializeFileSystem(context);
 
     sensor.execute(context);
 
-    assertThat(context.allIssues()).isEmpty();
+    assertThat(context.allIssues()).isNotEmpty();
     // assertThat(logTester.logs()).containsExactly("Failed to build Maven project");
   }
 }

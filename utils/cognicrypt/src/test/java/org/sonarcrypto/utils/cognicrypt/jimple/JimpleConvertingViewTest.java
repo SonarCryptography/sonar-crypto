@@ -1,4 +1,4 @@
-package org.sonarcrypto.utils.cognicrypt;
+package org.sonarcrypto.utils.cognicrypt.jimple;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

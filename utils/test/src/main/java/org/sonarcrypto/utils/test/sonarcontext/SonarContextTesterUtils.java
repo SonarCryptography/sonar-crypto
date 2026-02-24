@@ -36,4 +36,24 @@ public class SonarContextTesterUtils {
           .forEach(fileSystem::add);
     }
   }
+
+  private InputFile addJavaFile(
+      SensorContextTester sensorContext, Path baseDir, String relativePath, String content)
+      throws IOException {
+    Path srcDir = baseDir.resolve("src/main/java");
+    Files.createDirectories(srcDir);
+    Path javaFile = srcDir.resolve(relativePath);
+    Files.createDirectories(javaFile.getParent());
+    Files.writeString(javaFile, content);
+
+    InputFile inputFile =
+        TestInputFileBuilder.create("mod", baseDir.toFile(), javaFile.toFile())
+            .setLanguage("java")
+            .setType(InputFile.Type.MAIN)
+            .setCharset(StandardCharsets.UTF_8)
+            .setContents(content)
+            .build();
+    sensorContext.fileSystem().add(inputFile);
+    return inputFile;
+  }
 }

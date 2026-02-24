@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
 import org.jspecify.annotations.NullMarked;
-import org.sonarcrypto.utils.cognicrypt.JimpleScanner;
 import org.sonarcrypto.utils.cognicrypt.crysl.CryslRuleProvider;
 import org.sonarcrypto.utils.cognicrypt.crysl.Ruleset;
+import org.sonarcrypto.utils.cognicrypt.jimple.JimpleScanner;
 
 @NullMarked
 public non-sealed class JimpleTestRunner

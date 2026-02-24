@@ -19,6 +19,7 @@
         <module>utils/jbc2jimple</module>
         <module>utils/maven</module>
         <module>utils/resource</module>
+        <module>utils/sonar</module>
         <module>utils/test</module>
     </modules>
 

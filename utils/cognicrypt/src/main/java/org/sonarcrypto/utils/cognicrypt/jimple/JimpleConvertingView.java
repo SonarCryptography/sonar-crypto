@@ -1,4 +1,4 @@
-package org.sonarcrypto.utils.cognicrypt;
+package org.sonarcrypto.utils.cognicrypt.jimple;
 
 import boomerang.scope.sootup.BoomerangPreInterceptor;
 import java.util.*;
