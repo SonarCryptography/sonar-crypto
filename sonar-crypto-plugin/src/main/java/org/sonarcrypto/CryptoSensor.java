@@ -43,7 +43,7 @@ public class CryptoSensor implements Sensor {
       return;
     }
 
-    final Ruleset ruleset = Ruleset.BC;
+    final Ruleset ruleset = Ruleset.JCA;
     Path ruleDir;
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();

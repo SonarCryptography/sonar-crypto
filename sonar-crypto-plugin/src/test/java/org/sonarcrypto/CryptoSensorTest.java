@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.sonarcrypto.utils.test.sonarcontext.SonarContextTesterUtils.initializeFileSystem;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
@@ -41,5 +43,19 @@ class CryptoSensorTest {
 
     assertThat(context.allIssues()).isEmpty();
     assertThat(logTester.logs()).containsExactly("Failed to build Maven project");
+  }
+
+  @Test
+  void testExecuteMavenProject() throws IOException {
+    CryptoSensor sensor = new CryptoSensor();
+    SensorContextTester context =
+        SensorContextTester.create(Path.of("../e2e/src/test/resources/Java/Maven/Basic"));
+
+    initializeFileSystem(context);
+
+    sensor.execute(context);
+
+    assertThat(context.allIssues()).isEmpty();
+    // assertThat(logTester.logs()).containsExactly("Failed to build Maven project");
   }
 }
