@@ -9,14 +9,18 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.constraints.violations.ViolatedConstraint;
 import crypto.constraints.violations.ViolatedValueConstraint;
 import crypto.utils.CrySLUtils;
-import java.util.Locale;
-import java.util.StringJoiner;
+import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonarcrypto.CryptoRulesDefinition;
+import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
 
 @NullMarked
 public class CcErrorConverter {
@@ -34,8 +38,7 @@ public class CcErrorConverter {
     final var issue = this.getContext().newIssue().forRule(CryptoRulesDefinition.CC_RULE);
     final var location = issue.newLocation().on(inputFile);
 
-    if (error instanceof ConstraintError err)
-      convertConstraintError(inputFile, location, method, err);
+    if (error instanceof ConstraintError err) convertConstraintError(inputFile, location, err);
     else {
       location
           .at(inputFile.selectLine(max(error.getLineNumber(), 1)))
@@ -50,68 +53,118 @@ public class CcErrorConverter {
   }
 
   private void convertConstraintError(
-      InputFile inputFile, NewIssueLocation location, Method method, ConstraintError error) {
+      InputFile inputFile, NewIssueLocation location, ConstraintError error) {
     location
         .at(selectLocation(inputFile, error))
         .message(generateConstraintErrorMessage(error.getViolatedConstraint()));
   }
 
   private String generateConstraintErrorMessage(ViolatedConstraint violatedConstraint) {
-    if (violatedConstraint instanceof ViolatedValueConstraint vc) {
-      final var nth = CrySLUtils.getIndexAsString(vc.parameter().index()).toLowerCase(Locale.ROOT);
-      final var violatingValues = vc.violatingValues();
+    if (violatedConstraint instanceof ViolatedValueConstraint violatedValueConstraint) {
 
-      final var messageBuilder =
-          new StringBuilder()
-              .append("The ")
-              .append(nth)
-              .append(" given to the callee causes a cryptographic error.\n");
+      final var messageBuilder = new StringBuilder();
 
-      final var violatingValuesIterator = violatingValues.iterator();
+      final var violatingValues = violatedValueConstraint.violatingValues();
+      final var violatingValuesCount = violatingValues.size();
 
-      final var validValueRange = vc.constraint().getConstraint().getValueRange();
+      final var validValueRange =
+          violatedValueConstraint.constraint().getConstraint().getValueRange();
       final var validValueRangeCount = validValueRange.size();
 
-      if (!violatingValuesIterator.hasNext()) {
-        if (validValueRangeCount > 0) messageBuilder.append("Its value should be ");
-      } else {
-        final var joiner = new StringJoiner(", ");
-        joiner.add(violatingValuesIterator.next().getTransformedVal().getStringValue());
+      final var violatedValuesStr =
+          join(violatingValues.stream().map(it -> it.getTransformedVal().getStringValue()), "or");
+      final var validValuesStr = join(validValueRange, "or");
 
-        if (!violatingValuesIterator.hasNext()) {
-          messageBuilder.append("The value ").append(joiner).append(" is ");
-        } else {
-          messageBuilder.append("The values ");
+      final var calleeInfo = CalleeInfo.of(violatedValueConstraint.parameter().statement());
 
-          do {
-            joiner.add(violatingValuesIterator.next().getTransformedVal().getStringValue());
-          } while (violatingValuesIterator.hasNext());
+      messageBuilder.append(
+          String.format(
+              "The %s given to %s causes a cryptographic error.",
+              stringifyArgumentIndex(
+                  violatedValueConstraint.parameter().index(),
+                  calleeInfo.map(CalleeInfo::parameterCount).orElse(null)),
+              calleeInfo.map(CalleeInfo::name).orElse("the callee")));
 
-          messageBuilder.append(" are ").append(joiner);
-        }
-
-        messageBuilder.append("given");
-
-        if (validValueRangeCount > 0) messageBuilder.append(", but it should be ");
-      }
+      if (violatingValuesCount < 1)
+        messageBuilder.append(validValueRangeCount > 0 ? "\nThe given value" : "");
+      else if (violatingValuesCount == 1)
+        messageBuilder.append(String.format("\nThe value %s is given", violatedValuesStr));
+      else messageBuilder.append(String.format("\nThe values %s are given", violatedValuesStr));
 
       if (validValueRangeCount > 0) {
+        if (violatingValuesCount == 0) messageBuilder.append("The value should be ");
+        else messageBuilder.append(", but it should be ");
 
         if (validValueRangeCount > 1) messageBuilder.append("one of ");
 
-        final var joiner = new StringJoiner(", ");
-        validValueRange.forEach(joiner::add);
-        messageBuilder.append(joiner);
+        messageBuilder.append(validValuesStr);
       }
 
       messageBuilder.append('.');
 
-      // System.out.println(messageBuilder);
+      System.out.println(messageBuilder);
 
       return messageBuilder.toString();
     }
 
     return violatedConstraint.getSimplifiedMessage(0);
+  }
+
+  /**
+   * Can't use {@link CrySLUtils#getIndexAsString}, because it returns "parameter" instead
+   * "argument".
+   */
+  private String stringifyArgumentIndex(
+      int zeroBasedArgumentIndex, @Nullable Integer parameterCount) {
+    if (zeroBasedArgumentIndex < 0) return "return value";
+
+    if (parameterCount != null && parameterCount == 1) return "argument";
+
+    return switch (zeroBasedArgumentIndex) {
+      case 0 -> "first argument";
+      case 1 -> "second argument";
+      case 2 -> "third argument";
+      case 3 -> "fourth argument";
+      case 4 -> "fifth argument";
+      case 5 -> "sixth argument";
+      default -> (zeroBasedArgumentIndex + 1) + "th argument";
+    };
+  }
+
+  private static String join(Iterable<?> values, String lastSeparator) {
+    return join(StreamSupport.stream(values.spliterator(), false), lastSeparator);
+  }
+
+  private static String join(Stream<?> values, @Nullable String lastSeparator) {
+    final var iterator = values.iterator();
+
+    if (!iterator.hasNext()) return "";
+
+    final var sb = new StringBuilder();
+
+    var valueCount = 0;
+
+    while (iterator.hasNext()) {
+      if (++valueCount > 1) sb.append(", ");
+
+      final var next = iterator.next();
+
+      if (valueCount > 2
+          && lastSeparator != null
+          && !lastSeparator.isEmpty()
+          && !iterator.hasNext()) {
+        sb.append(lastSeparator).append(' ');
+      }
+
+      if (next instanceof String s) sb.append(quote(s));
+      else sb.append(next);
+    }
+
+    return sb.toString();
+  }
+
+  private static String quote(String value) {
+    return "\"" + StringEscapeUtils.escapeJava(value) + "\"";
   }
 
   private TextRange selectLocation(InputFile inputFile, AbstractError error) {
