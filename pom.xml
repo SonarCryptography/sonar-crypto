@@ -27,7 +27,7 @@
 
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
-        <sonar.plugin.api.version>13.4.3.4290</sonar.plugin.api.version>
+        <sonar.plugin.api.version>13.5.0.4319</sonar.plugin.api.version>
         <sonarqube.api.impl.version>26.2.0.119303</sonarqube.api.impl.version>
         <packaging.plugin.version>1.25.1.3002</packaging.plugin.version>
         <slf4j.version>2.0.17</slf4j.version>
@@ -148,7 +148,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.4</version>
+                    <version>3.5.5</version>
                 </plugin>
                 <plugin>
                     <groupId>com.googlecode.maven-download-plugin</groupId>
