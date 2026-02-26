@@ -9,11 +9,23 @@ public class TextUtils {
 
   /** Joins items of an iterable to a comma separated string, e.g. {@code "Foo, Bar, and Baz"}. */
   public static String join(Iterable<?> values, @Nullable String lastDelimiter) {
-    return join(StreamSupport.stream(values.spliterator(), false), lastDelimiter);
+    return join(values, lastDelimiter, null);
+  }
+
+  /** Joins items of an iterable to a comma separated string, e.g. {@code "Foo, Bar, and Baz"}. */
+  public static String join(
+      Iterable<?> values, @Nullable String lastDelimiter, @Nullable String suffix) {
+    return join(StreamSupport.stream(values.spliterator(), false), lastDelimiter, suffix);
   }
 
   /** Joins items of an iterable to a comma separated string, e.g. {@code "Foo, Bar, and Baz"}. */
   public static String join(Stream<?> values, @Nullable String lastSeparator) {
+    return join(values, lastSeparator, null);
+  }
+
+  /** Joins items of an iterable to a comma separated string, e.g. {@code "Foo, Bar, and Baz"}. */
+  public static String join(
+      Stream<?> values, @Nullable String lastSeparator, @Nullable String suffix) {
     final var iterator = values.iterator();
 
     if (!iterator.hasNext()) {
@@ -43,6 +55,10 @@ public class TextUtils {
       } else {
         sb.append(next);
       }
+    }
+
+    if (valueCount > 1 && suffix != null && !suffix.isEmpty()) {
+      sb.append(", ").append(suffix);
     }
 
     return sb.toString();

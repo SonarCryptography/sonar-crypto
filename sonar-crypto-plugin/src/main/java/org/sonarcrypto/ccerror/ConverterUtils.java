@@ -19,7 +19,7 @@ public class ConverterUtils {
    *         <th>Result</th>
    *     </tr>
    *     <tr>
-   *         <td><code>&lt; 0 || parameterCount == 1</code></td>
+   *         <td><code>&lt; 0 || argumentCount == 1</code></td>
    *         <td>just <code>"argument"</code></td>
    *     </tr>
    *     <tr>
