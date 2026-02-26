@@ -1,25 +1,36 @@
 package org.sonarcrypto.utils.jbc2jimple;
 
-import static java.nio.file.StandardOpenOption.*;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+
 import org.jspecify.annotations.NullMarked;
+
+
+import org.sonarcrypto.utils.jimple.mapper.LineMappingCollection;
+import org.sonarcrypto.utils.jimple.mapper.LineNumberMapper;
+import org.sonarcrypto.utils.jimple.printer.JimplePrinter;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ExitCode;
 import picocli.CommandLine.Option;
 import sootup.core.model.SourceType;
-import sootup.core.util.printer.JimplePrinter;
 import sootup.java.bytecode.frontend.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.views.JavaView;
 
 @NullMarked
 public class Jbc2JimpleConverter {
+
+  private Map<String, LineMappingCollection> lineMappings = new HashMap<>();
+
   /**
    * Converts Java classes of the given class path into Jimple files that are written into the given
    * output directory.
@@ -49,27 +60,65 @@ public class Jbc2JimpleConverter {
             new JavaClassPathAnalysisInputLocation(
                 javaClassPath, SourceType.Application, List.of()));
 
-    final var jimplePrinter = new JimplePrinter();
     final var sootClassesIterator = javaView.getClasses().iterator();
 
     var convertedClasses = 0L;
+    lineMappings.clear(); // Clear any previous mappings
 
     while (sootClassesIterator.hasNext()) {
       final var sootClass = sootClassesIterator.next();
+      final String className = sootClass.getName();
 
+      // Create a line number mapper for this class
+      final var lineNumberMapper = new LineNumberMapper(className);
+      final var jimplePrinter = new JimplePrinter(lineNumberMapper);
+
+      // Write Jimple file
       try (final var out =
           new PrintWriter(
               Files.newOutputStream(
-                  jimpleOutputPath.resolve(sootClass.getName() + ".jimple"),
+                  jimpleOutputPath.resolve(className + ".jimple"),
                   CREATE,
                   WRITE,
                   TRUNCATE_EXISTING))) {
         jimplePrinter.printTo(sootClass, out);
         convertedClasses++;
+
+        // Collect the mappings
+        LineMappingCollection mappings = lineNumberMapper.getCollection();
+        lineMappings.put(className, mappings);
+
+        // Write mapping file
+        writeMappingFile(jimpleOutputPath, className, mappings);
       }
     }
 
     return convertedClasses;
+  }
+
+  /**
+   * Writes a mapping file for the given class.
+   *
+   * @param outputPath The output directory path
+   * @param className The name of the class
+   * @param mappings The line mapping collection
+   * @throws IOException if writing fails
+   */
+  private void writeMappingFile(Path outputPath, String className, LineMappingCollection mappings)
+      throws IOException {
+    Path mappingFilePath = outputPath.resolve(className + ".jimple.map.json");
+    try (final var writer = Files.newBufferedWriter(mappingFilePath, CREATE, WRITE, TRUNCATE_EXISTING)) {
+      mappings.writeJson(writer);
+    }
+  }
+
+  /**
+   * Returns the line mappings collected during the last conversion.
+   *
+   * @return A map from class name to its line mapping collection
+   */
+  public Map<String, LineMappingCollection> getLineMappings() {
+    return new HashMap<>(lineMappings);
   }
 
   @SuppressWarnings("DataFlowIssue")
@@ -78,13 +127,13 @@ public class Jbc2JimpleConverter {
     @Option(
         names = {"-cp", "--classPath"},
         description = "Sets the class path",
-        required = true)
+        required = false)
     private String classPath = null;
 
     @Option(
         names = {"-jo", "--jimpleOutput"},
         description = "Sets the Jimple output directory",
-        required = true)
+        required = false)
     private String outputPath = null;
 
     @Override
@@ -121,9 +170,8 @@ public class Jbc2JimpleConverter {
 
     System.out.println();
     System.out.println("Converting classes ...");
-
+    
     final var count = new Jbc2JimpleConverter().convert(cliArgs.classPath, cliArgs.outputPath);
-
     System.out.println();
     System.out.println("Done. " + count + " class file(s) converted.");
   }

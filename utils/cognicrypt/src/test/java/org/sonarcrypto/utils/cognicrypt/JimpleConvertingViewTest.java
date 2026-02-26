@@ -1,14 +1,15 @@
 package org.sonarcrypto.utils.cognicrypt;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
+
 import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.model.SourceType;
 import sootup.core.types.ClassType;
@@ -34,6 +35,9 @@ class JimpleConvertingViewTest {
   void readJimpleFromResources_loadsClass() {
     JimpleAnalysisInputLocation inputLocation = getAnalysisInputLocationForTestJimple();
 
+    inputLocation = new JimpleAnalysisInputLocation(
+            Path.of("/home/torun/Arbeit/code/sonar-crypto/e2e/src/test/resources/Java/Maven/Basic/target/jimple"), SourceType.Application, Collections.emptyList());
+
     // Create the view
     JimpleConvertingView view = new JimpleConvertingView(inputLocation);
 
@@ -48,7 +52,6 @@ class JimpleConvertingViewTest {
 
     // Create the view
     JimpleConvertingView view = new JimpleConvertingView(inputLocation);
-
     // Get the JimpleTest class
     ClassType jimpleTestType = view.getIdentifierFactory().getClassType("JimpleTest");
 
@@ -87,7 +90,10 @@ class JimpleConvertingViewTest {
         jimpleTestClass.getMethods().stream().anyMatch(m -> m.getName().equals("getValue"));
     assertThat(hasGetValue).isTrue();
 
-    boolean hasSetValue =
+    var test = jimpleTestClass.getMethodsByName("setValue");
+    var meth = test.iterator().next();
+    var b = meth.getBody();
+        boolean hasSetValue =
         jimpleTestClass.getMethods().stream().anyMatch(m -> m.getName().equals("setValue"));
     assertThat(hasSetValue).isTrue();
 
