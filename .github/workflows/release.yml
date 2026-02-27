@@ -21,7 +21,7 @@ jobs:
       - name: Build SonarQube Plugin
         run: mvn package -DskipTests
       - name: Upload Jar artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: crypto-plugin
           path: sonar-crypto-plugin/target/*.jar
