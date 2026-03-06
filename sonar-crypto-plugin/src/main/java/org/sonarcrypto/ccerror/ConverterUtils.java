@@ -1,10 +1,11 @@
 package org.sonarcrypto.ccerror;
 
-import static java.lang.Math.max;
+import static java.lang.Math.*;
 
 import boomerang.scope.sootup.jimple.JimpleUpStatement;
 import crypto.analysis.errors.AbstractError;
 import crypto.utils.CrySLUtils;
+import java.io.IOException;
 import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 import org.sonar.api.batch.fs.InputFile;
@@ -128,13 +129,29 @@ public class ConverterUtils {
 
       final var position = positionInfo.getStmtPosition();
 
-      final var startLine = position.getFirstLine();
-      final var startLineOffset = position.getFirstCol();
+      final var startLine = max(position.getFirstLine(), 1);
+      var startLineOffset = position.getFirstCol();
       final var endLine = position.getLastLine();
-      final var endLineOffset = position.getLastCol();
+      var endLineOffset = position.getLastCol();
 
-      if (startLine < 1) {
-        return inputFile.selectLine(1);
+      if (startLineOffset < 0 && endLine < 1 && endLineOffset < 1) {
+        try {
+          final var actualLine =
+              inputFile.contents().lines().skip(max(0, startLine - 1)).findFirst().orElse("");
+
+          if (!actualLine.isEmpty()) {
+            final var actualLineOffset =
+                (int)
+                    min(
+                        actualLine.chars().takeWhile(Character::isWhitespace).count(),
+                        Integer.MAX_VALUE);
+
+            endLineOffset = actualLine.length();
+            if (actualLineOffset < actualLine.length() - 1) startLineOffset = actualLineOffset;
+          }
+        } catch (IOException e) {
+          // Ignore and continue.
+        }
       }
 
       if (endLineOffset < 1) {

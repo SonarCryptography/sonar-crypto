@@ -40,7 +40,6 @@ public class CcErrorConverter {
                 SignatureUtils.shortNameOf(method)));
 
     issue.forRule(CryptoRulesDefinition.CC_RULE);
-    // issue.overrideSeverity(Severity.MAJOR); // Has no effect
 
     location.at(selectLocation(inputFile, error));
 
