@@ -27,7 +27,7 @@ public class CryptoRulesDefinition implements RulesDefinition {
         .setHtmlDescription(
             "Detects misuses of cryptographic APIs that could lead to security vulnerabilities.")
         .setStatus(RuleStatus.BETA)
-        .setSeverity(Severity.MINOR)
+        .setSeverity(Severity.CRITICAL)
         .setType(RuleType.VULNERABILITY);
 
     repository.done();

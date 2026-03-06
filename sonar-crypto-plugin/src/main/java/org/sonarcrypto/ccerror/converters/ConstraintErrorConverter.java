@@ -1,29 +1,40 @@
 package org.sonarcrypto.ccerror.converters;
 
 import static org.sonarcrypto.ccerror.ConverterUtils.*;
-import static org.sonarcrypto.utils.sonar.TextUtils.join;
+import static org.sonarcrypto.utils.sonar.TextUtils.*;
 
 import crypto.analysis.errors.ConstraintError;
+import crypto.constraints.violations.ViolatedBinaryConstraint;
 import crypto.constraints.violations.ViolatedConstraint;
+import crypto.constraints.violations.ViolatedNeverTypeOfConstraint;
 import crypto.constraints.violations.ViolatedValueConstraint;
+import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
 
+@NullMarked
 public class ConstraintErrorConverter {
-  public static void convert(StringBuilder messageBuilder, ConstraintError error) {
-    generateConstraintErrorMessage(messageBuilder, error.getViolatedConstraint());
+  public static boolean convert(StringBuilder messageBuilder, ConstraintError error) {
+    return generateConstraintErrorMessage(messageBuilder, error.getViolatedConstraint());
   }
 
-  public static void generateConstraintErrorMessage(
+  static boolean generateConstraintErrorMessage(
       StringBuilder messageBuilder, ViolatedConstraint violatedConstraint) {
     if (violatedConstraint instanceof ViolatedValueConstraint violatedValueConstraint) {
       generateViolatedValueConstraintMessage(messageBuilder, violatedValueConstraint);
-      // generateViolatedValueConstraintMessageShort(messageBuilder, violatedValueConstraint);
+    } else if (violatedConstraint
+        instanceof ViolatedNeverTypeOfConstraint violatedNeverTypeOfConstraint) {
+      generateViolatedNeverTypeOfConstraintMessage(messageBuilder, violatedNeverTypeOfConstraint);
+    } else if (violatedConstraint instanceof ViolatedBinaryConstraint violatedBinaryConstraint) {
+      // generateViolatedBinaryConstraintMessage(messageBuilder, violatedBinaryConstraint);
+      return false;
     } else {
       messageBuilder.append(violatedConstraint.getSimplifiedMessage(0));
     }
+
+    return true;
   }
 
-  public static void generateViolatedValueConstraintMessage(
+  static void generateViolatedValueConstraintMessage(
       StringBuilder messageBuilder, ViolatedValueConstraint constraint) {
     final var violatingValues = constraint.violatingValues();
     final var violatingValuesCount = violatingValues.size();
@@ -37,9 +48,8 @@ public class ConstraintErrorConverter {
         String.format(
             "The %s given to %s ",
             stringifyArgumentIndex(
-                constraint.parameter().index(),
-                calleeInfo.map(CalleeInfo::argumentCount).orElse(null)),
-            calleeInfo.map(CalleeInfo::name).orElse("the callee")));
+                constraint.parameter().index(), calleeInfo.map(CalleeInfo::argumentCount)),
+            stringifyCallee(calleeInfo)));
 
     if (violatingValuesCount > 0) {
       if (violatingValuesCount == 1) {
@@ -79,29 +89,45 @@ public class ConstraintErrorConverter {
     messageBuilder.append('.');
   }
 
-  // public static void generateViolatedValueConstraintMessageShort(
-  //	StringBuilder messageBuilder,
-  //	ViolatedValueConstraint constraint
-  // ) {
-  //	final var violatingValues = constraint.violatingValues();
-  //	final var validValueRange = constraint.constraint().getConstraint().getValueRange();
-  //	final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
-  //
-  //	messageBuilder.append(
-  //		String.format(
-  //			"The %s given to %s contains invalid value(s).\nGiven value(s): %s\nValid value(s): %s",
-  //			stringifyArgumentIndex(
-  //				constraint.parameter().index(),
-  //				calleeInfo.map(CalleeInfo::argumentCount).orElse(null)
-  //			),
-  //			calleeInfo.map(CalleeInfo::name).orElse("the callee"),
-  //			join(
-  //				violatingValues.stream().map(it -> it.getTransformedVal().getStringValue()),
-  //				"or",
-  //				"respectively"
-  //			),
-  //			join(validValueRange, "or")
-  //		)
-  //	);
-  // }
+  static void generateViolatedNeverTypeOfConstraintMessage(
+      StringBuilder messageBuilder, ViolatedNeverTypeOfConstraint constraint) {
+    final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
+
+    messageBuilder.append(
+        String.format(
+            "The %s given to %s ",
+            stringifyArgumentIndex(
+                constraint.parameter().index(), calleeInfo.map(CalleeInfo::argumentCount)),
+            stringifyCallee(calleeInfo)));
+
+    messageBuilder
+        .append("should never be of the type ")
+        .append(quote(constraint.notAllowedType()))
+        .append('.');
+  }
+
+  static void generateViolatedBinaryConstraintMessage(
+      StringBuilder messageBuilder, ViolatedBinaryConstraint constraint) {
+    // TODO: Clarify, whether this is a composite error with errors nonetheless reported?
+
+    // final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
+    //
+    // messageBuilder.append(
+    //    String.format(
+    //        "The %s given to %s ",
+    //        stringifyArgumentIndex(
+    //            constraint.parameter().index(),
+    //            calleeInfo.map(CalleeInfo::argumentCount).orElse(null)),
+    //        stringifyCallee(calleeInfo)));
+    //
+    // messageBuilder.append("should never be of the type
+    // ").append(quote(constraint.notAllowedType())).append('.');
+
+    // final var binaryConstraint = constraint.constraint();
+    // final var leftConstraint = binaryConstraint.getLeftConstraint();
+    // final var rightConstraint = binaryConstraint.getRightConstraint();
+    //
+    // final var errorMessage = constraint.getErrorMessage();
+    // messageBuilder.append(errorMessage);
+  }
 }

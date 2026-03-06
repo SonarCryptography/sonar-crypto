@@ -5,11 +5,75 @@ import static java.lang.Math.max;
 import boomerang.scope.sootup.jimple.JimpleUpStatement;
 import crypto.analysis.errors.AbstractError;
 import crypto.utils.CrySLUtils;
+import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
+import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
+import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
 
 public class ConverterUtils {
+  /**
+   * Stringifies the callee from a callee info, e.g., {@code `Foo.bar`}. Constructor and static
+   * constructor are handled differently, e.g., {@code `Foo`'s constructor}. If the callee info is
+   * {@code null}, the string {@code the callee} is returned.
+   */
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+  public static String stringifyCallee(Optional<CalleeInfo> calleeInfo) {
+    return stringifyCallee(calleeInfo.orElse(null));
+  }
+
+  /**
+   * Stringifies the callee from a callee info, e.g., {@code `Foo.bar`}. Constructor and static
+   * constructor are handled differently, e.g., {@code `Foo`'s constructor}. If the callee info is
+   * {@code null}, the string {@code the callee} is returned.
+   */
+  public static String stringifyCallee(@Nullable CalleeInfo calleeInfo) {
+    if (calleeInfo == null) {
+      return "the callee";
+    }
+
+    final var name = calleeInfo.methodName();
+
+    return switch (name) {
+      case "<init>" -> SignatureUtils.shortNameOf(calleeInfo.className()) + "'s constructor";
+      case "<clinit>" ->
+          SignatureUtils.shortNameOf(calleeInfo.className()) + "'s static constructor";
+      default -> SignatureUtils.shortNameOf(calleeInfo.className(), calleeInfo.methodName());
+    };
+  }
+
+  /**
+   * Converts a zero-based argument index into an ordinal form.
+   *
+   * <table>
+   *     <tr>
+   *         <th>Index</th>
+   *         <th>Result</th>
+   *     </tr>
+   *     <tr>
+   *         <td><code>&lt; 0 || argumentCount == 1</code></td>
+   *         <td>just <code>"argument"</code></td>
+   *     </tr>
+   *     <tr>
+   *         <td><code>&gt; 0 && &lt; 6</code></td>
+   *         <td>ordinal as a word, e.g., <code>"third argument"</code></td>
+   *     </tr>
+   *     <tr>
+   *         <td><i>else</i></td>
+   *         <td>ordinal as a number, e.g., <code>"7th argument"</code></td>
+   *     </tr>
+   * </table>
+   *
+   * <p>See also {@link CrySLUtils#getIndexAsString} for parameters that also considers a negative
+   * index as "return value".
+   */
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+  public static String stringifyArgumentIndex(
+      int zeroBasedArgumentIndex, Optional<Integer> parameterCount) {
+    return stringifyArgumentIndex(zeroBasedArgumentIndex, parameterCount.orElse(null));
+  }
+
   /**
    * Converts a zero-based argument index into an ordinal form.
    *
