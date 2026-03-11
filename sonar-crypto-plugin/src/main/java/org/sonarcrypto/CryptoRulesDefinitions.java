@@ -3,6 +3,7 @@ package org.sonarcrypto;
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.rule.RuleStatus;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
+import org.sonarcrypto.cryptorules.Severity;
 
 @NullMarked
 public class CryptoRulesDefinitions {
@@ -13,7 +14,7 @@ public class CryptoRulesDefinitions {
           .withDescription(
               "Detects misuses of cryptographic APIs that could lead to security vulnerabilities.")
           .withStatus(RuleStatus.BETA)
-          .withSeverity(org.sonar.api.rule.Severity.CRITICAL)
+          .withSeverity(Severity.CRITICAL)
           .withHowToFixSection("<p>How to fix ...</p>")
           .withAssessSection("<p>Assess the problem ...</p>")
           .withResourcesSection(

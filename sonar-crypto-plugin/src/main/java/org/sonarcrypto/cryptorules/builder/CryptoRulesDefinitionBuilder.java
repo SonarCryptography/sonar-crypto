@@ -3,49 +3,46 @@ package org.sonarcrypto.cryptorules.builder;
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.rule.RuleStatus;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
+import org.sonarcrypto.cryptorules.Severity;
 
 @NullMarked
 public interface CryptoRulesDefinitionBuilder {
 
-  interface Rule {
+  interface WithRule {
     /** Sets the rule (key). */
-    Name withRule(String rule);
+    WithName withRule(String rule);
   }
 
-  interface Name {
+  interface WithName {
     /** Sets the name. */
-    Description withName(String name);
+    WithDescription withName(String name);
   }
 
-  interface Description {
+  interface WithDescription {
     /** Sets the description in HTML format. */
-    Status withDescription(String html);
+    WithStatus withDescription(String html);
   }
 
-  interface Status {
-    Severity withStatus(RuleStatus ruleStatus);
+  interface WithStatus {
+    WithSeverity withStatus(RuleStatus ruleStatus);
   }
 
-  interface Severity {
-    /**
-     * Sets the severity. See {@link org.sonar.api.rule.Severity} for valid values.
-     *
-     * @see org.sonar.api.rule.Severity
-     */
-    HowToFixSection withSeverity(String severity);
+  interface WithSeverity {
+    /** Sets the severity. */
+    WithHowToFixSection withSeverity(Severity severity);
   }
 
-  interface HowToFixSection extends Build {
+  interface WithHowToFixSection extends Build {
     /** Sets the "how to fix" section description in HTML format. */
-    AssessSection withHowToFixSection(String html);
+    WithAssessSection withHowToFixSection(String html);
   }
 
-  interface AssessSection extends Build {
+  interface WithAssessSection extends Build {
     /** Sets the "assess" section description in HTML format. */
-    ResourcesSection withAssessSection(String html);
+    WithResourcesSection withAssessSection(String html);
   }
 
-  interface ResourcesSection extends Build {
+  interface WithResourcesSection extends Build {
     /** Sets the "resources" section description in HTML format. */
     Build withResourcesSection(String html);
   }

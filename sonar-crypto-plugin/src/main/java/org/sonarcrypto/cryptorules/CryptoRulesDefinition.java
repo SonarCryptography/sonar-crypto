@@ -24,7 +24,7 @@ public class CryptoRulesDefinition implements RulesDefinition {
   private final String name;
   private final String description;
   private final RuleStatus ruleStatus;
-  private final String severity;
+  private final Severity severity;
   private final @Nullable String assessSection;
   private final @Nullable String howToFixSection;
   private final @Nullable String resourceSection;
@@ -34,7 +34,7 @@ public class CryptoRulesDefinition implements RulesDefinition {
       String name,
       String description,
       RuleStatus ruleStatus,
-      String severity,
+      Severity severity,
       @Nullable String assessSection,
       @Nullable String howToFixSection,
       @Nullable String resourceSection) {
@@ -64,11 +64,10 @@ public class CryptoRulesDefinition implements RulesDefinition {
             .setName(this.name)
             .setHtmlDescription(this.description)
             .setStatus(this.ruleStatus)
-            .setSeverity(this.severity)
+            .setSeverity(this.severity.toRuleSeverity())
             .setType(RuleType.VULNERABILITY)
             .setCleanCodeAttribute(CleanCodeAttribute.TRUSTWORTHY)
-            .addDefaultImpact(
-                SoftwareQuality.SECURITY, org.sonar.api.issue.impact.Severity.BLOCKER);
+            .addDefaultImpact(SoftwareQuality.SECURITY, this.severity.toImpactSeverity());
 
     if (this.howToFixSection != null) {
       newRule.addDescriptionSection(
@@ -98,7 +97,7 @@ public class CryptoRulesDefinition implements RulesDefinition {
   }
 
   /** Creates a crypto rules definition builder. */
-  public static CryptoRulesDefinitionBuilder.Rule builder() {
+  public static CryptoRulesDefinitionBuilder.WithRule builder() {
     return new CryptoRulesDefinitionBuilderImpl();
   }
 }

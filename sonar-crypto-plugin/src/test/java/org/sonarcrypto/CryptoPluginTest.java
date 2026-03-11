@@ -27,6 +27,6 @@ class CryptoPluginTest {
 
     assertThat(context.getExtensions())
         .containsExactly(
-            CryptoRulesDefinitions.class, CryptoQualityProfile.class, CryptoSensor.class);
+            CryptoRulesDefinitions.CC1, CryptoQualityProfile.class, CryptoSensor.class);
   }
 }
