@@ -11,7 +11,7 @@ import org.jspecify.annotations.NullMarked;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
-import org.sonarcrypto.CryptoRulesDefinition;
+import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.converters.AlternativeReqPredicateErrorConverter;
 import org.sonarcrypto.ccerror.converters.ConstraintErrorConverter;
 import org.sonarcrypto.ccerror.converters.RequiredPredicateErrorConverter;
@@ -39,7 +39,7 @@ public class CcErrorConverter {
                 "Cryptographic weakness in method %s detected:\n",
                 SignatureUtils.shortNameOf(method)));
 
-    issue.forRule(CryptoRulesDefinition.CC_RULE);
+    issue.forRule(CryptoRulesDefinitions.CC1.getRuleKey());
 
     location.at(selectLocation(inputFile, error));
 

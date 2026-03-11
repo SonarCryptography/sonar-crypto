@@ -2,6 +2,7 @@ package org.sonarcrypto;
 
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
+import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 
 @NullMarked
 public class CryptoQualityProfile implements BuiltInQualityProfilesDefinition {

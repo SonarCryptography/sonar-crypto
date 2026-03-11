@@ -63,7 +63,7 @@ public class CcToSonarIssues {
    */
   public void reportIssue(
       SensorContext context, InputFile inputFile, int line, String errorMessage) {
-    NewIssue issue = context.newIssue().forRule(CryptoRulesDefinition.CC_RULE);
+    NewIssue issue = context.newIssue().forRule(CryptoRulesDefinitions.CC1.getRuleKey());
     NewIssueLocation location =
         issue
             .newLocation()
