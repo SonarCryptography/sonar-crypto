@@ -188,8 +188,10 @@ class CcToSonarIssuesTest {
   }
 
   private static boomerang.scope.Method method(String name) {
-    boomerang.scope.Method m = mock(boomerang.scope.Method.class);
-    when(m.getName()).thenReturn(name);
-    return m;
+    var declaringClassMock = wrappedClass("com.example");
+    boomerang.scope.Method methodMock = mock(boomerang.scope.Method.class);
+    when(methodMock.getName()).thenReturn(name);
+    when(methodMock.getDeclaringClass()).thenReturn(declaringClassMock);
+    return methodMock;
   }
 }

@@ -128,8 +128,8 @@ public class ConverterUtils {
       final var positionInfo = upStmt.getDelegate().getPositionInfo();
 
       final var position = positionInfo.getStmtPosition();
-
       final var startLine = max(position.getFirstLine(), 1);
+
       var startLineOffset = position.getFirstCol();
       final var endLine = position.getLastLine();
       var endLineOffset = position.getLastCol();
@@ -162,6 +162,6 @@ public class ConverterUtils {
           startLine, startLineOffset, max(endLine - 1, startLine), endLineOffset);
     }
 
-    return inputFile.selectLine(error.getLineNumber());
+    return inputFile.selectLine(max(error.getLineNumber(), 1));
   }
 }

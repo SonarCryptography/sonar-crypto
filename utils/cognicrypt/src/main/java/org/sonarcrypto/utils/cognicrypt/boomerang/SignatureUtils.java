@@ -3,8 +3,10 @@ package org.sonarcrypto.utils.cognicrypt.boomerang;
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+@NullMarked
 public class SignatureUtils {
   public static String shortNameOf(DeclaredMethod method) {
     return shortNameOf(method.getDeclaringClass(), method.getName());
