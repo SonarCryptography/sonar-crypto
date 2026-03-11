@@ -1,14 +1,14 @@
 package org.sonarcrypto;
 
+import static org.sonarcrypto.cryptorules.CryptoRulesDefinition.LANGUAGE_KEY;
+
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
-import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 
 @NullMarked
 public class CryptoQualityProfile implements BuiltInQualityProfilesDefinition {
 
   private static final String PROFILE_NAME = "Crypto Security";
-  private static final String LANGUAGE_KEY = "java";
 
   @Override
   public void define(Context context) {
@@ -16,7 +16,8 @@ public class CryptoQualityProfile implements BuiltInQualityProfilesDefinition {
         context.createBuiltInQualityProfile(PROFILE_NAME, LANGUAGE_KEY);
     profile.setDefault(true);
 
-    profile.activateRule(CryptoRulesDefinition.REPOSITORY_KEY, CryptoRulesDefinition.CC_RULE_NAME);
+    final var ruleKey = CryptoRulesDefinitions.CC1.getRuleKey();
+    profile.activateRule(ruleKey.repository(), ruleKey.rule());
 
     profile.done();
   }

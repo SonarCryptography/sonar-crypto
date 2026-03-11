@@ -1,8 +1,9 @@
-package org.sonarcrypto.cryptorules;
+package org.sonarcrypto.cryptorules.builder;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonar.api.rule.RuleStatus;
+import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
 @NullMarked
@@ -16,13 +17,13 @@ public class CryptoRulesDefinitionBuilderImpl
         CryptoRulesDefinitionBuilder.AssessSection,
         CryptoRulesDefinitionBuilder.ResourcesSection,
         CryptoRulesDefinitionBuilder.Build {
-  CryptoRulesDefinitionBuilderImpl() {}
+  public CryptoRulesDefinitionBuilderImpl() {}
 
   private String rule;
   private String name;
   private String description;
-  private RuleStatus ruleStatus = RuleStatus.BETA;
-  private String severity = org.sonar.api.rule.Severity.CRITICAL;
+  private RuleStatus ruleStatus;
+  private String severity;
   private @Nullable String assessSection;
   private @Nullable String howToFixSection;
   private @Nullable String resourceSection;

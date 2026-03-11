@@ -10,15 +10,15 @@ import org.sonar.api.rules.RuleType;
 import org.sonar.api.server.rule.RuleDescriptionSection;
 import org.sonar.api.server.rule.RuleDescriptionSection.RuleDescriptionSectionKeys;
 import org.sonar.api.server.rule.RulesDefinition;
+import org.sonarcrypto.cryptorules.builder.CryptoRulesDefinitionBuilder;
+import org.sonarcrypto.cryptorules.builder.CryptoRulesDefinitionBuilderImpl;
 
 @NullMarked
 public class CryptoRulesDefinition implements RulesDefinition {
 
   public static final String REPOSITORY_KEY = "crypto-java";
   public static final String REPOSITORY_NAME = "Cryptography Analysis";
-  public static final String CC_RULE_NAME = "CC1";
-  public static final RuleKey CC_RULE = RuleKey.of(REPOSITORY_KEY, CC_RULE_NAME);
-  private static final String LANGUAGE_KEY = "java";
+  public static final String LANGUAGE_KEY = "java";
 
   private final RuleKey ruleKey;
   private final String name;
@@ -29,7 +29,7 @@ public class CryptoRulesDefinition implements RulesDefinition {
   private final @Nullable String howToFixSection;
   private final @Nullable String resourceSection;
 
-  CryptoRulesDefinition(
+  public CryptoRulesDefinition(
       String rule,
       String name,
       String description,
@@ -48,11 +48,7 @@ public class CryptoRulesDefinition implements RulesDefinition {
     this.resourceSection = resourceSection;
   }
 
-  /**
-   * Gets the rule key.
-   *
-   * @return The value to get.
-   */
+  /** Gets the rule key. */
   public RuleKey getRuleKey() {
     return this.ruleKey;
   }
@@ -101,6 +97,7 @@ public class CryptoRulesDefinition implements RulesDefinition {
     repository.done();
   }
 
+  /** Creates a crypto rules definition builder. */
   public static CryptoRulesDefinitionBuilder.Rule builder() {
     return new CryptoRulesDefinitionBuilderImpl();
   }
