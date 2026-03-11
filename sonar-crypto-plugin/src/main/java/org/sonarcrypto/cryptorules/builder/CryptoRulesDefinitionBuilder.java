@@ -29,17 +29,17 @@ public interface CryptoRulesDefinitionBuilder {
 
   interface WithSeverity {
     /** Sets the severity. */
-    WithHowToFixSection withSeverity(Severity severity);
-  }
-
-  interface WithHowToFixSection extends Build {
-    /** Sets the "how to fix" section description in HTML format. */
-    WithAssessSection withHowToFixSection(String html);
+    WithAssessSection withSeverity(Severity severity);
   }
 
   interface WithAssessSection extends Build {
     /** Sets the "assess" section description in HTML format. */
-    WithResourcesSection withAssessSection(String html);
+    WithHowToFixSection withAssessSection(String html);
+  }
+
+  interface WithHowToFixSection extends Build {
+    /** Sets the "how to fix" section description in HTML format. */
+    WithResourcesSection withHowToFixSection(String html);
   }
 
   interface WithResourcesSection extends Build {

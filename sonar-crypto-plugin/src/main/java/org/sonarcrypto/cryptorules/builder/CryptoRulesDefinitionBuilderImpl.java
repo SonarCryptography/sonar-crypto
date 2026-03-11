@@ -54,19 +54,19 @@ public class CryptoRulesDefinitionBuilderImpl
   }
 
   @Override
-  public CryptoRulesDefinitionBuilder.WithHowToFixSection withSeverity(Severity severity) {
+  public CryptoRulesDefinitionBuilder.WithAssessSection withSeverity(Severity severity) {
     this.severity = severity;
     return this;
   }
 
   @Override
-  public CryptoRulesDefinitionBuilder.WithResourcesSection withAssessSection(String html) {
+  public CryptoRulesDefinitionBuilder.WithHowToFixSection withAssessSection(String html) {
     this.assessSection = html;
     return this;
   }
 
   @Override
-  public CryptoRulesDefinitionBuilder.WithAssessSection withHowToFixSection(String html) {
+  public CryptoRulesDefinitionBuilder.WithResourcesSection withHowToFixSection(String html) {
     this.howToFixSection = html;
     return this;
   }
