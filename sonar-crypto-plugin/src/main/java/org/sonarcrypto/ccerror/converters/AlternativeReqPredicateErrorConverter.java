@@ -5,11 +5,14 @@ import static org.sonarcrypto.ccerror.ConverterUtils.*;
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.constraints.RequiredPredicate;
 import org.jspecify.annotations.NullMarked;
+import org.sonarcrypto.CryptoRulesDefinitions;
+import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
 
 @NullMarked
 public class AlternativeReqPredicateErrorConverter {
-  public static boolean convert(StringBuilder messageBuilder, AlternativeReqPredicateError error) {
+  public static CryptoRulesDefinition convert(
+      StringBuilder messageBuilder, AlternativeReqPredicateError error) {
     final var violatedPredicate = error.getViolatedPredicate();
     final var firstViolatedPredicate = violatedPredicate.predicates().stream().findFirst();
     final var calleeInfo = CalleeInfo.of(firstViolatedPredicate.map(RequiredPredicate::statement));
@@ -24,6 +27,6 @@ public class AlternativeReqPredicateErrorConverter {
                 stringifyCallee(calleeInfo)))
         .append("was cryptographically improper generated.");
 
-    return true;
+    return CryptoRulesDefinitions.CC1;
   }
 }

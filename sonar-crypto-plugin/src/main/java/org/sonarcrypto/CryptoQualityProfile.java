@@ -4,6 +4,7 @@ import static org.sonarcrypto.cryptorules.CryptoRulesDefinition.LANGUAGE_KEY;
 
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
+import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 
 @NullMarked
 public class CryptoQualityProfile implements BuiltInQualityProfilesDefinition {
@@ -16,9 +17,14 @@ public class CryptoQualityProfile implements BuiltInQualityProfilesDefinition {
         context.createBuiltInQualityProfile(PROFILE_NAME, LANGUAGE_KEY);
     profile.setDefault(true);
 
-    final var ruleKey = CryptoRulesDefinitions.CC1.getRuleKey();
-    profile.activateRule(ruleKey.repository(), ruleKey.rule());
+    activateRule(profile, CryptoRulesDefinitions.CC1);
 
     profile.done();
+  }
+
+  private void activateRule(
+      NewBuiltInQualityProfile profile, CryptoRulesDefinition cryptoRulesDefinition) {
+    final var ruleKey = cryptoRulesDefinition.getRuleKey();
+    profile.activateRule(ruleKey.repository(), ruleKey.rule());
   }
 }

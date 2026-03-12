@@ -9,15 +9,19 @@ import crypto.constraints.violations.ViolatedConstraint;
 import crypto.constraints.violations.ViolatedNeverTypeOfConstraint;
 import crypto.constraints.violations.ViolatedValueConstraint;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.sonarcrypto.CryptoRulesDefinitions;
+import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
 
 @NullMarked
 public class ConstraintErrorConverter {
-  public static boolean convert(StringBuilder messageBuilder, ConstraintError error) {
+  public static @Nullable CryptoRulesDefinition convert(
+      StringBuilder messageBuilder, ConstraintError error) {
     return generateConstraintErrorMessage(messageBuilder, error.getViolatedConstraint());
   }
 
-  static boolean generateConstraintErrorMessage(
+  static @Nullable CryptoRulesDefinition generateConstraintErrorMessage(
       StringBuilder messageBuilder, ViolatedConstraint violatedConstraint) {
     if (violatedConstraint instanceof ViolatedValueConstraint violatedValueConstraint) {
       generateViolatedValueConstraintMessage(messageBuilder, violatedValueConstraint);
@@ -25,13 +29,13 @@ public class ConstraintErrorConverter {
         instanceof ViolatedNeverTypeOfConstraint violatedNeverTypeOfConstraint) {
       generateViolatedNeverTypeOfConstraintMessage(messageBuilder, violatedNeverTypeOfConstraint);
     } else if (violatedConstraint instanceof ViolatedBinaryConstraint violatedBinaryConstraint) {
-      // generateViolatedBinaryConstraintMessage(messageBuilder, violatedBinaryConstraint);
-      return false;
+      // TODO: generateViolatedBinaryConstraintMessage(messageBuilder, violatedBinaryConstraint);
+      return null;
     } else {
       messageBuilder.append(violatedConstraint.getSimplifiedMessage(0));
     }
 
-    return true;
+    return CryptoRulesDefinitions.CC1;
   }
 
   static void generateViolatedValueConstraintMessage(

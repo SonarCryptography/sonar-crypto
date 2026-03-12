@@ -15,6 +15,7 @@ import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.converters.AlternativeReqPredicateErrorConverter;
 import org.sonarcrypto.ccerror.converters.ConstraintErrorConverter;
 import org.sonarcrypto.ccerror.converters.RequiredPredicateErrorConverter;
+import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
 
 @NullMarked
@@ -39,24 +40,24 @@ public class CcErrorConverter {
                 "Cryptographic weakness in method %s detected:\n",
                 SignatureUtils.shortNameOf(method)));
 
-    issue.forRule(CryptoRulesDefinitions.CC1.getRuleKey());
-
     location.at(selectLocation(inputFile, error));
 
-    final boolean converted;
+    final CryptoRulesDefinition cryptoRulesDefinition;
 
     if (error instanceof AlternativeReqPredicateError err) {
-      converted = AlternativeReqPredicateErrorConverter.convert(messageBuilder, err);
+      cryptoRulesDefinition = AlternativeReqPredicateErrorConverter.convert(messageBuilder, err);
     } else if (error instanceof ConstraintError err) {
-      converted = ConstraintErrorConverter.convert(messageBuilder, err);
+      cryptoRulesDefinition = ConstraintErrorConverter.convert(messageBuilder, err);
     } else if (error instanceof RequiredPredicateError err) {
-      converted = RequiredPredicateErrorConverter.convert(messageBuilder, err);
+      cryptoRulesDefinition = RequiredPredicateErrorConverter.convert(messageBuilder, err);
     } else {
       messageBuilder.append(error.toErrorMarkerString());
-      converted = true;
+      cryptoRulesDefinition = CryptoRulesDefinitions.CC1;
     }
 
-    if (!converted) return;
+    if (cryptoRulesDefinition == null) return;
+
+    issue.forRule(cryptoRulesDefinition.getRuleKey());
 
     if (messageBuilder.length() > NewIssueLocation.MESSAGE_MAX_SIZE) {
       messageBuilder.setLength(NewIssueLocation.MESSAGE_MAX_SIZE);
