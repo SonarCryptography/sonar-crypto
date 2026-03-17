@@ -34,13 +34,6 @@ class JimpleConvertingViewTest {
   void readJimpleFromResources_loadsClass() {
     JimpleAnalysisInputLocation inputLocation = getAnalysisInputLocationForTestJimple();
 
-    inputLocation =
-        new JimpleAnalysisInputLocation(
-            Path.of(
-                "/home/torun/Arbeit/code/sonar-crypto/e2e/src/test/resources/Java/Maven/Basic/target/jimple"),
-            SourceType.Application,
-            Collections.emptyList());
-
     // Create the view
     JimpleConvertingView view = new JimpleConvertingView(inputLocation);
 
@@ -93,9 +86,6 @@ class JimpleConvertingViewTest {
         jimpleTestClass.getMethods().stream().anyMatch(m -> m.getName().equals("getValue"));
     assertThat(hasGetValue).isTrue();
 
-    var test = jimpleTestClass.getMethodsByName("setValue");
-    var meth = test.iterator().next();
-    var b = meth.getBody();
     boolean hasSetValue =
         jimpleTestClass.getMethods().stream().anyMatch(m -> m.getName().equals("setValue"));
     assertThat(hasSetValue).isTrue();
