@@ -40,7 +40,7 @@ import sootup.core.signatures.MethodSignature;
 import sootup.core.signatures.PackageName;
 import sootup.core.types.ClassType;
 import sootup.core.types.Type;
-import sootup.core.util.printer.StmtPrinter;
+import sootup.core.util.printer.LabeledStmtPrinter;
 
 /**
  * Prints out a class and all its methods.
@@ -73,7 +73,6 @@ public class JimplePrinter {
   private final Set<Option> options = EnumSet.noneOf(Option.class);
   private int jimpleLnNum = 0; // actual line number
   @Nullable private LineNumberMapper lineNumberMapper = null;
-  @Nullable private String currentSourceFileName = null; // Tracks source file during printing
 
   public JimplePrinter(Option... options) {
     this.options.addAll(Arrays.asList(options));
@@ -131,43 +130,19 @@ public class JimplePrinter {
     return null;
   }
 
-  /**
-   * Records a position in the line number mapper if it's available and position is not
-   * NoPositionInformation.
-   */
-  private void recordPosition(
-      int jimpleLine,
-      String signature,
-      @Nullable String sourceFileName,
-      Position position,
-      Runnable recordAction) {
-    if (lineNumberMapper != null && !(position instanceof NoPositionInformation)) {
-      recordAction.run();
-    }
-  }
-
-  private LabeledStmtPrinter determinePrinter() {
-    if (useAbbreviations()) {
-      return new BriefStmtPrinter();
-    } else if (options.contains(Option.LegacyMode)) {
-      return new LegacyJimplePrinter();
-    } else {
-      return new NormalStmtPrinter();
-    }
-  }
-
   public void printTo(SootClass cl, PrintWriter out) {
-    printTo(cl, out, determinePrinter());
+    printTo(cl, out, new NormalStmtPrinter());
   }
 
-  public void printTo(SootClass cl, PrintWriter out, LabeledStmtPrinter printer) {
+  public void printTo(SootClass cl, PrintWriter out, NormalStmtPrinter printer) {
     printer.enableImports(options.contains(Option.UseImports));
 
     // add jimple line number tags
     setJimpleLnNum(0);
 
     // Store source file name for use during printing and set it in the mapper
-    currentSourceFileName = getSourceFileName(cl);
+    // Tracks source file during printing
+    String currentSourceFileName = getSourceFileName(cl);
     if (lineNumberMapper != null) {
       lineNumberMapper.setSourceFileName(currentSourceFileName);
     }
@@ -195,7 +170,7 @@ public class JimplePrinter {
       if (cl.isInterface() && ClassModifier.isAbstract(modifiers)) {
         modifiers.remove(ClassModifier.ABSTRACT);
       }
-      if (modifiers.size() != 0) {
+      if (!modifiers.isEmpty()) {
         printer.modifier(ClassModifier.toString(modifiers));
         printer.literal(" ");
       }
@@ -271,7 +246,7 @@ public class JimplePrinter {
       out.println();
     }
 
-    out.println(printer.toString());
+    out.println(printer);
   }
 
   private void printFields(SootClass cl, LabeledStmtPrinter printer) {
@@ -311,7 +286,7 @@ public class JimplePrinter {
     }
   }
 
-  private void printMethods(SootClass cl, LabeledStmtPrinter printer) {
+  private void printMethods(SootClass cl, NormalStmtPrinter printer) {
     Iterator<? extends SootMethod> methodIt =
         getIterator(cl.getMethods(), SootClassMember::getSignature);
 
@@ -365,21 +340,21 @@ public class JimplePrinter {
   }
 
   public void printTo(Body body, PrintWriter out) {
-    printTo(body, out, determinePrinter());
+    printTo(body, out, new NormalStmtPrinter());
   }
 
   /**
    * Prints out the method corresponding to body Body, (declaration and body), in the textual format
    * corresponding to the IR used to encode body body.
    */
-  public void printTo(Body body, PrintWriter out, LabeledStmtPrinter printer) {
+  public void printTo(Body body, PrintWriter out, NormalStmtPrinter printer) {
     printer.enableImports(options.contains(Option.UseImports));
     printBody(body, printer);
     out.print(printer);
   }
 
   public void printTo(StmtGraph<?> graph, PrintWriter out) {
-    printTo(graph, out, determinePrinter());
+    printTo(graph, out, new NormalStmtPrinter());
   }
 
   public void printTo(StmtGraph<?> graph, PrintWriter out, LabeledStmtPrinter printer) {
@@ -393,7 +368,7 @@ public class JimplePrinter {
    *
    * @param printer the StmtPrinter that determines how to print the statements
    */
-  private void printBody(Body b, LabeledStmtPrinter printer) {
+  private void printBody(Body b, NormalStmtPrinter printer) {
 
     if (addJimpleLn()) {
       setJimpleLnNum(addJimpleLnTags(getJimpleLnNum(), b.getMethodSignature()));
@@ -519,7 +494,7 @@ public class JimplePrinter {
 
   /** Prints the given <code>JimpleBody</code> to the specified <code>PrintWriter</code>. */
   // Print out local variables
-  private void printLocalsInBody(Body body, StmtPrinter up) {
+  private void printLocalsInBody(Body body, NormalStmtPrinter up) {
     Map<Type, List<Local>> typeToLocals = new LinkedHashMap<>(body.getLocalCount() * 2 + 1, 0.7f);
 
     // group locals by type

@@ -2,11 +2,8 @@ package org.sonarcrypto.utils.jbc2jimple;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.sonarcrypto.utils.jimple.mapper.ElementType;
 import org.sonarcrypto.utils.jimple.mapper.LineMapping;
 import org.sonarcrypto.utils.jimple.mapper.LineMappingCollection;
@@ -16,7 +13,7 @@ import org.sonarcrypto.utils.jimple.mapper.LineNumberMapper;
 class LineMappingIntegrationTest {
 
   @Test
-  void testEndToEndLineMappingCollection(@TempDir Path tempDir) throws IOException {
+  void testEndToEndLineMappingCollection() {
     // This test requires actual compiled classes to work
     // For now, we verify the API works correctly
 
@@ -24,8 +21,7 @@ class LineMappingIntegrationTest {
 
     // Verify that we can get mappings (will be empty without actual classes)
     Map<String, LineMappingCollection> mappings = converter.getLineMappings();
-    assertThat(mappings).isNotNull();
-    assertThat(mappings).isEmpty(); // No classes converted yet
+    assertThat(mappings).isNotNull().isEmpty();
   }
 
   @Test
@@ -38,7 +34,6 @@ class LineMappingIntegrationTest {
 
     // For each class that was converted
     for (Map.Entry<String, LineMappingCollection> entry : mappings.entrySet()) {
-      String className = entry.getKey();
       LineMappingCollection collection = entry.getValue();
 
       // Verify collection structure
@@ -51,8 +46,6 @@ class LineMappingIntegrationTest {
         assertThat(mapping.getJimpleLine()).isGreaterThanOrEqualTo(0);
         assertThat(mapping.getElementType()).isNotNull();
         assertThat(mapping.getElementSignature()).isNotNull();
-        // Source file name may be null if not available
-        // assertThat(mapping.getSourceFileName()).isNotNull();
         assertThat(mapping.getSourcePosition()).isNotNull();
       }
     }

@@ -4,11 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -16,7 +14,7 @@ import org.junit.jupiter.api.io.TempDir;
 class Jbc2JimpleConverterFileWritingTest {
 
   @Test
-  void testMappingFilesAreWritten(@TempDir Path tempDir) throws IOException {
+  void testMappingFilesAreWritten(@TempDir Path tempDir) {
     // Get the path to test classes
     String testClassPath = "src/test/resources";
     Path testClassDir = Path.of(testClassPath);
@@ -39,16 +37,16 @@ class Jbc2JimpleConverterFileWritingTest {
         List<Path> jimpleFiles =
             Files.list(tempDir)
                 .filter(p -> p.getFileName().toString().endsWith(".jimple"))
-                .collect(Collectors.toList());
+                .toList();
 
         List<Path> mappingFiles =
             Files.list(tempDir)
                 .filter(p -> p.getFileName().toString().endsWith(".jimple.map.json"))
-                .collect(Collectors.toList());
+                .toList();
 
         assertThat(jimpleFiles).isNotEmpty();
         assertThat(mappingFiles).isNotEmpty();
-        assertThat(mappingFiles.size()).isEqualTo(jimpleFiles.size());
+        assertThat(mappingFiles).hasSameSizeAs(jimpleFiles);
 
         // Verify that mapping files contain valid JSON
         for (Path mappingFile : mappingFiles) {
@@ -64,7 +62,7 @@ class Jbc2JimpleConverterFileWritingTest {
           assertThat(root.get("mappings").isArray()).isTrue();
 
           // Verify individual mappings don't have sourceFileName
-          if (root.get("mappings").size() > 0) {
+          if (!root.get("mappings").isEmpty()) {
             JsonNode firstMapping = root.get("mappings").get(0);
             assertThat(firstMapping.get("sourceFileName"))
                 .isNull(); // Should NOT be in individual mappings
@@ -82,16 +80,5 @@ class Jbc2JimpleConverterFileWritingTest {
       System.out.println("Note: Test couldn't complete conversion: " + e.getMessage());
       // This is expected if there are no valid class files in test resources
     }
-  }
-
-  @Test
-  void testMappingFileNamingConvention(@TempDir Path tempDir) throws IOException {
-    // This test verifies the naming convention even without actual conversion
-    String className = "com.example.TestClass";
-    String expectedJimpleFile = className + ".jimple";
-    String expectedMappingFile = className + ".jimple.map.json";
-
-    assertThat(expectedMappingFile).endsWith(".jimple.map.json");
-    assertThat(expectedMappingFile).startsWith(className);
   }
 }

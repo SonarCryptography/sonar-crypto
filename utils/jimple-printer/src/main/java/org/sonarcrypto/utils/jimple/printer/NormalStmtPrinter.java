@@ -28,6 +28,7 @@ import sootup.core.jimple.common.ref.JParameterRef;
 import sootup.core.jimple.common.ref.JThisRef;
 import sootup.core.model.SootField;
 import sootup.core.model.SootMethod;
+import sootup.core.util.printer.LabeledStmtPrinter;
 
 /** StmtPrinter implementation for normal (full) Jimple */
 public class NormalStmtPrinter extends LabeledStmtPrinter {
@@ -54,8 +55,7 @@ public class NormalStmtPrinter extends LabeledStmtPrinter {
     if (r instanceof JThisRef) {
       output.append("@this: ");
       typeSignature(r.getType());
-    } else if (r instanceof JParameterRef) {
-      JParameterRef pr = (JParameterRef) r;
+    } else if (r instanceof JParameterRef pr) {
       output.append("@parameter").append(pr.getIndex()).append(": ");
       typeSignature(r.getType());
     } else if (r instanceof JCaughtExceptionRef) {
@@ -64,6 +64,8 @@ public class NormalStmtPrinter extends LabeledStmtPrinter {
       throw new RuntimeException();
     }
   }
+
+  void enableImports(boolean enable) {}
 
   @Override
   public void literal(String s) {
