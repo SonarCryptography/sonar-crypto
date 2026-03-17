@@ -22,6 +22,11 @@ package org.sonarcrypto.utils.jimple.printer;
  * #L%
  */
 
+import java.io.PrintWriter;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.sonarcrypto.utils.jimple.mapper.LineNumberMapper;
 import sootup.core.graph.StmtGraph;
 import sootup.core.jimple.Jimple;
@@ -36,12 +41,6 @@ import sootup.core.signatures.PackageName;
 import sootup.core.types.ClassType;
 import sootup.core.types.Type;
 import sootup.core.util.printer.StmtPrinter;
-
-import javax.annotation.Nullable;
-import java.io.PrintWriter;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Prints out a class and all its methods.
@@ -72,7 +71,7 @@ public class JimplePrinter {
   }
 
   private final Set<Option> options = EnumSet.noneOf(Option.class);
-  private  int jimpleLnNum = 0; // actual line number
+  private int jimpleLnNum = 0; // actual line number
   @Nullable private LineNumberMapper lineNumberMapper = null;
   @Nullable private String currentSourceFileName = null; // Tracks source file during printing
 
@@ -133,7 +132,8 @@ public class JimplePrinter {
   }
 
   /**
-   * Records a position in the line number mapper if it's available and position is not NoPositionInformation.
+   * Records a position in the line number mapper if it's available and position is not
+   * NoPositionInformation.
    */
   private void recordPosition(
       int jimpleLine,
@@ -299,9 +299,7 @@ public class JimplePrinter {
         Position fieldPosition = f.getPosition();
         if (lineNumberMapper != null && !(fieldPosition instanceof NoPositionInformation)) {
           lineNumberMapper.recordFieldPosition(
-              getJimpleLnNum(),
-              f.getSignature().toString(),
-              fieldPosition);
+              getJimpleLnNum(), f.getSignature().toString(), fieldPosition);
         }
 
         if (addJimpleLn()) {
@@ -353,9 +351,7 @@ public class JimplePrinter {
           Position methodPosition = method.getPosition();
           if (lineNumberMapper != null && !(methodPosition instanceof NoPositionInformation)) {
             lineNumberMapper.recordMethodPosition(
-                getJimpleLnNum() - 1,
-                method.getSignature().toString(),
-                methodPosition);
+                getJimpleLnNum() - 1, method.getSignature().toString(), methodPosition);
           }
         }
 

@@ -1,20 +1,18 @@
 package org.sonarcrypto.utils.jbc2jimple;
 
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.nio.file.StandardOpenOption.WRITE;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
 import org.jspecify.annotations.NullMarked;
-
-
 import org.sonarcrypto.utils.jimple.mapper.LineMappingCollection;
 import org.sonarcrypto.utils.jimple.mapper.LineNumberMapper;
 import org.sonarcrypto.utils.jimple.printer.JimplePrinter;
@@ -107,7 +105,8 @@ public class Jbc2JimpleConverter {
   private void writeMappingFile(Path outputPath, String className, LineMappingCollection mappings)
       throws IOException {
     Path mappingFilePath = outputPath.resolve(className + ".jimple.map.json");
-    try (final var writer = Files.newBufferedWriter(mappingFilePath, CREATE, WRITE, TRUNCATE_EXISTING)) {
+    try (final var writer =
+        Files.newBufferedWriter(mappingFilePath, CREATE, WRITE, TRUNCATE_EXISTING)) {
       mappings.writeJson(writer);
     }
   }
@@ -170,7 +169,7 @@ public class Jbc2JimpleConverter {
 
     System.out.println();
     System.out.println("Converting classes ...");
-    
+
     final var count = new Jbc2JimpleConverter().convert(cliArgs.classPath, cliArgs.outputPath);
     System.out.println();
     System.out.println("Done. " + count + " class file(s) converted.");

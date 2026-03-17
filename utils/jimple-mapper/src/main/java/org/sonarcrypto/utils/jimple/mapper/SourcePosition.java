@@ -1,8 +1,8 @@
 package org.sonarcrypto.utils.jimple.mapper;
 
 /**
- * Represents a position in source code with line and column information.
- * Designed with a flat structure for protobuf compatibility.
+ * Represents a position in source code with line and column information. Designed with a flat
+ * structure for protobuf compatibility.
  */
 public class SourcePosition {
   private final int firstLine;
@@ -68,4 +68,3 @@ public class SourcePosition {
     return result;
   }
 }
-

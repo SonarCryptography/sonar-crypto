@@ -1,8 +1,8 @@
 package org.sonarcrypto.utils.jimple.mapper;
 
 /**
- * Represents a single mapping entry from a Jimple line number to source code position.
- * Designed with a flat structure for protobuf compatibility.
+ * Represents a single mapping entry from a Jimple line number to source code position. Designed
+ * with a flat structure for protobuf compatibility.
  */
 public class LineMapping {
   private final int jimpleLine;
@@ -72,4 +72,3 @@ public class LineMapping {
     return result;
   }
 }
-

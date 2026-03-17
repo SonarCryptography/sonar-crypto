@@ -1,17 +1,16 @@
 package org.sonarcrypto.utils.jimple.mapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import sootup.core.model.FullPosition;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import sootup.core.model.FullPosition;
 
 class LineMappingJsonTest {
 
@@ -20,12 +19,11 @@ class LineMappingJsonTest {
     LineNumberMapper mapper = new LineNumberMapper("com.example.TestClass");
     mapper.setSourceFileName("TestClass.java");
 
-    mapper.recordClassPosition(1, "com.example.TestClass",
-        new FullPosition(10, 1, 50, 1));
-    mapper.recordFieldPosition(3, "<com.example.TestClass: int value>",
-        new FullPosition(15, 5, 15, 20));
-    mapper.recordMethodPosition(7, "<com.example.TestClass: void test()>",
-        new FullPosition(20, 3, 30, 4));
+    mapper.recordClassPosition(1, "com.example.TestClass", new FullPosition(10, 1, 50, 1));
+    mapper.recordFieldPosition(
+        3, "<com.example.TestClass: int value>", new FullPosition(15, 5, 15, 20));
+    mapper.recordMethodPosition(
+        7, "<com.example.TestClass: void test()>", new FullPosition(20, 3, 30, 4));
 
     LineMappingCollection collection = mapper.getCollection();
     String json = collection.toJson();
@@ -66,8 +64,7 @@ class LineMappingJsonTest {
   void testWriteJsonToWriter() throws IOException {
     LineNumberMapper mapper = new LineNumberMapper("com.example.TestClass");
     mapper.setSourceFileName("TestClass.java");
-    mapper.recordClassPosition(1, "com.example.TestClass",
-        new FullPosition(10, 1, 50, 1));
+    mapper.recordClassPosition(1, "com.example.TestClass", new FullPosition(10, 1, 50, 1));
 
     LineMappingCollection collection = mapper.getCollection();
 
@@ -85,10 +82,9 @@ class LineMappingJsonTest {
     LineNumberMapper mapper = new LineNumberMapper("com.example.TestClass");
     mapper.setSourceFileName("TestClass.java");
 
-    mapper.recordClassPosition(1, "com.example.TestClass",
-        new FullPosition(10, 1, 50, 1));
-    mapper.recordFieldPosition(3, "<com.example.TestClass: int value>",
-        new FullPosition(15, 5, 15, 20));
+    mapper.recordClassPosition(1, "com.example.TestClass", new FullPosition(10, 1, 50, 1));
+    mapper.recordFieldPosition(
+        3, "<com.example.TestClass: int value>", new FullPosition(15, 5, 15, 20));
 
     LineMappingCollection collection = mapper.getCollection();
 
@@ -115,8 +111,7 @@ class LineMappingJsonTest {
   void testJsonFormatIsPrettyPrinted() throws IOException {
     LineNumberMapper mapper = new LineNumberMapper("com.example.TestClass");
     mapper.setSourceFileName("TestClass.java");
-    mapper.recordClassPosition(1, "com.example.TestClass",
-        new FullPosition(10, 1, 50, 1));
+    mapper.recordClassPosition(1, "com.example.TestClass", new FullPosition(10, 1, 50, 1));
 
     LineMappingCollection collection = mapper.getCollection();
     String json = collection.toJson();
@@ -126,5 +121,3 @@ class LineMappingJsonTest {
     assertThat(json).contains("  "); // Should have indentation
   }
 }
-
-

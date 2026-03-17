@@ -1,5 +1,10 @@
 package org.sonarcrypto.utils.jbc2jimple;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.sonarcrypto.utils.jimple.mapper.ElementType;
@@ -7,15 +12,7 @@ import org.sonarcrypto.utils.jimple.mapper.LineMapping;
 import org.sonarcrypto.utils.jimple.mapper.LineMappingCollection;
 import org.sonarcrypto.utils.jimple.mapper.LineNumberMapper;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * Integration test demonstrating the complete line mapping functionality.
- */
+/** Integration test demonstrating the complete line mapping functionality. */
 class LineMappingIntegrationTest {
 
   @Test
@@ -68,16 +65,20 @@ class LineMappingIntegrationTest {
     mapper.setSourceFileName("TestClass.java");
 
     // Record various types of positions
-    mapper.recordClassPosition(1, "com.example.TestClass",
-        new sootup.core.model.FullPosition(1, 1, 50, 1));
+    mapper.recordClassPosition(
+        1, "com.example.TestClass", new sootup.core.model.FullPosition(1, 1, 50, 1));
 
-    mapper.recordFieldPosition(3, "<com.example.TestClass: int value>",
-        new sootup.core.model.FullPosition(5, 5, 5, 20));
+    mapper.recordFieldPosition(
+        3, "<com.example.TestClass: int value>", new sootup.core.model.FullPosition(5, 5, 5, 20));
 
-    mapper.recordMethodPosition(7, "<com.example.TestClass: void test()>",
+    mapper.recordMethodPosition(
+        7,
+        "<com.example.TestClass: void test()>",
         new sootup.core.model.FullPosition(10, 3, 20, 4));
 
-    mapper.recordStmtPosition(12, "$r0 := @this: com.example.TestClass",
+    mapper.recordStmtPosition(
+        12,
+        "$r0 := @this: com.example.TestClass",
         new sootup.core.model.FullPosition(11, 9, 11, 50));
 
     // Get collection
@@ -101,4 +102,3 @@ class LineMappingIntegrationTest {
     assertThat(collection.getMappings().get(3).getJimpleLine()).isEqualTo(12);
   }
 }
-

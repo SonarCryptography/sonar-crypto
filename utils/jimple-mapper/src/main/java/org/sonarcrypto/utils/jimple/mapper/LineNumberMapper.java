@@ -1,14 +1,13 @@
 package org.sonarcrypto.utils.jimple.mapper;
 
-import sootup.core.model.Position;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
+import sootup.core.model.Position;
 
 /**
- * Collects line number mappings from Jimple code to source positions.
- * Records mappings for classes, methods, fields, and statements.
+ * Collects line number mappings from Jimple code to source positions. Records mappings for classes,
+ * methods, fields, and statements.
  */
 public class LineNumberMapper {
   private final String className;
@@ -22,8 +21,7 @@ public class LineNumberMapper {
   }
 
   /**
-   * Sets the source file name for this class.
-   * Should be called once when the source file is known.
+   * Sets the source file name for this class. Should be called once when the source file is known.
    *
    * @param sourceFileName The source file name (just filename, not full path)
    */
@@ -111,4 +109,3 @@ public class LineNumberMapper {
     return mappings.size();
   }
 }
-

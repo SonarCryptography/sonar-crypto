@@ -23,6 +23,8 @@ package org.sonarcrypto.utils.jimple.printer;
  */
 
 import com.google.common.collect.ComparisonChain;
+import java.util.*;
+import javax.annotation.Nonnull;
 import sootup.core.graph.BasicBlock;
 import sootup.core.graph.StmtGraph;
 import sootup.core.jimple.Jimple;
@@ -36,9 +38,6 @@ import sootup.core.signatures.FieldSignature;
 import sootup.core.signatures.FieldSubSignature;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.Type;
-
-import javax.annotation.Nonnull;
-import java.util.*;
 
 public abstract class LabeledStmtPrinter extends AbstractStmtPrinter {
   /** branch targets * */

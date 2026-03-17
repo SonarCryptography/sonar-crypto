@@ -24,6 +24,9 @@ package org.sonarcrypto.utils.jimple.printer;
  *
  */
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Nonnull;
 import sootup.core.jimple.Jimple;
 import sootup.core.jimple.basic.Local;
 import sootup.core.jimple.common.constant.Constant;
@@ -33,10 +36,6 @@ import sootup.core.types.ArrayType;
 import sootup.core.types.ClassType;
 import sootup.core.types.Type;
 import sootup.core.util.printer.StmtPrinter;
-
-import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.Map;
 
 /** Partial default StmtPrinter implementation. */
 public abstract class AbstractStmtPrinter extends StmtPrinter {

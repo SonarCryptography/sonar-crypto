@@ -1,11 +1,11 @@
 package org.sonarcrypto.utils.jimple.mapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
 import sootup.core.jimple.basic.NoPositionInformation;
 import sootup.core.model.FullPosition;
 import sootup.core.model.Position;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class LineNumberMapperTest {
 
@@ -87,7 +87,8 @@ class LineNumberMapperTest {
 
     mapper.recordClassPosition(1, "com.example.TestClass", new FullPosition(1, 1, 30, 1));
     mapper.recordFieldPosition(3, "<com.example.TestClass: int x>", new FullPosition(5, 5, 5, 15));
-    mapper.recordMethodPosition(5, "<com.example.TestClass: void test()>", new FullPosition(10, 3, 20, 4));
+    mapper.recordMethodPosition(
+        5, "<com.example.TestClass: void test()>", new FullPosition(10, 3, 20, 4));
     mapper.recordStmtPosition(8, "x = 5", new FullPosition(15, 9, 15, 14));
 
     LineMappingCollection collection = mapper.getCollection();
@@ -116,4 +117,3 @@ class LineNumberMapperTest {
     assertThat(mapping.getSourcePosition().getLastLine()).isEqualTo(-1);
   }
 }
-

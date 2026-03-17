@@ -1,5 +1,11 @@
 package org.sonarcrypto.utils.jimple.printer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import sootup.core.graph.BasicBlock;
 import sootup.core.graph.BlockGraphIterator;
 import sootup.core.graph.MutableBasicBlockImpl;
@@ -9,13 +15,6 @@ import sootup.core.jimple.basic.Trap;
 import sootup.core.jimple.common.stmt.JNopStmt;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.types.ClassType;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /*-
  * #%L

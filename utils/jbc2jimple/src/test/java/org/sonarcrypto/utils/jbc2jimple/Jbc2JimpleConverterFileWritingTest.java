@@ -1,22 +1,18 @@
 package org.sonarcrypto.utils.jbc2jimple;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.sonarcrypto.utils.jbc2jimple.Jbc2JimpleConverter;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * End-to-end test demonstrating the complete file writing functionality.
- */
+/** End-to-end test demonstrating the complete file writing functionality. */
 class Jbc2JimpleConverterFileWritingTest {
 
   @Test
@@ -40,13 +36,15 @@ class Jbc2JimpleConverterFileWritingTest {
 
       if (count > 0) {
         // Verify that both .jimple and .jimple.map.json files were created
-        List<Path> jimpleFiles = Files.list(tempDir)
-            .filter(p -> p.getFileName().toString().endsWith(".jimple"))
-            .collect(Collectors.toList());
+        List<Path> jimpleFiles =
+            Files.list(tempDir)
+                .filter(p -> p.getFileName().toString().endsWith(".jimple"))
+                .collect(Collectors.toList());
 
-        List<Path> mappingFiles = Files.list(tempDir)
-            .filter(p -> p.getFileName().toString().endsWith(".jimple.map.json"))
-            .collect(Collectors.toList());
+        List<Path> mappingFiles =
+            Files.list(tempDir)
+                .filter(p -> p.getFileName().toString().endsWith(".jimple.map.json"))
+                .collect(Collectors.toList());
 
         assertThat(jimpleFiles).isNotEmpty();
         assertThat(mappingFiles).isNotEmpty();
@@ -68,11 +66,16 @@ class Jbc2JimpleConverterFileWritingTest {
           // Verify individual mappings don't have sourceFileName
           if (root.get("mappings").size() > 0) {
             JsonNode firstMapping = root.get("mappings").get(0);
-            assertThat(firstMapping.get("sourceFileName")).isNull(); // Should NOT be in individual mappings
+            assertThat(firstMapping.get("sourceFileName"))
+                .isNull(); // Should NOT be in individual mappings
           }
 
-          System.out.println("Verified mapping file: " + mappingFile.getFileName() +
-                           " with " + root.get("mappings").size() + " mappings");
+          System.out.println(
+              "Verified mapping file: "
+                  + mappingFile.getFileName()
+                  + " with "
+                  + root.get("mappings").size()
+                  + " mappings");
         }
       }
     } catch (Exception e) {
@@ -92,4 +95,3 @@ class Jbc2JimpleConverterFileWritingTest {
     assertThat(expectedMappingFile).startsWith(className);
   }
 }
-
