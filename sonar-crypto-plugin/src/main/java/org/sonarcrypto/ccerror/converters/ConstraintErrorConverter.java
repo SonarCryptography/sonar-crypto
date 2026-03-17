@@ -35,7 +35,7 @@ public class ConstraintErrorConverter {
       messageBuilder.append(violatedConstraint.getSimplifiedMessage(0));
     }
 
-    return CryptoRulesDefinitions.CC1;
+    return CryptoRulesDefinitions.CC2_UA;
   }
 
   static void generateViolatedValueConstraintMessage(
@@ -110,28 +110,28 @@ public class ConstraintErrorConverter {
         .append('.');
   }
 
-  static void generateViolatedBinaryConstraintMessage(
-      StringBuilder messageBuilder, ViolatedBinaryConstraint constraint) {
-    // TODO: Clarify, whether this is a composite error with errors nonetheless reported?
-
-    // final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
-    //
-    // messageBuilder.append(
-    //    String.format(
-    //        "The %s given to %s ",
-    //        stringifyArgumentIndex(
-    //            constraint.parameter().index(),
-    //            calleeInfo.map(CalleeInfo::argumentCount).orElse(null)),
-    //        stringifyCallee(calleeInfo)));
-    //
-    // messageBuilder.append("should never be of the type
-    // ").append(quote(constraint.notAllowedType())).append('.');
-
-    // final var binaryConstraint = constraint.constraint();
-    // final var leftConstraint = binaryConstraint.getLeftConstraint();
-    // final var rightConstraint = binaryConstraint.getRightConstraint();
-    //
-    // final var errorMessage = constraint.getErrorMessage();
-    // messageBuilder.append(errorMessage);
-  }
+  // static void generateViolatedBinaryConstraintMessage(
+  //    StringBuilder messageBuilder, ViolatedBinaryConstraint constraint) {
+  //  // TODO: Clarify, whether this is a composite error with errors nonetheless reported?
+  //
+  //   final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
+  //
+  //   messageBuilder.append(
+  //      String.format(
+  //          "The %s given to %s ",
+  //          stringifyArgumentIndex(
+  //              constraint.parameter().index(),
+  //              calleeInfo.map(CalleeInfo::argumentCount).orElse(null)),
+  //          stringifyCallee(calleeInfo)));
+  //
+  //   messageBuilder.append("should never be of the type
+  //   ").append(quote(constraint.notAllowedType())).append('.');
+  //
+  //   final var binaryConstraint = constraint.constraint();
+  //   final var leftConstraint = binaryConstraint.getLeftConstraint();
+  //   final var rightConstraint = binaryConstraint.getRightConstraint();
+  //
+  //   final var errorMessage = constraint.getErrorMessage();
+  //   messageBuilder.append(errorMessage);
+  // }
 }

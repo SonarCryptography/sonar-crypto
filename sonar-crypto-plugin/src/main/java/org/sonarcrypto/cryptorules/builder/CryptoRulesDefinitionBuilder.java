@@ -33,12 +33,12 @@ public interface CryptoRulesDefinitionBuilder {
     WithAssessSection withSeverity(Severity severity);
   }
 
-  interface WithAssessSection extends Build {
+  interface WithAssessSection extends WithHowToFixSection {
     /** Sets the "assess" section description in HTML format. */
     WithHowToFixSection withAssessSection(@Language("html") String html);
   }
 
-  interface WithHowToFixSection extends Build {
+  interface WithHowToFixSection extends WithResourcesSection {
     /** Sets the "how to fix" section description in HTML format. */
     WithResourcesSection withHowToFixSection(@Language("html") String html);
   }

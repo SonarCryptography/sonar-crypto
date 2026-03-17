@@ -13,7 +13,7 @@ class CryptoRulesDefinitionsTest {
   @Test
   void define() {
     RulesDefinition.Context context = new RulesDefinition.Context();
-    CryptoRulesDefinitions.CC1.define(context);
+    CryptoRulesDefinitions.CC2_UA.define(context);
 
     RulesDefinition.Repository repository = context.repository("crypto-java");
     assertThat(repository).isNotNull();

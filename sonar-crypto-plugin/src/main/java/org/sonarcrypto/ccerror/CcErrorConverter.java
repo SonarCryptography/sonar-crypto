@@ -52,7 +52,7 @@ public class CcErrorConverter {
       cryptoRulesDefinition = RequiredPredicateErrorConverter.convert(messageBuilder, err);
     } else {
       messageBuilder.append(error.toErrorMarkerString());
-      cryptoRulesDefinition = CryptoRulesDefinitions.CC1;
+      cryptoRulesDefinition = CryptoRulesDefinitions.CC1_OI;
     }
 
     if (cryptoRulesDefinition == null) return;

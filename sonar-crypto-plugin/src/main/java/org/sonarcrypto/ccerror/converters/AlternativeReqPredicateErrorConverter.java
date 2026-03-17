@@ -27,6 +27,6 @@ public class AlternativeReqPredicateErrorConverter {
                 stringifyCallee(calleeInfo)))
         .append("was cryptographically improper generated.");
 
-    return CryptoRulesDefinitions.CC1;
+    return CryptoRulesDefinitions.CC2_UA;
   }
 }

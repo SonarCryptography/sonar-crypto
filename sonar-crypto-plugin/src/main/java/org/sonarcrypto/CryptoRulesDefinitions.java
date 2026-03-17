@@ -7,34 +7,81 @@ import org.sonarcrypto.cryptorules.Severity;
 
 @NullMarked
 public class CryptoRulesDefinitions {
-  public static final CryptoRulesDefinition CC1 =
+  public static final CryptoRulesDefinition CC1_OI =
       CryptoRulesDefinition.builder()
-          .withRule("CC1")
+          .withRule("CC1_OI")
+          .withName("Other Issue")
+          .withDescription(
+              """
+              <p>The algorithm or mode specified is cryptographically unsecure,
+              either because it is considered as too weak, like SHA1,
+              or it is cryptographically broken, like MD5 or DES.</p>
+              """)
+          .withStatus(RuleStatus.BETA)
+          .withSeverity(Severity.CRITICAL)
+          // .withAssessSection(
+          //    """
+          //    """)
+          // .withHowToFixSection(
+          //    """
+          //    """)
+          .withResourcesSection(
+              """
+              <ul>
+              <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a></li>
+              <ul>
+              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
+              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a></li>
+              </ul>
+              <li><a href="https://en.wikipedia.org/wiki/Length_extension_attack">Length extension attack</a></li>
+              </ul>
+              """)
+          .build();
+
+  public static final CryptoRulesDefinition CC2_UA =
+      CryptoRulesDefinition.builder()
+          .withRule("CC1_UA")
           .withName("Unsecure Algorithm")
           .withDescription(
               """
-              The algorithm or mode specified is cryptographically unsecure,
+              <p>The algorithm or mode specified is cryptographically unsecure,
               either because it is considered as too weak, like SHA1,
-              or it is cryptographically broken, like MD5 or DES.
+              or it is cryptographically broken, like MD5 or DES.</p>
               """)
           .withStatus(RuleStatus.BETA)
           .withSeverity(Severity.CRITICAL)
           .withAssessSection(
               """
-              <p>Cryptographic errors mostly have a big impact on the security of a program.
-              Small mistakes can weaken or break the security,
-              which gains attackers unauthorized access to read or write data
-              or even to execute arbitrary code on your system.</p>
+              <p>Cryptographic issues are mostly a serious problem,
+              as they allow attackers to break the encryption,
+              e.g., to disclose the information or to sign data in your name.</p>
+
+              <h2>Broken Hash Algorithms</h2>
+              <p>Broken hash algorithms, such as MD5, allow attackers to run collision attacks by
+              computing same hashes from different data.
+              Hence, you cannot rely on those hashes anymore.</p>
+
+              <h2>Broken Encryption Algorithms</h2>
+              <p>Broken encryption algorithms, such DES, allow attackers to decrypt the content
+              through brute-force attacks and to reverse-compute the secret key.</p>
+
+              <h2>Broken or Weak Encryption Modes</h2>
+              <p>The ECB mode of AES, for example, if used for encrypting multiple blocks,
+              allows attackers to infer the secret key
+              by finding patterns in the encrypted data.</p>
               """)
           .withHowToFixSection(
               """
               <p>This issue can be fixed by choosing a cryptographical secure algorithm or mode.</p>
+
               <h2>Hashing</h2>
               <p>Instead of MD5 or SHA1, use algorithms of the SHA-2 or SHA-3 families, e.g., SHA-256 or SHA3-256.</p>
               <p>Beware that untrimmed SHA-2 modes are, despite considered as secure, vulnerable to length extension attacks.
-              Consider using a trimmed mode instead, like SHA-512/256, or use SHA-3 that is not vulnerable to this kind of attack.
+              Consider using a trimmed mode instead, like SHA-512/256, or use SHA-3 that is not vulnerable to this kind of attack.</p>
+
               <h2>Encryption</h2>
-              <p>Instead of AES with ECB or CBC mode, use AES in combination with GCM mode.</p>
+              <p>Instead of AES with ECB or CBC mode, use AES in combination with GCM mode.
+              In general but especially for GCM, it is very important to never reuse an initialization vector.</p>
               <p>Instead of DSA, use RSA or ECC.</p>
               <p>Consider using post-quantum algorithms. But do not use them alone; always combine them with approved sate-of-the-art algorithms.</p>
               """)
@@ -47,6 +94,51 @@ public class CryptoRulesDefinitions {
               <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a></li>
               </ul>
               <li><a href="https://en.wikipedia.org/wiki/Length_extension_attack">Length extension attack</a></li>
+              </ul>
+              """)
+          .build();
+
+  public static final CryptoRulesDefinition CC3_KL =
+      CryptoRulesDefinition.builder()
+          .withRule("CC2_KL")
+          .withName("Insufficient Key Length")
+          .withDescription(
+              """
+              <p>The key length specified is insufficient.</p>
+              """)
+          .withStatus(RuleStatus.BETA)
+          .withSeverity(Severity.CRITICAL)
+          .withAssessSection(
+              """
+              <p>Cryptographic issues are mostly a serious problem,
+              as they allow attackers to break the encryption,
+              e.g., to disclose the information or to sign data in your name.</p>
+
+              <h2>Insufficient Key Length</h2>
+              <p>Cryptography not only relies on secure algorithms,
+              but also on the size of the used keys,
+              where a key might be a password or a random value,
+              e.g., used for an initialization vector.</p>
+              """)
+          .withHowToFixSection(
+              """
+              <p>This issue can be fixed by choosing an appropriate key length.
+              The key size heavily depends on the algorithm used.</p>
+
+              <h2>Examples</h2>
+
+              <table>
+              <tr><th>Algorithm</th><th>Recommended Key Length</th></tr>
+              <tr><td>AES</td><td>at least 128 bits, ideally 256 bits</td></tr>
+              <tr><td>RSA</td><td>at least 2048 bits, ideally 3096 bits or higher</td></tr>
+              <tr><td>Curve25519 (ECC)</td><td>256 bits (but effectively 128 bits); corresponds to approximately 3096 bits of RSA</td></tr>
+              </table>
+              """)
+          .withResourcesSection(
+              """
+              <ul>
+              <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a></li>
+              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
               </ul>
               """)
           .build();
