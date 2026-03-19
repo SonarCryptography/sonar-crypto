@@ -29,12 +29,13 @@ class LineMappingJsonTest {
     String json = collection.toJson();
 
     // Verify JSON is valid and contains expected data
-    assertThat(json).isNotNull();
-    assertThat(json).contains("com.example.TestClass");
-    assertThat(json).contains("TestClass.java");
-    assertThat(json).contains("CLASS");
-    assertThat(json).contains("FIELD");
-    assertThat(json).contains("METHOD");
+    assertThat(json)
+        .isNotNull()
+        .contains("com.example.TestClass")
+        .contains("TestClass.java")
+        .contains("CLASS")
+        .contains("FIELD")
+        .contains("METHOD");
 
     // Parse JSON to verify structure
     ObjectMapper objectMapper = new ObjectMapper();

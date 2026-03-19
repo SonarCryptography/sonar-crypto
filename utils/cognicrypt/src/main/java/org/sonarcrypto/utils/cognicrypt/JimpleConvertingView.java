@@ -18,11 +18,8 @@ import sootup.core.frontend.OverridingBodySource;
 import sootup.core.frontend.OverridingClassSource;
 import sootup.core.frontend.ResolveException;
 import sootup.core.inputlocation.AnalysisInputLocation;
-import sootup.core.jimple.basic.SimpleStmtPositionInfo;
-import sootup.core.jimple.basic.StmtPositionInfo;
 import sootup.core.jimple.common.stmt.*;
 import sootup.core.jimple.javabytecode.stmt.*;
-import sootup.core.jimple.visitor.StmtVisitor;
 import sootup.core.model.*;
 import sootup.core.types.ClassType;
 import sootup.java.core.*;
@@ -115,12 +112,8 @@ public class JimpleConvertingView extends JavaView {
         for (LineMapping m : loaded.getMappings()) {
           switch (m.getElementType()) {
             case CLASS -> classMap.put(m.getJimpleLine(), m);
-            case METHOD -> {
-              methodMap.put(m.getJimpleLine(), m);
-            }
-            case FIELD -> {
-              fieldMap.put(m.getJimpleLine(), m);
-            }
+            case METHOD -> methodMap.put(m.getJimpleLine(), m);
+            case FIELD -> fieldMap.put(m.getJimpleLine(), m);
             case STATEMENT -> stmtMap.put(m.getJimpleLine(), m);
           }
         }
@@ -166,29 +159,10 @@ public class JimpleConvertingView extends JavaView {
               m -> {
                 if (m.getBodySource() instanceof OverridingBodySource preInterceptedBodySource) {
                   final BoomerangPreInterceptor interceptor = new BoomerangPreInterceptor();
+                  final LocationReplacerInterceptor locationInterceptor =
+                      new LocationReplacerInterceptor(statementMappings);
                   Body.BodyBuilder builder = Body.builder(m.getBody(), m.getModifiers());
-                  Map<Stmt, Stmt> stmtsToReplace = new LinkedHashMap<>();
-                  builder
-                      .getStmtGraph()
-                      .iterator()
-                      .forEachRemaining(
-                          stmt -> {
-                            LineMapping mapping =
-                                statementMappings.get(
-                                    stmt.getPositionInfo().getStmtPosition().getFirstLine());
-                            if (mapping != null) {
-                              StmtPositionInfo newPosInfo =
-                                  new SimpleStmtPositionInfo(
-                                      mapping.getSourcePosition().getFirstLine());
-                              PositionReplacer replacer = new PositionReplacer(newPosInfo);
-                              stmt.accept(replacer);
-                              if (replacer.result != null && replacer.result != stmt) {
-                                stmtsToReplace.put(stmt, replacer.result);
-                              }
-                            }
-                          });
-                  stmtsToReplace.forEach(
-                      (old, updated) -> builder.getStmtGraph().replaceNode(old, updated));
+                  locationInterceptor.interceptBody(builder, JimpleConvertingView.this);
                   interceptor.interceptBody(builder, JimpleConvertingView.this);
                   OverridingBodySource interceptedBodySource =
                       preInterceptedBodySource.withBody(builder.build());
@@ -256,90 +230,28 @@ public class JimpleConvertingView extends JavaView {
           .map(m -> m.getSourcePosition().toSootUpPosition())
           .orElse(resolvedClass.getPosition());
     }
-  }
 
-  private static class PositionReplacer implements StmtVisitor {
-
-    private final StmtPositionInfo newPositionInfo;
-    Stmt result = null;
-
-    private PositionReplacer(StmtPositionInfo newPositionInfo) {
-      this.newPositionInfo = newPositionInfo;
+    @Override
+    public boolean equals(Object o) {
+      if (o == null || getClass() != o.getClass()) return false;
+      if (!super.equals(o)) return false;
+      WrappingSootClassSource that = (WrappingSootClassSource) o;
+      return Objects.equals(resolvedClass, that.resolvedClass)
+          && Objects.equals(classMappings, that.classMappings)
+          && Objects.equals(methodMappings, that.methodMappings)
+          && Objects.equals(fieldMappings, that.fieldMappings)
+          && Objects.equals(statementMappings, that.statementMappings);
     }
 
     @Override
-    public void caseBreakpointStmt(JBreakpointStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseInvokeStmt(JInvokeStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseAssignStmt(JAssignStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseIdentityStmt(JIdentityStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseEnterMonitorStmt(JEnterMonitorStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseExitMonitorStmt(JExitMonitorStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseGotoStmt(JGotoStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseIfStmt(JIfStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseNopStmt(JNopStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseRetStmt(JRetStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseReturnStmt(JReturnStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseReturnVoidStmt(JReturnVoidStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseSwitchStmt(JSwitchStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void caseThrowStmt(JThrowStmt stmt) {
-      result = stmt.withPositionInfo(newPositionInfo);
-    }
-
-    @Override
-    public void defaultCaseStmt(Stmt stmt) {
-      result = stmt; // unknown type — leave unchanged
+    public int hashCode() {
+      return Objects.hash(
+          super.hashCode(),
+          resolvedClass,
+          classMappings,
+          methodMappings,
+          fieldMappings,
+          statementMappings);
     }
   }
 }
