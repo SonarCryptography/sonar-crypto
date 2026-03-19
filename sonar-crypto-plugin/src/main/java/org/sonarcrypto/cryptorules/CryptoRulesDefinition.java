@@ -23,6 +23,7 @@ public class CryptoRulesDefinition implements RulesDefinition {
   private final RuleKey ruleKey;
   private final String name;
   private final String description;
+  private final @Nullable String definitionKey;
   private final RuleStatus ruleStatus;
   private final Severity severity;
   private final @Nullable String assessSection;
@@ -33,11 +34,13 @@ public class CryptoRulesDefinition implements RulesDefinition {
       String rule,
       String name,
       String description,
+      @Nullable String definitionKey,
       RuleStatus ruleStatus,
       Severity severity,
       @Nullable String assessSection,
       @Nullable String howToFixSection,
       @Nullable String resourceSection) {
+    this.definitionKey = definitionKey;
     this.ruleKey = RuleKey.of(REPOSITORY_KEY, rule);
     this.name = name;
     this.description = description;
@@ -46,6 +49,10 @@ public class CryptoRulesDefinition implements RulesDefinition {
     this.assessSection = assessSection;
     this.howToFixSection = howToFixSection;
     this.resourceSection = resourceSection;
+  }
+
+  public @Nullable String getDefinitionKey() {
+    return this.definitionKey;
   }
 
   /** Gets the rule key. */

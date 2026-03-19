@@ -1,12 +1,13 @@
 package org.sonarcrypto.ccerror;
 
-import static org.sonarcrypto.ccerror.ConverterUtils.selectLocation;
+import static org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils.selectLocation;
 
 import boomerang.scope.Method;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.RequiredPredicateError;
+import java.util.Optional;
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -15,7 +16,8 @@ import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.converters.AlternativeReqPredicateErrorConverter;
 import org.sonarcrypto.ccerror.converters.ConstraintErrorConverter;
 import org.sonarcrypto.ccerror.converters.RequiredPredicateErrorConverter;
-import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
+import org.sonarcrypto.ccerror.violations.SimpleViolation;
+import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
 
 @NullMarked
@@ -31,6 +33,22 @@ public class CcErrorConverter {
   }
 
   public void convertError(InputFile inputFile, Method method, AbstractError error) {
+    final Violation violation;
+
+    if (error instanceof AlternativeReqPredicateError err) {
+      violation = AlternativeReqPredicateErrorConverter.convert(err);
+    } else if (error instanceof ConstraintError err) {
+      violation = ConstraintErrorConverter.convert(err);
+    } else if (error instanceof RequiredPredicateError err) {
+      violation = RequiredPredicateErrorConverter.convert(err);
+    } else {
+      violation =
+          new SimpleViolation(
+              CryptoRulesDefinitions.CC1_OI, Optional.empty(), error.toErrorMarkerString());
+    }
+
+    if (violation == null) return;
+
     final var issue = this.getContext().newIssue();
     final var location = issue.newLocation().on(inputFile);
 
@@ -42,27 +60,13 @@ public class CcErrorConverter {
 
     location.at(selectLocation(inputFile, error));
 
-    final CryptoRulesDefinition cryptoRulesDefinition;
-
-    if (error instanceof AlternativeReqPredicateError err) {
-      cryptoRulesDefinition = AlternativeReqPredicateErrorConverter.convert(messageBuilder, err);
-    } else if (error instanceof ConstraintError err) {
-      cryptoRulesDefinition = ConstraintErrorConverter.convert(messageBuilder, err);
-    } else if (error instanceof RequiredPredicateError err) {
-      cryptoRulesDefinition = RequiredPredicateErrorConverter.convert(messageBuilder, err);
-    } else {
-      messageBuilder.append(error.toErrorMarkerString());
-      cryptoRulesDefinition = CryptoRulesDefinitions.CC1_OI;
-    }
-
-    if (cryptoRulesDefinition == null) return;
-
-    issue.forRule(cryptoRulesDefinition.getRuleKey());
+    issue.forRule(violation.rulesDefinition().getRuleKey());
 
     if (messageBuilder.length() > NewIssueLocation.MESSAGE_MAX_SIZE) {
       messageBuilder.setLength(NewIssueLocation.MESSAGE_MAX_SIZE);
     }
 
+    violation.createMessage(messageBuilder);
     location.message(messageBuilder.toString());
 
     // System.out.println(error.toErrorMarkerString());

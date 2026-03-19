@@ -1,137 +1,74 @@
 package org.sonarcrypto.ccerror.converters;
 
-import static org.sonarcrypto.ccerror.ConverterUtils.*;
-import static org.sonarcrypto.utils.sonar.TextUtils.*;
-
 import crypto.analysis.errors.ConstraintError;
+import crypto.constraints.ValueConstraint;
 import crypto.constraints.violations.ViolatedBinaryConstraint;
 import crypto.constraints.violations.ViolatedConstraint;
 import crypto.constraints.violations.ViolatedNeverTypeOfConstraint;
 import crypto.constraints.violations.ViolatedValueConstraint;
+import java.util.Optional;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.CryptoRulesDefinitions;
-import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
+import org.sonarcrypto.ccerror.violations.*;
 import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
+import org.sonarcrypto.utils.cognicrypt.crysl.Args;
+import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
 public class ConstraintErrorConverter {
-  public static @Nullable CryptoRulesDefinition convert(
-      StringBuilder messageBuilder, ConstraintError error) {
-    return generateConstraintErrorMessage(messageBuilder, error.getViolatedConstraint());
+  public static @Nullable Violation convert(ConstraintError error) {
+    return generateConstraintErrorMessage(error.getViolatedConstraint());
   }
 
-  static @Nullable CryptoRulesDefinition generateConstraintErrorMessage(
-      StringBuilder messageBuilder, ViolatedConstraint violatedConstraint) {
+  static @Nullable Violation generateConstraintErrorMessage(ViolatedConstraint violatedConstraint) {
     if (violatedConstraint instanceof ViolatedValueConstraint violatedValueConstraint) {
-      generateViolatedValueConstraintMessage(messageBuilder, violatedValueConstraint);
+      return generateViolatedValueConstraintMessage(violatedValueConstraint);
     } else if (violatedConstraint
         instanceof ViolatedNeverTypeOfConstraint violatedNeverTypeOfConstraint) {
-      generateViolatedNeverTypeOfConstraintMessage(messageBuilder, violatedNeverTypeOfConstraint);
+      return generateViolatedNeverTypeOfConstraintMessage(violatedNeverTypeOfConstraint);
     } else if (violatedConstraint instanceof ViolatedBinaryConstraint violatedBinaryConstraint) {
-      // TODO: generateViolatedBinaryConstraintMessage(messageBuilder, violatedBinaryConstraint);
-      return null;
+      return generateViolatedBinaryConstraintMessage(violatedBinaryConstraint);
     } else {
-      messageBuilder.append(violatedConstraint.getSimplifiedMessage(0));
+      return new SimpleViolation(
+          CryptoRulesDefinitions.CC1_OI,
+          Optional.empty(),
+          violatedConstraint.getSimplifiedMessage(0));
     }
-
-    return CryptoRulesDefinitions.CC2_UA;
   }
 
-  static void generateViolatedValueConstraintMessage(
-      StringBuilder messageBuilder, ViolatedValueConstraint constraint) {
+  static Violation generateViolatedValueConstraintMessage(ViolatedValueConstraint constraint) {
     final var violatingValues = constraint.violatingValues();
-    final var violatingValuesCount = violatingValues.size();
-
     final var validValueRange = constraint.constraint().getConstraint().getValueRange();
-    final var validValueRangeCount = validValueRange.size();
-
     final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
 
-    messageBuilder.append(
-        String.format(
-            "The %s given to %s ",
-            stringifyArgumentIndex(
-                constraint.parameter().index(), calleeInfo.map(CalleeInfo::argumentCount)),
-            stringifyCallee(calleeInfo)));
-
-    if (violatingValuesCount > 0) {
-      if (violatingValuesCount == 1) {
-        messageBuilder.append("has the value ");
-      } else {
-        messageBuilder.append("has the values ");
-      }
-
-      messageBuilder.append(
-          join(
-              violatingValues.stream().map(it -> it.getTransformedVal().getStringValue()),
-              "or",
-              "respectively"));
-    } else {
-      messageBuilder.append(validValueRangeCount > 0 ? "\nThe given value" : "");
-    }
-
-    if (validValueRangeCount > 0) {
-      if (violatingValuesCount == 0) {
-        messageBuilder.append("should be ");
-      }
-      if (violatingValuesCount == 1) {
-        messageBuilder.append(", but it should be ");
-      }
-    } else {
-      messageBuilder.append(", but they should be ");
-    }
-
-    if (validValueRangeCount > 1) {
-      if (violatingValuesCount > 1) {
-        messageBuilder.append("contained in ").append(join(validValueRange, "and"));
-      } else {
-        messageBuilder.append("one of ").append(join(validValueRange, "or"));
-      }
-    }
-
-    messageBuilder.append('.');
+    return new ArgsViolation(
+        CryptoRulesDefinitions.CC2_UA,
+        CallInfo.optOf(calleeInfo, constraint.parameter().index()),
+        new Args(
+            violatingValues.stream().map(it -> it.getTransformedVal().getStringValue()).toList(),
+            validValueRange));
   }
 
-  static void generateViolatedNeverTypeOfConstraintMessage(
-      StringBuilder messageBuilder, ViolatedNeverTypeOfConstraint constraint) {
+  static Violation generateViolatedNeverTypeOfConstraintMessage(
+      ViolatedNeverTypeOfConstraint constraint) {
     final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
 
-    messageBuilder.append(
-        String.format(
-            "The %s given to %s ",
-            stringifyArgumentIndex(
-                constraint.parameter().index(), calleeInfo.map(CalleeInfo::argumentCount)),
-            stringifyCallee(calleeInfo)));
-
-    messageBuilder
-        .append("should never be of the type ")
-        .append(quote(constraint.notAllowedType()))
-        .append('.');
+    return new NeverTypeViolation(
+        /* TODO: Use correct rule definition */ CryptoRulesDefinitions.CC1_OI,
+        CallInfo.optOf(calleeInfo, constraint.parameter().index()),
+        constraint.notAllowedType());
   }
 
-  // static void generateViolatedBinaryConstraintMessage(
-  //    StringBuilder messageBuilder, ViolatedBinaryConstraint constraint) {
-  //  // TODO: Clarify, whether this is a composite error with errors nonetheless reported?
-  //
-  //   final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
-  //
-  //   messageBuilder.append(
-  //      String.format(
-  //          "The %s given to %s ",
-  //          stringifyArgumentIndex(
-  //              constraint.parameter().index(),
-  //              calleeInfo.map(CalleeInfo::argumentCount).orElse(null)),
-  //          stringifyCallee(calleeInfo)));
-  //
-  //   messageBuilder.append("should never be of the type
-  //   ").append(quote(constraint.notAllowedType())).append('.');
-  //
-  //   final var binaryConstraint = constraint.constraint();
-  //   final var leftConstraint = binaryConstraint.getLeftConstraint();
-  //   final var rightConstraint = binaryConstraint.getRightConstraint();
-  //
-  //   final var errorMessage = constraint.getErrorMessage();
-  //   messageBuilder.append(errorMessage);
-  // }
+  static @Nullable Violation generateViolatedBinaryConstraintMessage(
+      ViolatedBinaryConstraint constraint) {
+
+    final var rightConstraint = constraint.constraint().getRightConstraint();
+
+    if (rightConstraint instanceof ValueConstraint) {
+      // TODO: Implement ...
+    }
+
+    return null;
+  }
 }

@@ -1,32 +1,24 @@
 package org.sonarcrypto.ccerror.converters;
 
-import static org.sonarcrypto.ccerror.ConverterUtils.*;
-
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.constraints.RequiredPredicate;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.CryptoRulesDefinitions;
-import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
+import org.sonarcrypto.ccerror.violations.SimpleViolation;
+import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
+import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
 public class AlternativeReqPredicateErrorConverter {
-  public static CryptoRulesDefinition convert(
-      StringBuilder messageBuilder, AlternativeReqPredicateError error) {
+  public static Violation convert(AlternativeReqPredicateError error) {
     final var violatedPredicate = error.getViolatedPredicate();
     final var firstViolatedPredicate = violatedPredicate.predicates().stream().findFirst();
     final var calleeInfo = CalleeInfo.of(firstViolatedPredicate.map(RequiredPredicate::statement));
 
-    messageBuilder
-        .append(
-            String.format(
-                "The %s given to %s ",
-                stringifyArgumentIndex(
-                    firstViolatedPredicate.map(RequiredPredicate::index).orElse(-1),
-                    calleeInfo.map(CalleeInfo::argumentCount)),
-                stringifyCallee(calleeInfo)))
-        .append("was cryptographically improper generated.");
-
-    return CryptoRulesDefinitions.CC2_UA;
+    return new SimpleViolation(
+        CryptoRulesDefinitions.CC1_OI,
+        CallInfo.optOf(calleeInfo, firstViolatedPredicate.map(RequiredPredicate::index).orElse(-1)),
+        "was cryptographically improper generated.");
   }
 }

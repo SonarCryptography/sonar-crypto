@@ -21,7 +21,12 @@ public interface CryptoRulesDefinitionBuilder {
 
   interface WithDescription {
     /** Sets the description in HTML format. */
-    WithStatus withDescription(@Language("html") String html);
+    WithKey withDescription(@Language("html") String html);
+  }
+
+  interface WithKey extends WithStatus {
+    /** Sets the definition key. */
+    WithStatus withKey(String definitionKey);
   }
 
   interface WithStatus {

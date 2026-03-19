@@ -154,7 +154,7 @@ class CcToSonarIssuesTest {
   void report_issue_should_prefix_message_with_api_misuse_text() throws IOException {
     InputFile inputFile = addJavaFile("Test.java", "public class Test {}");
 
-    String customMessage = "Weak encryption algorithm used";
+    String customMessage = "Weak encryption actualAlgorithm used";
     issueReporter.reportIssue(sensorContext, inputFile, 1, customMessage);
 
     Issue issue = sensorContext.allIssues().iterator().next();

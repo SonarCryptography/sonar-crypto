@@ -1,4 +1,4 @@
-package org.sonarcrypto.ccerror;
+package org.sonarcrypto.utils.cognicrypt.crysl;
 
 import static java.lang.Math.*;
 

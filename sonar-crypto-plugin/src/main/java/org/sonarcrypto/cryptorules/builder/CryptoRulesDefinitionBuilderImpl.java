@@ -9,7 +9,8 @@ import org.sonarcrypto.cryptorules.Severity;
 @SuppressWarnings("NotNullFieldNotInitialized")
 @NullMarked
 public class CryptoRulesDefinitionBuilderImpl
-    implements CryptoRulesDefinitionBuilder.WithRule,
+    implements CryptoRulesDefinitionBuilder.WithKey,
+        CryptoRulesDefinitionBuilder.WithRule,
         CryptoRulesDefinitionBuilder.WithName,
         CryptoRulesDefinitionBuilder.WithDescription,
         CryptoRulesDefinitionBuilder.WithStatus,
@@ -23,6 +24,7 @@ public class CryptoRulesDefinitionBuilderImpl
   private String rule;
   private String name;
   private String description;
+  private String definitionKey;
   private RuleStatus ruleStatus;
   private Severity severity;
   private @Nullable String assessSection;
@@ -42,8 +44,14 @@ public class CryptoRulesDefinitionBuilderImpl
   }
 
   @Override
-  public CryptoRulesDefinitionBuilder.WithStatus withDescription(String html) {
+  public CryptoRulesDefinitionBuilder.WithKey withDescription(String html) {
     this.description = html;
+    return this;
+  }
+
+  @Override
+  public CryptoRulesDefinitionBuilder.WithStatus withKey(String definitionKey) {
+    this.definitionKey = definitionKey;
     return this;
   }
 
@@ -83,6 +91,7 @@ public class CryptoRulesDefinitionBuilderImpl
         this.rule,
         this.name,
         this.description,
+        this.definitionKey,
         this.ruleStatus,
         this.severity,
         this.assessSection,

@@ -48,6 +48,7 @@ public class CryptoRulesDefinitions {
               either because it is considered as too weak, like SHA1,
               or it is cryptographically broken, like MD5 or DES.</p>
               """)
+          .withKey("algorithm")
           .withStatus(RuleStatus.BETA)
           .withSeverity(Severity.CRITICAL)
           .withAssessSection(
@@ -106,6 +107,7 @@ public class CryptoRulesDefinitions {
               """
               <p>The key length specified is insufficient.</p>
               """)
+          .withKey("key length")
           .withStatus(RuleStatus.BETA)
           .withSeverity(Severity.CRITICAL)
           .withAssessSection(
