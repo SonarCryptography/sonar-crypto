@@ -1,5 +1,7 @@
 package org.sonarcrypto.utils.jimple.mapper;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
@@ -18,8 +20,11 @@ public class LineMappingCollection {
   @Nullable private final String sourceFileName;
   private final List<LineMapping> mappings;
 
+  @JsonCreator
   public LineMappingCollection(
-      String className, @Nullable String sourceFileName, List<LineMapping> mappings) {
+      @JsonProperty("className") String className,
+      @JsonProperty("sourceFileName") @Nullable String sourceFileName,
+      @JsonProperty("mappings") List<LineMapping> mappings) {
     this.className = className;
     this.sourceFileName = sourceFileName;
     this.mappings = new ArrayList<>(mappings);
@@ -34,6 +39,7 @@ public class LineMappingCollection {
     return sourceFileName;
   }
 
+  /** All mappings in insertion order. */
   public List<LineMapping> getMappings() {
     return Collections.unmodifiableList(mappings);
   }

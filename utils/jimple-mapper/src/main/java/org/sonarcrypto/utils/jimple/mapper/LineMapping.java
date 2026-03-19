@@ -1,5 +1,8 @@
 package org.sonarcrypto.utils.jimple.mapper;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Represents a single mapping entry from a Jimple line number to source code position. Designed
  * with a flat structure for protobuf compatibility.
@@ -10,11 +13,12 @@ public class LineMapping {
   private final String elementSignature;
   private final SourcePosition sourcePosition;
 
+  @JsonCreator
   public LineMapping(
-      int jimpleLine,
-      ElementType elementType,
-      String elementSignature,
-      SourcePosition sourcePosition) {
+      @JsonProperty("jimpleLine") int jimpleLine,
+      @JsonProperty("elementType") ElementType elementType,
+      @JsonProperty("elementSignature") String elementSignature,
+      @JsonProperty("sourcePosition") SourcePosition sourcePosition) {
     this.jimpleLine = jimpleLine;
     this.elementType = elementType;
     this.elementSignature = elementSignature;

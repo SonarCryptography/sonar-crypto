@@ -1,5 +1,10 @@
 package org.sonarcrypto.utils.jimple.mapper;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import sootup.core.model.FullPosition;
+import sootup.core.model.Position;
+
 /**
  * Represents a position in source code with line and column information. Designed with a flat
  * structure for protobuf compatibility.
@@ -10,7 +15,12 @@ public class SourcePosition {
   private final int firstCol;
   private final int lastCol;
 
-  public SourcePosition(int firstLine, int lastLine, int firstCol, int lastCol) {
+  @JsonCreator
+  public SourcePosition(
+      @JsonProperty("firstLine") int firstLine,
+      @JsonProperty("lastLine") int lastLine,
+      @JsonProperty("firstCol") int firstCol,
+      @JsonProperty("lastCol") int lastCol) {
     this.firstLine = firstLine;
     this.lastLine = lastLine;
     this.firstCol = firstCol;
@@ -66,5 +76,9 @@ public class SourcePosition {
     result = 31 * result + firstCol;
     result = 31 * result + lastCol;
     return result;
+  }
+
+  public Position toSootUpPosition() {
+    return new FullPosition(firstLine, firstCol, lastLine, lastCol);
   }
 }
