@@ -134,28 +134,23 @@ public class ConverterUtils {
       final var endLine = position.getLastLine();
       var endLineOffset = position.getLastCol();
 
-      if (startLineOffset < 0 && endLine < 1 && endLineOffset < 1) {
-        try {
-          final var actualLine =
-              inputFile.contents().lines().skip(max(0, startLine - 1)).findFirst().orElse("");
+      try {
+        final var actualLine =
+            inputFile.contents().lines().skip(max(0, startLine - 1)).findFirst().orElse("");
 
-          if (!actualLine.isEmpty()) {
-            final var actualLineOffset =
-                (int)
-                    min(
-                        actualLine.chars().takeWhile(Character::isWhitespace).count(),
-                        Integer.MAX_VALUE);
+        if (!actualLine.isEmpty()) {
+          final var actualLineOffset =
+              (int)
+                  min(
+                      actualLine.chars().takeWhile(Character::isWhitespace).count(),
+                      Integer.MAX_VALUE);
 
-            endLineOffset = actualLine.length();
-            if (actualLineOffset < actualLine.length() - 1) startLineOffset = actualLineOffset;
-          }
-        } catch (IOException e) {
-          // Ignore and continue.
+          if (actualLineOffset < actualLine.length() - 1) startLineOffset = actualLineOffset;
+
+          if (endLineOffset < 1) endLineOffset = actualLine.length();
         }
-      }
-
-      if (endLineOffset < 1) {
-        return inputFile.selectLine(startLine);
+      } catch (IOException e) {
+        // Ignore and continue.
       }
 
       return inputFile.newRange(
