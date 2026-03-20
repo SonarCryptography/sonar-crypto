@@ -8,9 +8,9 @@ public class CryptoPlugin implements Plugin {
 
   @Override
   public void define(Context context) {
-    context.addExtension(CryptoRulesDefinitions.CC1_OI);
-    context.addExtension(CryptoRulesDefinitions.CC2_UA);
-    context.addExtension(CryptoRulesDefinitions.CC3_KL);
+    context.addExtension(CryptoRulesDefinitions.CC1_GENERAL);
+    context.addExtension(CryptoRulesDefinitions.CC2_ALGORITHM);
+    context.addExtension(CryptoRulesDefinitions.CC5_KEY_LEN);
     context.addExtension(CryptoQualityProfile.class);
     context.addExtension(CryptoSensor.class);
   }

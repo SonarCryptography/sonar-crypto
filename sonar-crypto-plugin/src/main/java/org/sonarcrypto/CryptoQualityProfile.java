@@ -17,9 +17,9 @@ public class CryptoQualityProfile implements BuiltInQualityProfilesDefinition {
         context.createBuiltInQualityProfile(PROFILE_NAME, LANGUAGE_KEY);
     profile.setDefault(true);
 
-    activateRule(profile, CryptoRulesDefinitions.CC1_OI);
-    activateRule(profile, CryptoRulesDefinitions.CC2_UA);
-    activateRule(profile, CryptoRulesDefinitions.CC3_KL);
+    activateRule(profile, CryptoRulesDefinitions.CC1_GENERAL);
+    activateRule(profile, CryptoRulesDefinitions.CC2_ALGORITHM);
+    activateRule(profile, CryptoRulesDefinitions.CC5_KEY_LEN);
 
     profile.done();
   }

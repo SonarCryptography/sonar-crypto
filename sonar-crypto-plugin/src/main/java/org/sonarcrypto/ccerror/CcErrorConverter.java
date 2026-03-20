@@ -44,7 +44,7 @@ public class CcErrorConverter {
     } else {
       violation =
           new SimpleViolation(
-              CryptoRulesDefinitions.CC1_OI, Optional.empty(), error.toErrorMarkerString());
+              CryptoRulesDefinitions.CC1_GENERAL, Optional.empty(), error.toErrorMarkerString());
     }
 
     if (violation == null) return;

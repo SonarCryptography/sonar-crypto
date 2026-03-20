@@ -31,7 +31,7 @@ public class ConstraintErrorConverter {
       return generateViolatedBinaryConstraintMessage(violatedBinaryConstraint);
     } else {
       return new SimpleViolation(
-          CryptoRulesDefinitions.CC1_OI,
+          CryptoRulesDefinitions.CC1_GENERAL,
           Optional.empty(),
           violatedConstraint.getSimplifiedMessage(0));
     }
@@ -43,7 +43,7 @@ public class ConstraintErrorConverter {
     final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
 
     return new ArgsViolation(
-        CryptoRulesDefinitions.CC2_UA,
+        CryptoRulesDefinitions.CC2_ALGORITHM,
         CallInfo.optOf(calleeInfo, constraint.parameter().index()),
         new Args(
             violatingValues.stream().map(it -> it.getTransformedVal().getStringValue()).toList(),
@@ -55,7 +55,7 @@ public class ConstraintErrorConverter {
     final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
 
     return new NeverTypeViolation(
-        /* TODO: Use correct rule definition */ CryptoRulesDefinitions.CC1_OI,
+        /* TODO: Use correct rule definition */ CryptoRulesDefinitions.CC1_GENERAL,
         CallInfo.optOf(calleeInfo, constraint.parameter().index()),
         constraint.notAllowedType());
   }

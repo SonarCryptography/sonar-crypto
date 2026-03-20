@@ -7,10 +7,10 @@ import org.sonarcrypto.cryptorules.Severity;
 
 @NullMarked
 public class CryptoRulesDefinitions {
-  public static final CryptoRulesDefinition CC1_OI =
+  public static final CryptoRulesDefinition CC1_GENERAL =
       CryptoRulesDefinition.builder()
-          .withRule("CC1_OI")
-          .withName("Other Issue")
+          .withRule("CC1")
+          .withName("General")
           .withDescription(
               """
               <p>The algorithm or mode specified is cryptographically unsecure,
@@ -19,18 +19,29 @@ public class CryptoRulesDefinitions {
               """)
           .withStatus(RuleStatus.BETA)
           .withSeverity(Severity.CRITICAL)
-          // .withAssessSection(
-          //    """
-          //    """)
-          // .withHowToFixSection(
-          //    """
-          //    """)
+          .withAssessSection(
+              """
+              <p>Cryptographic issues are mostly a serious problem,
+              as they allow attackers to break the encryption,
+              e.g., to disclose the information or to sign data in your name.</p>
+              """)
+          .withHowToFixSection(
+              """
+              <p>Check the algorithms you chose, the corresponding mode, padding, key length, cost,
+              or iterations to ensure a secure encryption, hashing, or password derivation.</p>
+              <p>Check whether you use a
+              cryptographically secure pseudo-random number generator (CSPRNG)
+              to generate sensitive values, such as initialization vectors.</p>
+              <p>Fore storing passwords, use a key derivation function,
+              such as PBKDF2 or Argon2id.</p>
+              """)
           .withResourcesSection(
               """
               <ul>
               <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a></li>
               <ul>
               <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
+              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
               <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a></li>
               </ul>
               <li><a href="https://en.wikipedia.org/wiki/Length_extension_attack">Length extension attack</a></li>
@@ -38,9 +49,9 @@ public class CryptoRulesDefinitions {
               """)
           .build();
 
-  public static final CryptoRulesDefinition CC2_UA =
+  public static final CryptoRulesDefinition CC2_ALGORITHM =
       CryptoRulesDefinition.builder()
-          .withRule("CC1_UA")
+          .withRule("CC2")
           .withName("Unsecure Algorithm")
           .withDescription(
               """
@@ -92,6 +103,7 @@ public class CryptoRulesDefinitions {
               <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a></li>
               <ul>
               <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
+              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
               <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a></li>
               </ul>
               <li><a href="https://en.wikipedia.org/wiki/Length_extension_attack">Length extension attack</a></li>
@@ -99,9 +111,12 @@ public class CryptoRulesDefinitions {
               """)
           .build();
 
-  public static final CryptoRulesDefinition CC3_KL =
+  // public static final CryptoRulesDefinition CC3_MODE = null;
+  // public static final CryptoRulesDefinition CC4_PADDING = null;
+
+  public static final CryptoRulesDefinition CC5_KEY_LEN =
       CryptoRulesDefinition.builder()
-          .withRule("CC2_KL")
+          .withRule("CC3")
           .withName("Insufficient Key Length")
           .withDescription(
               """
@@ -141,6 +156,7 @@ public class CryptoRulesDefinitions {
               <ul>
               <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a></li>
               <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
+              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
               </ul>
               """)
           .build();

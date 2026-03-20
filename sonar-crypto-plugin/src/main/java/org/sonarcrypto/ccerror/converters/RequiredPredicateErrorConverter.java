@@ -15,7 +15,7 @@ public class RequiredPredicateErrorConverter {
     final var calleeInfo = CalleeInfo.of(contradictedPredicates.statement());
 
     return new SimpleViolation(
-        CryptoRulesDefinitions.CC1_OI,
+        CryptoRulesDefinitions.CC1_GENERAL,
         CallInfo.optOf(calleeInfo, contradictedPredicates.index()),
         "was cryptographically improper generated.");
   }

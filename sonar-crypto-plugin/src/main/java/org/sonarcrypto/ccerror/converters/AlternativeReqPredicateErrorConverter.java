@@ -17,7 +17,7 @@ public class AlternativeReqPredicateErrorConverter {
     final var calleeInfo = CalleeInfo.of(firstViolatedPredicate.map(RequiredPredicate::statement));
 
     return new SimpleViolation(
-        CryptoRulesDefinitions.CC1_OI,
+        CryptoRulesDefinitions.CC1_GENERAL,
         CallInfo.optOf(calleeInfo, firstViolatedPredicate.map(RequiredPredicate::index).orElse(-1)),
         "was cryptographically improper generated.");
   }
