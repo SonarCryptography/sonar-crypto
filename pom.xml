@@ -20,6 +20,8 @@
         <module>utils/maven</module>
         <module>utils/resource</module>
         <module>utils/test</module>
+        <module>utils/jimple-printer</module>
+        <module>utils/jimple-mapper</module>
     </modules>
 
     <properties>
@@ -47,7 +49,6 @@
                 <version>${sonar.plugin.api.version}</version>
                 <scope>provided</scope>
             </dependency>
-
             <!-- Runtime dependencies -->
             <dependency>
                 <groupId>de.fraunhofer.iem</groupId>

@@ -48,7 +48,6 @@ class JimpleConvertingViewTest {
 
     // Create the view
     JimpleConvertingView view = new JimpleConvertingView(inputLocation);
-
     // Get the JimpleTest class
     ClassType jimpleTestType = view.getIdentifierFactory().getClassType("JimpleTest");
 
