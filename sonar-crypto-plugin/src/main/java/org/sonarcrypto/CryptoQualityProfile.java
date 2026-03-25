@@ -20,6 +20,7 @@ public class CryptoQualityProfile implements BuiltInQualityProfilesDefinition {
     activateRule(profile, CryptoRulesDefinitions.CC1_GENERAL);
     activateRule(profile, CryptoRulesDefinitions.CC2_ALGORITHM);
     activateRule(profile, CryptoRulesDefinitions.CC5_KEY_LEN);
+    activateRule(profile, CryptoRulesDefinitions.CC6_FORBIDDEN_TYPE);
 
     profile.done();
   }

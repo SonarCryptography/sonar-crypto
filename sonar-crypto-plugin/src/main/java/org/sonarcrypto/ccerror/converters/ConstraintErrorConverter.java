@@ -1,5 +1,7 @@
 package org.sonarcrypto.ccerror.converters;
 
+import static org.sonarcrypto.utils.sonar.TextUtils.quote;
+
 import crypto.analysis.errors.ConstraintError;
 import crypto.constraints.ValueConstraint;
 import crypto.constraints.violations.ViolatedBinaryConstraint;
@@ -30,10 +32,8 @@ public class ConstraintErrorConverter {
     } else if (violatedConstraint instanceof ViolatedBinaryConstraint violatedBinaryConstraint) {
       return generateViolatedBinaryConstraintMessage(violatedBinaryConstraint);
     } else {
-      return new SimpleViolation(
-          CryptoRulesDefinitions.CC1_GENERAL,
-          Optional.empty(),
-          violatedConstraint.getSimplifiedMessage(0));
+      return SimpleViolation.general(
+          Optional.empty(), -1, violatedConstraint.getSimplifiedMessage(0));
     }
   }
 
@@ -54,10 +54,10 @@ public class ConstraintErrorConverter {
       ViolatedNeverTypeOfConstraint constraint) {
     final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
 
-    return new NeverTypeViolation(
-        /* TODO: Use correct rule definition */ CryptoRulesDefinitions.CC1_GENERAL,
+    return new SimpleViolation(
+        CryptoRulesDefinitions.CC6_FORBIDDEN_TYPE,
         CallInfo.optOf(calleeInfo, constraint.parameter().index()),
-        constraint.notAllowedType());
+        "should never be of the type " + quote(constraint.notAllowedType()) + ".");
   }
 
   static @Nullable Violation generateViolatedBinaryConstraintMessage(

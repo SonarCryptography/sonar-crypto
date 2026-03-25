@@ -17,7 +17,7 @@ public class CryptoRulesDefinitions {
               either because it is considered as too weak, like SHA1,
               or it is cryptographically broken, like MD5 or DES.</p>
               """)
-          .withStatus(RuleStatus.BETA)
+          .withStatus(RuleStatus.READY)
           .withSeverity(Severity.CRITICAL)
           .withAssessSection(
               """
@@ -60,7 +60,7 @@ public class CryptoRulesDefinitions {
               or it is cryptographically broken, like MD5 or DES.</p>
               """)
           .withKey("algorithm")
-          .withStatus(RuleStatus.BETA)
+          .withStatus(RuleStatus.READY)
           .withSeverity(Severity.CRITICAL)
           .withAssessSection(
               """
@@ -116,14 +116,14 @@ public class CryptoRulesDefinitions {
 
   public static final CryptoRulesDefinition CC5_KEY_LEN =
       CryptoRulesDefinition.builder()
-          .withRule("CC3")
+          .withRule("CC5")
           .withName("Insufficient Key Length")
           .withDescription(
               """
               <p>The key length specified is insufficient.</p>
               """)
           .withKey("key length")
-          .withStatus(RuleStatus.BETA)
+          .withStatus(RuleStatus.READY)
           .withSeverity(Severity.CRITICAL)
           .withAssessSection(
               """
@@ -156,6 +156,41 @@ public class CryptoRulesDefinitions {
               <ul>
               <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a></li>
               <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
+              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+              </ul>
+              """)
+          .build();
+
+  public static final CryptoRulesDefinition CC6_FORBIDDEN_TYPE =
+      CryptoRulesDefinition.builder()
+          .withRule("CC6")
+          .withName("Forbidden Type")
+          .withDescription(
+              """
+              <p>The used type is per se cryptograpically unsecure.</p>
+              """)
+          .withKey("key length")
+          .withStatus(RuleStatus.READY)
+          .withSeverity(Severity.CRITICAL)
+          .withAssessSection(
+              """
+              <p>Cryptographic issues are mostly a serious problem,
+              as they allow attackers to break the encryption,
+              e.g., to disclose the information or to sign data in your name.</p>
+
+              <h2>Forbidden Type</h2>
+              <p>This issue mostly means that a constant value,
+              such as a string literal,
+              is used instead of a cryptographically secure generated random value.</p>
+              """)
+          .withHowToFixSection(
+              """
+              <p>Use a cryptographically secure pseudo-random number generator (CSPRNG)
+              to generate the value.</p>
+              """)
+          .withResourcesSection(
+              """
+              <ul>
               <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
               </ul>
               """)

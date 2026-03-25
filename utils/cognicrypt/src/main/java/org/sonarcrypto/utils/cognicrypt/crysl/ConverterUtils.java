@@ -72,7 +72,7 @@ public class ConverterUtils {
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   public static String stringifyArgumentIndex(
       int zeroBasedArgumentIndex, Optional<Integer> parameterCount) {
-    return stringifyArgumentIndex(zeroBasedArgumentIndex, parameterCount.orElse(null));
+    return stringifyArgumentIndex(zeroBasedArgumentIndex, parameterCount.orElse(-1));
   }
 
   /**
@@ -100,10 +100,8 @@ public class ConverterUtils {
    * <p>See also {@link CrySLUtils#getIndexAsString} for parameters that also considers a negative
    * index as "return value".
    */
-  public static String stringifyArgumentIndex(
-      int zeroBasedArgumentIndex, @Nullable Integer parameterCount) {
-    if (zeroBasedArgumentIndex < 0 || parameterCount != null && parameterCount == 1)
-      return "argument";
+  public static String stringifyArgumentIndex(int zeroBasedArgumentIndex, int parameterCount) {
+    if (zeroBasedArgumentIndex < 0 || parameterCount == 1) return "argument";
 
     return switch (zeroBasedArgumentIndex) {
       case 0 -> "first argument";
