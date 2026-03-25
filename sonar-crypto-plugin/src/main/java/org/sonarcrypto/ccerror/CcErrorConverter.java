@@ -7,7 +7,6 @@ import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.RequiredPredicateError;
-import java.util.Optional;
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -18,6 +17,7 @@ import org.sonarcrypto.ccerror.converters.RequiredPredicateErrorConverter;
 import org.sonarcrypto.ccerror.violations.SimpleViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
+import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
 public class CcErrorConverter {
@@ -41,7 +41,7 @@ public class CcErrorConverter {
     } else if (error instanceof RequiredPredicateError err) {
       violation = RequiredPredicateErrorConverter.convert(err);
     } else {
-      violation = SimpleViolation.general(Optional.empty(), error.toErrorMarkerString());
+      violation = SimpleViolation.general(CallInfo.none(), error.toErrorMarkerString());
     }
 
     if (violation == null) return;

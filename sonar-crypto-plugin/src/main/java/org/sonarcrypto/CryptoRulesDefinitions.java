@@ -202,7 +202,7 @@ public class CryptoRulesDefinitions {
               e.g., to disclose the information or to sign data in your name.</p>
 
               <h2>Forbidden Type</h2>
-              <p>This issue mostly means that a constant value,
+              <p>This issue mostly indicates that a constant value,
               such as a string literal,
               is used instead of a cryptographically secure generated random value.</p>
               """)

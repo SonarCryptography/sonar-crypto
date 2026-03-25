@@ -1,12 +1,17 @@
 package org.sonarcrypto.ccerror.converters;
 
 import crysl.rule.CrySLObject;
+import crysl.rule.CrySLPredicate;
 import java.util.Locale;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.RuleKind;
 
 @NullMarked
 public class RuleKindUtils {
+
+  public static RuleKind detectRuleKind(CrySLPredicate pred) {
+    return detectRuleKind(pred.getPredName());
+  }
 
   public static RuleKind detectRuleKind(CrySLObject obj) {
     final var splitter = obj.getSplitter();
@@ -23,7 +28,11 @@ public class RuleKindUtils {
       }
     }
 
-    final var name = obj.getVarName().toLowerCase(Locale.ROOT);
+    return detectRuleKind(obj.getVarName());
+  }
+
+  public static RuleKind detectRuleKind(String value) {
+    final var name = value.toLowerCase(Locale.ROOT);
 
     if (name.contains("alg")) {
       return RuleKind.ALGORITHM;

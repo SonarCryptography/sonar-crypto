@@ -1,16 +1,15 @@
 package org.sonarcrypto.ccerror.violations;
 
-import java.util.Optional;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.CryptoRulesDefinitions;
+import org.sonarcrypto.RuleKind;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
-import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
 public record SimpleViolation(
-    CryptoRulesDefinition rulesDefinition, Optional<CallInfo> callInfo, String subMessage)
+    CryptoRulesDefinition rulesDefinition, @Nullable CallInfo callInfo, String subMessage)
     implements Violation {
 
   @Override
@@ -19,24 +18,28 @@ public record SimpleViolation(
     messageBuilder.append(subMessage);
   }
 
-  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-  public static SimpleViolation general(
-      Optional<CalleeInfo> calleeInfo, Optional<Integer> argumentIndex) {
-    return general(calleeInfo, argumentIndex.orElse(-1), null);
+  public static SimpleViolation general(CallInfo callInfo) {
+    return general(callInfo, null);
   }
 
-  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-  public static SimpleViolation general(
-      Optional<CalleeInfo> calleeInfo, @Nullable String subMessage) {
-    return general(calleeInfo, -1, subMessage);
+  public static SimpleViolation general(CallInfo callInfo, @Nullable String subMessage) {
+    return of(CryptoRulesDefinitions.GENERAL, callInfo, subMessage);
   }
 
-  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-  public static SimpleViolation general(
-      Optional<CalleeInfo> calleeInfo, int argumentIndex, @Nullable String subMessage) {
+  public static SimpleViolation of(RuleKind ruleKind, CallInfo callInfo) {
+    return of(ruleKind, callInfo, null);
+  }
+
+  public static SimpleViolation of(
+      RuleKind ruleKind, CallInfo callInfo, @Nullable String subMessage) {
+    return of(CryptoRulesDefinitions.fromRuleKind(ruleKind), callInfo, subMessage);
+  }
+
+  public static SimpleViolation of(
+      CryptoRulesDefinition rulesDefinition, CallInfo callInfo, @Nullable String subMessage) {
     return new SimpleViolation(
-        CryptoRulesDefinitions.GENERAL,
-        CallInfo.optOf(calleeInfo, argumentIndex),
+        rulesDefinition,
+        callInfo,
         subMessage != null ? subMessage : "was cryptographically improper generated.");
   }
 }

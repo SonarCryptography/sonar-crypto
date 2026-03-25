@@ -2,6 +2,7 @@ package org.sonarcrypto;
 
 import static org.sonarcrypto.cryptorules.CryptoRulesDefinition.LANGUAGE_KEY;
 
+import java.util.Arrays;
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
@@ -17,12 +18,9 @@ public class CryptoQualityProfile implements BuiltInQualityProfilesDefinition {
         context.createBuiltInQualityProfile(PROFILE_NAME, LANGUAGE_KEY);
     profile.setDefault(true);
 
-    activateRule(profile, CryptoRulesDefinitions.GENERAL);
-    activateRule(profile, CryptoRulesDefinitions.ALGORITHM);
-    activateRule(profile, CryptoRulesDefinitions.MODE);
-    activateRule(profile, CryptoRulesDefinitions.PADDING);
-    activateRule(profile, CryptoRulesDefinitions.KEY_LENGTH);
-    activateRule(profile, CryptoRulesDefinitions.FORBIDDEN_TYPE);
+    Arrays.stream(RuleKind.values())
+        .map(CryptoRulesDefinitions::fromRuleKind)
+        .forEach(it -> activateRule(profile, it));
 
     profile.done();
   }

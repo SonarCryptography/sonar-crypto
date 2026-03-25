@@ -9,7 +9,6 @@ import crypto.constraints.violations.ViolatedBinaryConstraint;
 import crypto.constraints.violations.ViolatedConstraint;
 import crypto.constraints.violations.ViolatedNeverTypeOfConstraint;
 import crypto.constraints.violations.ViolatedValueConstraint;
-import java.util.Optional;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.CryptoRulesDefinitions;
@@ -32,8 +31,7 @@ public class ConstraintErrorConverter {
     } else if (violatedConstraint instanceof ViolatedBinaryConstraint violatedBinaryConstraint) {
       return generateViolatedBinaryConstraintMessage(violatedBinaryConstraint);
     } else {
-      return SimpleViolation.general(
-          Optional.empty(), -1, violatedConstraint.getSimplifiedMessage(0));
+      return SimpleViolation.general(CallInfo.none(), violatedConstraint.getSimplifiedMessage(0));
     }
   }
 
@@ -44,7 +42,7 @@ public class ConstraintErrorConverter {
 
     return new ArgsViolation(
         detectRuleKind(valueConstraint.getConstraint().getVar()),
-        CallInfo.optOf(constraint.parameter()),
+        CallInfo.of(constraint.parameter()),
         new Args(
             violatingValues.stream().map(it -> it.getTransformedVal().getStringValue()).toList(),
             validValueRange));
@@ -54,7 +52,7 @@ public class ConstraintErrorConverter {
       ViolatedNeverTypeOfConstraint constraint) {
     return new SimpleViolation(
         CryptoRulesDefinitions.FORBIDDEN_TYPE,
-        CallInfo.optOf(constraint.parameter()),
+        CallInfo.of(constraint.parameter()),
         "should never be of the type " + quote(constraint.notAllowedType()) + ".");
   }
 
