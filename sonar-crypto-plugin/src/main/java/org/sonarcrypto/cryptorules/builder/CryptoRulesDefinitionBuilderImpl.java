@@ -3,6 +3,7 @@ package org.sonarcrypto.cryptorules.builder;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonar.api.rule.RuleStatus;
+import org.sonarcrypto.RuleKind;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 import org.sonarcrypto.cryptorules.Severity;
 
@@ -10,7 +11,7 @@ import org.sonarcrypto.cryptorules.Severity;
 @NullMarked
 public class CryptoRulesDefinitionBuilderImpl
     implements CryptoRulesDefinitionBuilder.WithKey,
-        CryptoRulesDefinitionBuilder.WithRule,
+        CryptoRulesDefinitionBuilder.WithRuleKind,
         CryptoRulesDefinitionBuilder.WithName,
         CryptoRulesDefinitionBuilder.WithDescription,
         CryptoRulesDefinitionBuilder.WithStatus,
@@ -21,7 +22,7 @@ public class CryptoRulesDefinitionBuilderImpl
         CryptoRulesDefinitionBuilder.Build {
   public CryptoRulesDefinitionBuilderImpl() {}
 
-  private String rule;
+  private RuleKind ruleKind;
   private String name;
   private String description;
   private String definitionKey;
@@ -32,8 +33,8 @@ public class CryptoRulesDefinitionBuilderImpl
   private @Nullable String resourceSection;
 
   @Override
-  public CryptoRulesDefinitionBuilder.WithName withRule(String rule) {
-    this.rule = rule;
+  public CryptoRulesDefinitionBuilder.WithName withRuleKind(RuleKind ruleKind) {
+    this.ruleKind = ruleKind;
     return this;
   }
 
@@ -88,7 +89,7 @@ public class CryptoRulesDefinitionBuilderImpl
   @Override
   public CryptoRulesDefinition build() {
     return new CryptoRulesDefinition(
-        this.rule,
+        this.ruleKind,
         this.name,
         this.description,
         this.definitionKey,

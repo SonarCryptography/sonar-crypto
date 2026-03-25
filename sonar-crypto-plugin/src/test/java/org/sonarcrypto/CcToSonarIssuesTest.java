@@ -124,7 +124,7 @@ class CcToSonarIssuesTest {
 
     Issue issue = sensorContext.allIssues().iterator().next();
     assertThat(issue.ruleKey())
-        .hasToString(CryptoRulesDefinitions.CC2_ALGORITHM.getRuleKey().toString());
+        .hasToString(CryptoRulesDefinitions.ALGORITHM.getRuleKey().toString());
     assertThat(issue.primaryLocation().inputComponent()).isEqualTo(inputFile);
     assertThat(issue.primaryLocation().message())
         .isEqualTo("Cryptographic API misuse: Test error message");

@@ -35,7 +35,7 @@ public record SimpleViolation(
   public static SimpleViolation general(
       Optional<CalleeInfo> calleeInfo, int argumentIndex, @Nullable String subMessage) {
     return new SimpleViolation(
-        CryptoRulesDefinitions.CC1_GENERAL,
+        CryptoRulesDefinitions.GENERAL,
         CallInfo.optOf(calleeInfo, argumentIndex),
         subMessage != null ? subMessage : "was cryptographically improper generated.");
   }

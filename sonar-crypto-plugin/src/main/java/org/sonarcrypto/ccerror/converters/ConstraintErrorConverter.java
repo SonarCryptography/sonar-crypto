@@ -43,7 +43,7 @@ public class ConstraintErrorConverter {
     final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
 
     return new ArgsViolation(
-        CryptoRulesDefinitions.CC2_ALGORITHM,
+        CryptoRulesDefinitions.ALGORITHM,
         CallInfo.optOf(calleeInfo, constraint.parameter().index()),
         new Args(
             violatingValues.stream().map(it -> it.getTransformedVal().getStringValue()).toList(),
@@ -55,7 +55,7 @@ public class ConstraintErrorConverter {
     final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
 
     return new SimpleViolation(
-        CryptoRulesDefinitions.CC6_FORBIDDEN_TYPE,
+        CryptoRulesDefinitions.FORBIDDEN_TYPE,
         CallInfo.optOf(calleeInfo, constraint.parameter().index()),
         "should never be of the type " + quote(constraint.notAllowedType()) + ".");
   }

@@ -3,15 +3,16 @@ package org.sonarcrypto.cryptorules.builder;
 import org.intellij.lang.annotations.Language;
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.rule.RuleStatus;
+import org.sonarcrypto.RuleKind;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 import org.sonarcrypto.cryptorules.Severity;
 
 @NullMarked
 public interface CryptoRulesDefinitionBuilder {
 
-  interface WithRule {
-    /** Sets the rule (key). */
-    WithName withRule(String rule);
+  interface WithRuleKind {
+    /** Sets the rule kind. */
+    WithName withRuleKind(RuleKind ruleKind);
   }
 
   interface WithName {

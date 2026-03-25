@@ -7,9 +7,9 @@ import org.sonarcrypto.cryptorules.Severity;
 
 @NullMarked
 public class CryptoRulesDefinitions {
-  public static final CryptoRulesDefinition CC1_GENERAL =
+  public static final CryptoRulesDefinition GENERAL =
       CryptoRulesDefinition.builder()
-          .withRule("CC1")
+          .withRuleKind(RuleKind.GENERAL)
           .withName("General")
           .withDescription(
               """
@@ -49,9 +49,9 @@ public class CryptoRulesDefinitions {
               """)
           .build();
 
-  public static final CryptoRulesDefinition CC2_ALGORITHM =
+  public static final CryptoRulesDefinition ALGORITHM =
       CryptoRulesDefinition.builder()
-          .withRule("CC2")
+          .withRuleKind(RuleKind.ALGORITHM)
           .withName("Unsecure Algorithm")
           .withDescription(
               """
@@ -111,12 +111,12 @@ public class CryptoRulesDefinitions {
               """)
           .build();
 
-  // public static final CryptoRulesDefinition CC3_MODE = null;
-  // public static final CryptoRulesDefinition CC4_PADDING = null;
+  // public static final CryptoRulesDefinition MODE = null;
+  // public static final CryptoRulesDefinition PADDING = null;
 
-  public static final CryptoRulesDefinition CC5_KEY_LEN =
+  public static final CryptoRulesDefinition KEY_LENGTH =
       CryptoRulesDefinition.builder()
-          .withRule("CC5")
+          .withRuleKind(RuleKind.KEY_LENGTH)
           .withName("Insufficient Key Length")
           .withDescription(
               """
@@ -161,9 +161,9 @@ public class CryptoRulesDefinitions {
               """)
           .build();
 
-  public static final CryptoRulesDefinition CC6_FORBIDDEN_TYPE =
+  public static final CryptoRulesDefinition FORBIDDEN_TYPE =
       CryptoRulesDefinition.builder()
-          .withRule("CC6")
+          .withRuleKind(RuleKind.FORBIDDEN_TYPE)
           .withName("Forbidden Type")
           .withDescription(
               """
@@ -195,4 +195,15 @@ public class CryptoRulesDefinitions {
               </ul>
               """)
           .build();
+
+  public static CryptoRulesDefinition fromRuleKind(RuleKind ruleKind) {
+    return switch (ruleKind) {
+      case GENERAL -> CryptoRulesDefinitions.GENERAL;
+      case ALGORITHM -> CryptoRulesDefinitions.ALGORITHM;
+      // case MODE -> CryptoRulesDefinitions.MODE;
+      // case PADDING -> CryptoRulesDefinitions.PADDING;
+      case KEY_LENGTH -> CryptoRulesDefinitions.KEY_LENGTH;
+      case FORBIDDEN_TYPE -> CryptoRulesDefinitions.FORBIDDEN_TYPE;
+    };
+  }
 }
