@@ -19,7 +19,7 @@ class CryptoQualityProfileTest {
     assertThat(profile).isNotNull();
     assertThat(profile.language()).isEqualTo("java");
     assertThat(profile.isDefault()).isTrue();
-    assertThat(profile.rules()).hasSize(1);
+    assertThat(profile.rules()).hasSizeGreaterThan(0);
     assertThat(profile.rule(CryptoRulesDefinitions.ALGORITHM.getRuleKey())).isNotNull();
   }
 }

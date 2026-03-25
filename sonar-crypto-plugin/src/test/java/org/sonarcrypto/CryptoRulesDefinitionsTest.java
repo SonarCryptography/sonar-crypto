@@ -21,10 +21,13 @@ class CryptoRulesDefinitionsTest {
     assertThat(repository.name()).isEqualTo("Cryptography Analysis");
     assertThat(repository.rules()).hasSize(1);
 
-    RulesDefinition.Rule rule = context.repository("crypto-java").rule("CC1");
+    RulesDefinition.Rule rule =
+        context
+            .repository("crypto-java")
+            .rule(CryptoRulesDefinitions.ALGORITHM.getRuleKey().rule());
     assertThat(rule).isNotNull();
-    assertThat(rule.name()).isEqualTo("Cryptographic API Misuse");
-    assertThat(rule.status()).isEqualTo(RuleStatus.BETA);
+    assertThat(rule.name()).isEqualTo("Unsecure Algorithm");
+    assertThat(rule.status()).isEqualTo(RuleStatus.READY);
     assertThat(rule.severity()).isEqualTo(Severity.CRITICAL);
     assertThat(rule.type()).isEqualTo(RuleType.VULNERABILITY);
     assertThat(rule.htmlDescription()).isNotEmpty();
