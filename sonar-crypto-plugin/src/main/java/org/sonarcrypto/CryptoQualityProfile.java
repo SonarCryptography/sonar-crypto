@@ -19,6 +19,8 @@ public class CryptoQualityProfile implements BuiltInQualityProfilesDefinition {
 
     activateRule(profile, CryptoRulesDefinitions.GENERAL);
     activateRule(profile, CryptoRulesDefinitions.ALGORITHM);
+    activateRule(profile, CryptoRulesDefinitions.MODE);
+    activateRule(profile, CryptoRulesDefinitions.PADDING);
     activateRule(profile, CryptoRulesDefinitions.KEY_LENGTH);
     activateRule(profile, CryptoRulesDefinitions.FORBIDDEN_TYPE);
 

@@ -10,6 +10,8 @@ public class CryptoPlugin implements Plugin {
   public void define(Context context) {
     context.addExtension(CryptoRulesDefinitions.GENERAL);
     context.addExtension(CryptoRulesDefinitions.ALGORITHM);
+    context.addExtension(CryptoRulesDefinitions.MODE);
+    context.addExtension(CryptoRulesDefinitions.PADDING);
     context.addExtension(CryptoRulesDefinitions.KEY_LENGTH);
     context.addExtension(CryptoRulesDefinitions.FORBIDDEN_TYPE);
     context.addExtension(CryptoQualityProfile.class);

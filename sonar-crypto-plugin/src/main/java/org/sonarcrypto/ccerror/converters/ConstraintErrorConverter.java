@@ -1,5 +1,6 @@
 package org.sonarcrypto.ccerror.converters;
 
+import static org.sonarcrypto.ccerror.converters.RuleKindUtils.detectRuleKind;
 import static org.sonarcrypto.utils.sonar.TextUtils.quote;
 
 import crypto.analysis.errors.ConstraintError;
@@ -13,7 +14,6 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.violations.*;
-import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
 import org.sonarcrypto.utils.cognicrypt.crysl.Args;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
@@ -39,12 +39,12 @@ public class ConstraintErrorConverter {
 
   static Violation generateViolatedValueConstraintMessage(ViolatedValueConstraint constraint) {
     final var violatingValues = constraint.violatingValues();
-    final var validValueRange = constraint.constraint().getConstraint().getValueRange();
-    final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
+    final var valueConstraint = constraint.constraint();
+    final var validValueRange = valueConstraint.getConstraint().getValueRange();
 
     return new ArgsViolation(
-        CryptoRulesDefinitions.ALGORITHM,
-        CallInfo.optOf(calleeInfo, constraint.parameter().index()),
+        detectRuleKind(valueConstraint.getConstraint().getVar()),
+        CallInfo.optOf(constraint.parameter()),
         new Args(
             violatingValues.stream().map(it -> it.getTransformedVal().getStringValue()).toList(),
             validValueRange));
@@ -52,11 +52,9 @@ public class ConstraintErrorConverter {
 
   static Violation generateViolatedNeverTypeOfConstraintMessage(
       ViolatedNeverTypeOfConstraint constraint) {
-    final var calleeInfo = CalleeInfo.of(constraint.parameter().statement());
-
     return new SimpleViolation(
         CryptoRulesDefinitions.FORBIDDEN_TYPE,
-        CallInfo.optOf(calleeInfo, constraint.parameter().index()),
+        CallInfo.optOf(constraint.parameter()),
         "should never be of the type " + quote(constraint.notAllowedType()) + ".");
   }
 

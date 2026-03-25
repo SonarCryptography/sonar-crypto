@@ -2,6 +2,7 @@ package org.sonarcrypto.utils.cognicrypt.crysl;
 
 import static org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils.*;
 
+import crypto.extractparameter.ParameterWithExtractedValues;
 import java.util.Optional;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -21,6 +22,14 @@ public record CallInfo(Optional<CalleeInfo> calleeInfo, int argumentIndex) {
             key != null ? key : "value",
             stringifyArgumentIndex(argumentIndex, calleeInfo.map(CalleeInfo::argumentCount)),
             stringifyCallee(calleeInfo)));
+  }
+
+  public static Optional<CallInfo> optOf(ParameterWithExtractedValues param) {
+    return Optional.of(of(param));
+  }
+
+  public static CallInfo of(ParameterWithExtractedValues param) {
+    return of(CalleeInfo.of(param.statement()), param.index());
   }
 
   public static Optional<CallInfo> optOf(@Nullable CalleeInfo calleeInfo, int argumentIndex) {

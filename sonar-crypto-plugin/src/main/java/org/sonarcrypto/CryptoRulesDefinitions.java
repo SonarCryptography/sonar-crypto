@@ -111,8 +111,31 @@ public class CryptoRulesDefinitions {
               """)
           .build();
 
-  // public static final CryptoRulesDefinition MODE = null;
-  // public static final CryptoRulesDefinition PADDING = null;
+  public static final CryptoRulesDefinition MODE =
+      CryptoRulesDefinition.builder()
+          .withRuleKind(RuleKind.MODE)
+          .withName("Algorithm Mode")
+          .withDescription(
+              """
+               <p>Wong or unsecure mode used.</p>
+               """)
+          .withKey("mode")
+          .withStatus(RuleStatus.READY)
+          .withSeverity(Severity.CRITICAL)
+          .build();
+
+  public static final CryptoRulesDefinition PADDING =
+      CryptoRulesDefinition.builder()
+          .withRuleKind(RuleKind.PADDING)
+          .withName("Algorithm Padding")
+          .withDescription(
+              """
+               <p>Wong or unsecure padding used.</p>
+               """)
+          .withKey("padding")
+          .withStatus(RuleStatus.READY)
+          .withSeverity(Severity.CRITICAL)
+          .build();
 
   public static final CryptoRulesDefinition KEY_LENGTH =
       CryptoRulesDefinition.builder()
@@ -200,8 +223,8 @@ public class CryptoRulesDefinitions {
     return switch (ruleKind) {
       case GENERAL -> CryptoRulesDefinitions.GENERAL;
       case ALGORITHM -> CryptoRulesDefinitions.ALGORITHM;
-      // case MODE -> CryptoRulesDefinitions.MODE;
-      // case PADDING -> CryptoRulesDefinitions.PADDING;
+      case MODE -> CryptoRulesDefinitions.MODE;
+      case PADDING -> CryptoRulesDefinitions.PADDING;
       case KEY_LENGTH -> CryptoRulesDefinitions.KEY_LENGTH;
       case FORBIDDEN_TYPE -> CryptoRulesDefinitions.FORBIDDEN_TYPE;
     };
