@@ -57,6 +57,7 @@ bld/
 .sonar/
 .sonarqube/
 .scannerwork/
+e2e/src/test/resources/SonarPrivatePlugins/*.jar
 
 # MSTest test results
 [Tt]est[Rr]esult*/
