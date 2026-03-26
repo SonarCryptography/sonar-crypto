@@ -15,6 +15,9 @@ public class CryptoQualityProfile implements BuiltInQualityProfilesDefinition {
         context.createBuiltInQualityProfile(PROFILE_NAME, LANGUAGE_KEY);
     profile.setDefault(true);
 
+    // Activate arbitrary javasecurity rule to trigger the sonar-security-java-frontend-plugin.
+    profile.activateRule("javasecurity", "S3649");
+
     profile.activateRule(CryptoRulesDefinition.REPOSITORY_KEY, CryptoRulesDefinition.CC_RULE_NAME);
 
     profile.done();

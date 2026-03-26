@@ -16,17 +16,38 @@ import org.sonarcrypto.e2e.utility.FileUtilities;
 class OrchestratorTests {
   private static final String SONAR_MAVEN_PLUGIN_VERSION = "5.5.0.6356";
 
+  public static final File SONAR_SECURITY_JAVA_FRONTEND =
+      FileUtilities.findFile(
+          "src/test/resources/SonarPrivatePlugins", "sonar-security-java-frontend-plugin", ".jar");
+  public static final File SONAR_SECURITY_UCFG_BRIDGE =
+      FileUtilities.findFile(
+          "src/test/resources/SonarPrivatePlugins", "sonar-security-ucfg-bridge", ".jar");
+
   @RegisterExtension
   private static final OrchestratorExtension ORCHESTRATOR =
-      OrchestratorExtension.builderEnv()
-          .setZipFile(FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip"))
-          .useDefaultAdminCredentialsForBuilds(true)
-          .addPlugin(MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.22.0.41895"))
-          .addPlugin(
-              FileLocation.of(
-                  FileUtilities.findFile(
-                      "../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar")))
-          .build();
+      SONAR_SECURITY_JAVA_FRONTEND.exists() && SONAR_SECURITY_UCFG_BRIDGE.exists()
+          ? OrchestratorExtension.builderEnv()
+              .setZipFile(FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip"))
+              .useDefaultAdminCredentialsForBuilds(true)
+              .addPlugin(
+                  MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.22.0.41895"))
+              .addPlugin(FileLocation.of(SONAR_SECURITY_JAVA_FRONTEND))
+              .addPlugin(FileLocation.of(SONAR_SECURITY_UCFG_BRIDGE))
+              .addPlugin(
+                  FileLocation.of(
+                      FileUtilities.findFile(
+                          "../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar")))
+              .build()
+          : OrchestratorExtension.builderEnv()
+              .setZipFile(FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip"))
+              .useDefaultAdminCredentialsForBuilds(true)
+              .addPlugin(
+                  MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.22.0.41895"))
+              .addPlugin(
+                  FileLocation.of(
+                      FileUtilities.findFile(
+                          "../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar")))
+              .build();
 
   @TempDir File tempDir;
 
