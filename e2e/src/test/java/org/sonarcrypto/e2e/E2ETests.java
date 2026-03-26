@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sonar.orchestrator.build.BuildResult;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -15,14 +16,18 @@ class E2ETests extends OrchestratorTests {
     BuildResult result = executeMavenBuild(new File(JAVA_MAVEN_BASIC_PATH), "java-maven-basic");
 
     String log = result.getLogs();
-    List<Integer> logIndices =
-        List.of(
-            log.indexOf("Sensor JavaModuleSecuritySensor [securityjavafrontend]"),
-            log.indexOf("Sensor UCFG Bridge [ucfgbridge]"),
-            log.indexOf("UCFG Bridge [jimple]: 26 UCFGs read from"),
-            log.indexOf("Sensor CogniCryptSensor [crypto]"),
-            log.indexOf("Using Jimple files from bridge output"),
-            log.indexOf("Found 3 cryptographic errors"));
+    List<Integer> logIndices = new ArrayList<>();
+    if (areSonarPrivatePluginsAvailable()) {
+      logIndices.add(log.indexOf("Sensor JavaModuleSecuritySensor [securityjavafrontend]"));
+      logIndices.add(log.indexOf("Sensor UCFG Bridge [ucfgbridge]"));
+      logIndices.add(log.indexOf("UCFG Bridge [jimple]: 26 UCFGs read from"));
+      logIndices.add(log.indexOf("Sensor CogniCryptSensor [crypto]"));
+      logIndices.add(log.indexOf("Using Jimple files from bridge output"));
+    } else {
+      logIndices.add(log.indexOf("Sensor CogniCryptSensor [crypto]"));
+      logIndices.add(log.indexOf("No Jimple files found at"));
+    }
+    logIndices.add(log.indexOf("Found 3 cryptographic errors"));
 
     for (int i = 0; i < logIndices.size() - 1; i++) {
       assertThat(logIndices.get(i)).isLessThan(logIndices.get(i + 1));

@@ -1,5 +1,8 @@
 package org.sonarcrypto.e2e;
 
+import static org.sonarcrypto.utility.FileUtilities.SONAR_SECURITY_JAVA_FRONTEND;
+import static org.sonarcrypto.utility.FileUtilities.SONAR_SECURITY_UCFG_BRIDGE;
+
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.MavenBuild;
 import com.sonar.orchestrator.junit5.OrchestratorExtension;
@@ -11,28 +14,22 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
-import org.sonarcrypto.e2e.utility.FileUtilities;
+import org.sonarcrypto.utility.FileUtilities;
 
 class OrchestratorTests {
   private static final String SONAR_MAVEN_PLUGIN_VERSION = "5.5.0.6356";
-
-  public static final File SONAR_SECURITY_JAVA_FRONTEND =
-      FileUtilities.findFile(
-          "src/test/resources/SonarPrivatePlugins", "sonar-security-java-frontend-plugin", ".jar");
-  public static final File SONAR_SECURITY_UCFG_BRIDGE =
-      FileUtilities.findFile(
-          "src/test/resources/SonarPrivatePlugins", "sonar-security-ucfg-bridge", ".jar");
+  private static final String SONAR_PRIVATE_PLUGINS_DIR = "src/test/resources/SonarPrivatePlugins";
 
   @RegisterExtension
   private static final OrchestratorExtension ORCHESTRATOR =
-      SONAR_SECURITY_JAVA_FRONTEND.exists() && SONAR_SECURITY_UCFG_BRIDGE.exists()
+      areSonarPrivatePluginsAvailable()
           ? OrchestratorExtension.builderEnv()
               .setZipFile(FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip"))
               .useDefaultAdminCredentialsForBuilds(true)
               .addPlugin(
                   MavenLocation.of("org.sonarsource.java", "sonar-java-plugin", "8.22.0.41895"))
-              .addPlugin(FileLocation.of(SONAR_SECURITY_JAVA_FRONTEND))
-              .addPlugin(FileLocation.of(SONAR_SECURITY_UCFG_BRIDGE))
+              .addPlugin(FileLocation.of(getSonarPrivatePlugin(SONAR_SECURITY_JAVA_FRONTEND)))
+              .addPlugin(FileLocation.of(getSonarPrivatePlugin(SONAR_SECURITY_UCFG_BRIDGE)))
               .addPlugin(
                   FileLocation.of(
                       FileUtilities.findFile(
@@ -89,5 +86,13 @@ class OrchestratorTests {
     }
 
     return ORCHESTRATOR.executeBuild(build);
+  }
+
+  static boolean areSonarPrivatePluginsAvailable() {
+    return FileUtilities.areSonarPrivatePluginsAvailable(SONAR_PRIVATE_PLUGINS_DIR);
+  }
+
+  private static File getSonarPrivatePlugin(String pluginName) {
+    return FileUtilities.findFile(SONAR_PRIVATE_PLUGINS_DIR, pluginName, ".jar");
   }
 }

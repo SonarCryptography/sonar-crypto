@@ -1,4 +1,4 @@
-package org.sonarcrypto.e2e.utility;
+package org.sonarcrypto.utility;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,19 +14,21 @@ class FileUtilitiesTests {
   @Test
   void find_sonar_crypto_jar() {
     File file =
-        FileUtilities.findFile("../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar");
+        org.sonarcrypto.utility.FileUtilities.findFile(
+            "../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar");
     assertThat(file).isNotNull();
   }
 
   @Test
   void find_sq_for_orchestrator() {
-    File file = FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip");
+    File file =
+        org.sonarcrypto.utility.FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip");
     assertThat(file).isNotNull();
   }
 
   @Test
   void find_non_existent_fails() {
-    File file = FileUtilities.findFile("target", "non", ".existent");
+    File file = org.sonarcrypto.utility.FileUtilities.findFile("target", "non", ".existent");
     assertThat(logTester.logs(Level.ERROR))
         .containsExactly("Error while searching for file: non*.existent");
     assertThat(file).isNull();
