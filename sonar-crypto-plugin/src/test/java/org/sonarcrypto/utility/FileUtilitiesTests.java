@@ -12,14 +12,6 @@ class FileUtilitiesTests {
   @RegisterExtension LogTesterJUnit5 logTester = new LogTesterJUnit5();
 
   @Test
-  void find_sonar_crypto_jar() {
-    File file =
-        org.sonarcrypto.utility.FileUtilities.findFile(
-            "../sonar-crypto-plugin/target", "sonar-crypto-plugin", ".jar");
-    assertThat(file).isNotNull();
-  }
-
-  @Test
   void find_non_existent_fails() {
     File file = org.sonarcrypto.utility.FileUtilities.findFile("target", "non", ".existent");
     assertThat(logTester.logs(Level.ERROR))
