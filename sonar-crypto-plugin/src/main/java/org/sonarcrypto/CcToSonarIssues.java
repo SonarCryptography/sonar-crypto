@@ -6,6 +6,7 @@ import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
+import java.util.ArrayList;
 import java.util.Set;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
@@ -45,10 +46,33 @@ public class CcToSonarIssues {
         continue;
       }
 
+      final var errorConverter = new CcErrorConverter(context);
+      final var overriddenErrors = new ArrayList<AbstractError>(errors.size());
+      var atLeastOneErrorConverted = false;
+
       // Report each error in this class/method
       for (AbstractError error : errors) {
-        new CcErrorConverter(context).convertError(inputFile, method, error);
-        // reportIssue(context, inputFile, lineNumber, errorMessage);
+        // Subsequent errors are preceding errors
+        if (error.getSubsequentErrors().isEmpty()) {
+          // Ignore preceding errors
+          overriddenErrors.add(error);
+          continue;
+        }
+
+        if (errorConverter.convertError(inputFile, method, error)) {
+          atLeastOneErrorConverted = true;
+          continue;
+        }
+
+        overriddenErrors.add(error);
+      }
+
+      if (!atLeastOneErrorConverted) {
+        // Report overridden errors if no other error was reported,
+        // just in case that we do not miss errors.
+        for (final var error : overriddenErrors) {
+          errorConverter.convertError(inputFile, method, error);
+        }
       }
     }
   }

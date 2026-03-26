@@ -4,16 +4,16 @@ import static org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils.selectLocati
 
 import boomerang.scope.Method;
 import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.AlternativeReqPredicateError;
+import crypto.analysis.errors.AbstractRequiredPredicateError;
 import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.RequiredPredicateError;
 import org.jspecify.annotations.NullMarked;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
-import org.sonarcrypto.ccerror.converters.AlternativeReqPredicateErrorConverter;
-import org.sonarcrypto.ccerror.converters.ConstraintErrorConverter;
-import org.sonarcrypto.ccerror.converters.RequiredPredicateErrorConverter;
+import org.sonarcrypto.ccerror.converters.constrainterror.ConstraintErrorConverter;
+import org.sonarcrypto.ccerror.converters.constrainterror.RequiredPredicateErrorConverter;
 import org.sonarcrypto.ccerror.violations.SimpleViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
@@ -21,6 +21,8 @@ import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
 public class CcErrorConverter {
+  private static final Logger LOGGER = LoggerFactory.getLogger(CcErrorConverter.class);
+
   private final SensorContext context;
 
   public CcErrorConverter(SensorContext context) {
@@ -31,20 +33,18 @@ public class CcErrorConverter {
     return this.context;
   }
 
-  public void convertError(InputFile inputFile, Method method, AbstractError error) {
-    final Violation violation;
+  public boolean convertError(InputFile inputFile, Method method, AbstractError error) {
+    Violation violation = null;
 
-    if (error instanceof AlternativeReqPredicateError err) {
-      violation = AlternativeReqPredicateErrorConverter.convert(err);
+    if (error instanceof AbstractRequiredPredicateError err) {
+      violation = RequiredPredicateErrorConverter.convert(err);
     } else if (error instanceof ConstraintError err) {
       violation = ConstraintErrorConverter.convert(err);
-    } else if (error instanceof RequiredPredicateError err) {
-      violation = RequiredPredicateErrorConverter.convert(err);
-    } else {
-      violation = SimpleViolation.general(CallInfo.none(), error.toErrorMarkerString());
     }
 
-    if (violation == null) return;
+    if (violation == null) {
+      violation = SimpleViolation.general(CallInfo.none(), error.toErrorMarkerString());
+    }
 
     final var issue = this.getContext().newIssue();
     final var location = issue.newLocation().on(inputFile);
@@ -64,14 +64,14 @@ public class CcErrorConverter {
     }
 
     violation.createMessage(messageBuilder);
-    location.message(messageBuilder.toString());
+    final var message = messageBuilder.toString();
+    location.message(message);
 
-    // System.out.println(error.toErrorMarkerString());
-    // System.out.println();
-    // System.out.println(messageBuilder);
-    // System.out.println();
+    LOGGER.info("{}: {}", violation.rulesDefinition().getRuleKind(), message);
 
     issue.at(location);
     issue.save();
+
+    return true;
   }
 }
