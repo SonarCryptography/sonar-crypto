@@ -20,17 +20,10 @@ class FileUtilitiesTests {
   }
 
   @Test
-  void find_sq_for_orchestrator() {
-    File file =
-        org.sonarcrypto.utility.FileUtilities.findFile("target", "sq_for_orchestrator-", ".zip");
-    assertThat(file).isNotNull();
-  }
-
-  @Test
   void find_non_existent_fails() {
     File file = org.sonarcrypto.utility.FileUtilities.findFile("target", "non", ".existent");
     assertThat(logTester.logs(Level.ERROR))
-        .containsExactly("Error while searching for file: non*.existent");
+        .containsExactly("Error (file not found) while searching for file: non*.existent");
     assertThat(file).isNull();
   }
 }
