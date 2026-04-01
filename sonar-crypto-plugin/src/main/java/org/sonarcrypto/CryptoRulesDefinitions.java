@@ -219,6 +219,102 @@ public class CryptoRulesDefinitions {
               """)
           .build();
 
+  public static final CryptoRulesDefinition FORBIDDEN_METHOD =
+      CryptoRulesDefinition.builder()
+          .withRuleKind(RuleKind.FORBIDDEN_METHOD)
+          .withName("Forbidden Method")
+          .withDescription(
+              """
+              <p>The used type is per se cryptograpically unsecure.</p>
+              """)
+          .withKey("method")
+          .withStatus(RuleStatus.READY)
+          .withSeverity(Severity.CRITICAL)
+          .withAssessSection(
+              """
+              <p>Cryptographic issues are mostly a serious problem,
+              as they allow attackers to break the encryption,
+              e.g., to disclose the information or to sign data in your name.</p>
+
+              <h2>Forbidden Method</h2>
+              <p>...</p>
+              """)
+          .withHowToFixSection(
+              """
+              <p>...</p>
+              """)
+          .withResourcesSection(
+              """
+              <ul>
+              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+              </ul>
+              """)
+          .build();
+
+  public static final CryptoRulesDefinition UNCAUGHT_EXCEPTION =
+      CryptoRulesDefinition.builder()
+          .withRuleKind(RuleKind.UNCAUGHT_EXCEPTION)
+          .withName("Uncaught exception")
+          .withDescription(
+              """
+              <p>The used type is per se cryptograpically unsecure.</p>
+              """)
+          .withKey("exception")
+          .withStatus(RuleStatus.READY)
+          .withSeverity(Severity.CRITICAL)
+          .withAssessSection(
+              """
+              <p>Cryptographic issues are mostly a serious problem,
+              as they allow attackers to break the encryption,
+              e.g., to disclose the information or to sign data in your name.</p>
+
+              <h2>Uncaught Exception</h2>
+              <p>...</p>
+              """)
+          .withHowToFixSection(
+              """
+              <p>...</p>
+              """)
+          .withResourcesSection(
+              """
+              <ul>
+              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+              </ul>
+              """)
+          .build();
+
+  public static final CryptoRulesDefinition API_MISUSE =
+      CryptoRulesDefinition.builder()
+          .withRuleKind(RuleKind.API_MISUSE)
+          .withName("API Misuse")
+          .withDescription(
+              """
+              <p>The used type is per se cryptograpically unsecure.</p>
+              """)
+          .withKey("method")
+          .withStatus(RuleStatus.READY)
+          .withSeverity(Severity.CRITICAL)
+          .withAssessSection(
+              """
+              <p>Cryptographic issues are mostly a serious problem,
+              as they allow attackers to break the encryption,
+              e.g., to disclose the information or to sign data in your name.</p>
+
+              <h2>Uncaught Exception</h2>
+              <p>...</p>
+              """)
+          .withHowToFixSection(
+              """
+              <p>...</p>
+              """)
+          .withResourcesSection(
+              """
+              <ul>
+              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+              </ul>
+              """)
+          .build();
+
   public static CryptoRulesDefinition fromRuleKind(RuleKind ruleKind) {
     return switch (ruleKind) {
       case GENERAL -> CryptoRulesDefinitions.GENERAL;
@@ -227,6 +323,9 @@ public class CryptoRulesDefinitions {
       case PADDING -> CryptoRulesDefinitions.PADDING;
       case KEY_LENGTH -> CryptoRulesDefinitions.KEY_LENGTH;
       case FORBIDDEN_TYPE -> CryptoRulesDefinitions.FORBIDDEN_TYPE;
+      case FORBIDDEN_METHOD -> CryptoRulesDefinitions.FORBIDDEN_METHOD;
+      case UNCAUGHT_EXCEPTION -> CryptoRulesDefinitions.UNCAUGHT_EXCEPTION;
+      case API_MISUSE -> CryptoRulesDefinitions.API_MISUSE;
     };
   }
 }

@@ -3,17 +3,19 @@ package org.sonarcrypto.ccerror;
 import static org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils.selectLocation;
 
 import boomerang.scope.Method;
-import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.AbstractRequiredPredicateError;
-import crypto.analysis.errors.ConstraintError;
+import crypto.analysis.errors.*;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
+import org.sonarcrypto.ccerror.converters.ForbiddenMethodErrorConverter;
+import org.sonarcrypto.ccerror.converters.UncaughtExceptionErrorConverter;
 import org.sonarcrypto.ccerror.converters.constrainterror.ConstraintErrorConverter;
 import org.sonarcrypto.ccerror.converters.constrainterror.RequiredPredicateErrorConverter;
+import org.sonarcrypto.ccerror.converters.ordererror.IncompleteOperationErrorConverter;
+import org.sonarcrypto.ccerror.converters.ordererror.TypestateErrorConverter;
 import org.sonarcrypto.ccerror.violations.SimpleViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
@@ -40,7 +42,19 @@ public class CcErrorConverter {
       violation = RequiredPredicateErrorConverter.convert(err);
     } else if (error instanceof ConstraintError err) {
       violation = ConstraintErrorConverter.convert(err);
+    } else if (error instanceof ForbiddenMethodError err) {
+      violation = ForbiddenMethodErrorConverter.convert(err);
+    } else if (error instanceof UncaughtExceptionError err) {
+      violation = UncaughtExceptionErrorConverter.convert(err);
+    } else if (error instanceof TypestateError err) {
+      violation = TypestateErrorConverter.convert(err);
+    } else if (error instanceof IncompleteOperationError err) {
+      violation = IncompleteOperationErrorConverter.convert(err);
     }
+
+    // TODO: Implement remaining converters.
+    // * ImpreciseValueExtractionError
+    // * PredicateContradictionError
 
     if (violation == null) {
       violation = SimpleViolation.general(CallInfo.none(), error.toErrorMarkerString());

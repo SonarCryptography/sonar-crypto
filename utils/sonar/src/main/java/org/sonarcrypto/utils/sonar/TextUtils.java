@@ -1,10 +1,13 @@
 package org.sonarcrypto.utils.sonar;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.apache.commons.text.StringEscapeUtils;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+@NullMarked
 public class TextUtils {
 
   /** Joins items of an iterable to a comma separated string, e.g. {@code "Foo, Bar, and Baz"}. */
@@ -74,5 +77,45 @@ public class TextUtils {
    */
   public static String quote(String value) {
     return "\"" + StringEscapeUtils.escapeJava(value) + "\"";
+  }
+
+  public static Code code(String value) {
+    return new Code(
+        "`" + StringEscapeUtils.escapeJava(value).replace("\\", "").replace("`", "``") + "`");
+  }
+
+  // We need a class, because records can only have public constructors
+  public static final class Code {
+    private final String code;
+
+    Code(String code) {
+      this.code = code;
+    }
+
+    @Override
+    public String toString() {
+      return code;
+    }
+
+    public String code() {
+      return code;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || obj.getClass() != this.getClass()) {
+        return false;
+      }
+      var that = (Code) obj;
+      return Objects.equals(this.code, that.code);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(code);
+    }
   }
 }
