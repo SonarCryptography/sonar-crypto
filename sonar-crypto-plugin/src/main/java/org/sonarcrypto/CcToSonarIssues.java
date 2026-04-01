@@ -52,8 +52,7 @@ public class CcToSonarIssues {
 
       // Report each error in this class/method
       for (AbstractError error : errors) {
-        // Subsequent errors are preceding errors
-        if (error.getSubsequentErrors().isEmpty()) {
+        if (!error.getPrecedingErrors().isEmpty()) {
           // Ignore preceding errors
           overriddenErrors.add(error);
           continue;

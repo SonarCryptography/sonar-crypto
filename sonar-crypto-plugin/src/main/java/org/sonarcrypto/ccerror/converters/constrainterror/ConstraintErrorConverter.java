@@ -1,5 +1,6 @@
 package org.sonarcrypto.ccerror.converters.constrainterror;
 
+import static java.lang.Math.min;
 import static org.sonarcrypto.ccerror.converters.RuleKindUtils.detectRuleKind;
 import static org.sonarcrypto.utils.sonar.TextUtils.quote;
 
@@ -46,17 +47,39 @@ public class ConstraintErrorConverter {
     final var valueConstraint = constraint.constraint();
     final var validValueRange = valueConstraint.getConstraint().getValueRange();
 
+    final var MAX_SPLIT_LEN = 3;
+    final var constraintVar = valueConstraint.getConstraint().getVar();
+    final var splitter = constraintVar.getSplitter();
+
     return new ArgsViolation(
-        detectRuleKind(valueConstraint.getConstraint().getVar()),
+        detectRuleKind(constraintVar),
         CallInfo.of(constraint.parameter()),
         new Args(
             violatingValues.stream()
                 .map(
-                    it -> {
-                      final var transformedVal = it.getTransformedVal();
-                      return transformedVal.isStringConstant()
-                          ? transformedVal.getStringValue()
-                          : transformedVal.toString();
+                    violatingValue -> {
+                      final var transformedVal = violatingValue.getTransformedVal();
+
+                      if (!transformedVal.isStringConstant()) {
+                        return transformedVal.toString();
+                      }
+
+                      final var stringValue = transformedVal.getStringValue();
+
+                      if (splitter == null) {
+                        return stringValue;
+                      }
+
+                      final var splitIndex = splitter.getIndex();
+
+                      if (splitIndex < 0) {
+                        return stringValue;
+                      }
+
+                      final var splitStringValue =
+                          stringValue.split(splitter.getSplitter(), MAX_SPLIT_LEN);
+
+                      return splitStringValue[min(splitIndex, MAX_SPLIT_LEN - 1)];
                     })
                 .toList(),
             validValueRange));
