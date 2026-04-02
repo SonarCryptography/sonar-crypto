@@ -1,7 +1,7 @@
 package org.sonarcrypto.ccerror.converters.constrainterror;
 
 import static java.lang.Math.min;
-import static org.sonarcrypto.ccerror.converters.RuleKindUtils.detectRuleKind;
+import static org.sonarcrypto.ccerror.RuleKindUtils.detectRuleKind;
 import static org.sonarcrypto.utils.sonar.TextUtils.quote;
 
 import crypto.analysis.errors.ConstraintError;
@@ -26,7 +26,8 @@ public class ConstraintErrorConverter {
     return generateConstraintErrorMessage(error.getViolatedConstraint());
   }
 
-  static @Nullable Violation generateConstraintErrorMessage(ViolatedConstraint violatedConstraint) {
+  public static @Nullable Violation generateConstraintErrorMessage(
+      ViolatedConstraint violatedConstraint) {
     if (violatedConstraint instanceof ViolatedValueConstraint violatedValueConstraint) {
       return generateViolatedValueConstraintMessage(violatedValueConstraint);
     } else if (violatedConstraint
@@ -88,7 +89,7 @@ public class ConstraintErrorConverter {
   static Violation generateViolatedNeverTypeOfConstraintMessage(
       ViolatedNeverTypeOfConstraint constraint) {
     return new SimpleViolation(
-        CryptoRulesDefinitions.FORBIDDEN_TYPE,
+        CryptoRulesDefinitions.KEY_MATERIAL,
         CallInfo.of(constraint.parameter()),
         "should never be of the type " + quote(constraint.notAllowedType()) + ".");
   }

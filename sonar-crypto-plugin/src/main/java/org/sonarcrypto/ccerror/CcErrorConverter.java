@@ -11,6 +11,8 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonarcrypto.ccerror.converters.ForbiddenMethodErrorConverter;
+import org.sonarcrypto.ccerror.converters.ImpreciseValueExtractionErrorConverter;
+import org.sonarcrypto.ccerror.converters.PredicateContradictionErrorConverter;
 import org.sonarcrypto.ccerror.converters.UncaughtExceptionErrorConverter;
 import org.sonarcrypto.ccerror.converters.constrainterror.ConstraintErrorConverter;
 import org.sonarcrypto.ccerror.converters.constrainterror.RequiredPredicateErrorConverter;
@@ -50,11 +52,11 @@ public class CcErrorConverter {
       violation = TypestateErrorConverter.convert(err);
     } else if (error instanceof IncompleteOperationError err) {
       violation = IncompleteOperationErrorConverter.convert(err);
+    } else if (error instanceof ImpreciseValueExtractionError err) {
+      violation = ImpreciseValueExtractionErrorConverter.convert(err);
+    } else if (error instanceof PredicateContradictionError err) {
+      violation = PredicateContradictionErrorConverter.convert(err);
     }
-
-    // TODO: Implement remaining converters.
-    // * ImpreciseValueExtractionError
-    // * PredicateContradictionError
 
     if (violation == null) {
       violation = SimpleViolation.general(CallInfo.none(), error.toErrorMarkerString());

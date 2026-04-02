@@ -1,4 +1,4 @@
-package org.sonarcrypto.ccerror.converters;
+package org.sonarcrypto.ccerror;
 
 import crysl.rule.CrySLObject;
 import crysl.rule.CrySLPredicate;
@@ -43,12 +43,9 @@ public class RuleKindUtils {
     if (name.contains("pad")) {
       return RuleKind.PADDING;
     }
-    if (name.contains("keylen") || name.contains("length")) {
-      return RuleKind.KEY_LENGTH;
+    if (name.contains("keylen") || name.contains("length") || name.contains("keymat")) {
+      return RuleKind.KEY_MATERIAL;
     }
-    // if(name.contains("keymat")) {
-    //  return RuleKind.KEY_MATERIAL;
-    // }
     return RuleKind.GENERAL;
   }
 }

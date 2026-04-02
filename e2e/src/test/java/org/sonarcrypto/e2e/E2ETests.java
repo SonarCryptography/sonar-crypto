@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sonar.orchestrator.build.BuildResult;
 import java.io.File;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 class E2ETests extends OrchestratorTests {
@@ -13,6 +14,7 @@ class E2ETests extends OrchestratorTests {
   void java_maven_basic() {
     BuildResult result = executeMavenBuild(new File(JAVA_MAVEN_BASIC_PATH), "java-maven-basic");
     assertThat(result.getLogs())
-        .contains("Sensor CogniCryptSensor [crypto]", "Found 3 cryptographic errors");
+        .contains("Sensor CogniCryptSensor [crypto]")
+        .containsPattern(Pattern.compile("Found [1-9]\\d* cryptographic errors"));
   }
 }

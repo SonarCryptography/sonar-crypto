@@ -6,7 +6,7 @@ import crypto.analysis.errors.RequiredPredicateError;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonarcrypto.ccerror.converters.RuleKindUtils;
+import org.sonarcrypto.ccerror.RuleKindUtils;
 import org.sonarcrypto.ccerror.violations.SimpleViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
