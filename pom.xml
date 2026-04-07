@@ -21,6 +21,8 @@
         <module>utils/resource</module>
         <module>utils/sonar</module>
         <module>utils/test</module>
+        <module>utils/jimple-printer</module>
+        <module>utils/jimple-mapper</module>
     </modules>
 
     <properties>
@@ -29,7 +31,7 @@
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
         <sonar.plugin.api.version>13.5.0.4319</sonar.plugin.api.version>
-        <sonarqube.api.impl.version>26.2.0.119303</sonarqube.api.impl.version>
+        <sonarqube.api.impl.version>26.3.0.120487</sonarqube.api.impl.version>
         <packaging.plugin.version>1.25.1.3002</packaging.plugin.version>
         <slf4j.version>2.0.17</slf4j.version>
 
@@ -48,7 +50,6 @@
                 <version>${sonar.plugin.api.version}</version>
                 <scope>provided</scope>
             </dependency>
-
             <!-- Runtime dependencies -->
             <dependency>
                 <groupId>de.fraunhofer.iem</groupId>
@@ -132,7 +133,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.21.0</version>
+                <version>5.22.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -170,12 +171,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>3.6.2</version>
                 </plugin>
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.3.0</version>
                     <configuration>
                         <java>
                             <googleJavaFormat/>
