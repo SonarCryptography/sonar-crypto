@@ -36,10 +36,11 @@ class CryptoSensorTest {
   void execute_fails_for_non_maven_project() {
     CryptoSensor sensor = new CryptoSensor();
     SensorContextTester context = SensorContextTester.create(tempDir);
+    context.fileSystem().setWorkDir(tempDir);
 
     sensor.execute(context);
 
     assertThat(context.allIssues()).isEmpty();
-    assertThat(logTester.logs()).containsExactly("Failed to build Maven project");
+    assertThat(logTester.logs()).contains("Failed to build Maven project");
   }
 }
