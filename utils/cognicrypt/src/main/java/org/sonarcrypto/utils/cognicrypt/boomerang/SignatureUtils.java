@@ -36,6 +36,6 @@ public class SignatureUtils {
       declaringClassName = declaringClassName.substring(lastDotIndex + 1);
     }
 
-    return "`" + declaringClassName + (methodName != null ? "." + methodName : "") + "`";
+    return declaringClassName + (methodName != null ? "." + methodName : "");
   }
 }

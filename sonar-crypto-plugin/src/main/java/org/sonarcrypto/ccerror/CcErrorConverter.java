@@ -18,7 +18,7 @@ import org.sonarcrypto.ccerror.converters.constrainterror.ConstraintErrorConvert
 import org.sonarcrypto.ccerror.converters.constrainterror.RequiredPredicateErrorConverter;
 import org.sonarcrypto.ccerror.converters.ordererror.IncompleteOperationErrorConverter;
 import org.sonarcrypto.ccerror.converters.ordererror.TypestateErrorConverter;
-import org.sonarcrypto.ccerror.violations.SimpleViolation;
+import org.sonarcrypto.ccerror.violations.SimpleArgViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
@@ -59,7 +59,7 @@ public class CcErrorConverter {
     }
 
     if (violation == null) {
-      violation = SimpleViolation.general(CallInfo.none(), error.toErrorMarkerString());
+      violation = SimpleArgViolation.general(CallInfo.none(), error.toErrorMarkerString());
     }
 
     final var issue = this.getContext().newIssue();

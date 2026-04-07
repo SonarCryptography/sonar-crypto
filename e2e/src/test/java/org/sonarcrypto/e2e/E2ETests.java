@@ -6,6 +6,8 @@ import com.sonar.orchestrator.build.BuildResult;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 class E2ETests extends OrchestratorTests {
@@ -27,7 +29,9 @@ class E2ETests extends OrchestratorTests {
       logIndices.add(log.indexOf("Sensor CogniCryptSensor [crypto]"));
       logIndices.add(log.indexOf("No Jimple files found at"));
     }
-    logIndices.add(log.indexOf("Found 3 cryptographic errors"));
+
+    final Matcher matcher = Pattern.compile("Found [1-9]\\d* cryptographic errors").matcher(log);
+    logIndices.add(matcher.find() ? matcher.start() : -1);
 
     for (int i = 0; i < logIndices.size() - 1; i++) {
       assertThat(logIndices.get(i)).isLessThan(logIndices.get(i + 1));

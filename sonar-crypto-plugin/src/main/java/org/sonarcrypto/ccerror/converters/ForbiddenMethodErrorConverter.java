@@ -6,7 +6,7 @@ import static org.sonarcrypto.utils.sonar.TextUtils.code;
 import crypto.analysis.errors.ForbiddenMethodError;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.CryptoRulesDefinitions;
-import org.sonarcrypto.ccerror.violations.SimpleViolation;
+import org.sonarcrypto.ccerror.violations.SimpleArgViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 import org.sonarcrypto.utils.sonar.TextUtils;
@@ -38,7 +38,7 @@ public class ForbiddenMethodErrorConverter {
           .append(" instead.");
     }
 
-    return new SimpleViolation(
+    return new SimpleArgViolation(
         CryptoRulesDefinitions.FORBIDDEN_METHOD, CallInfo.none(), sb.toString());
   }
 }

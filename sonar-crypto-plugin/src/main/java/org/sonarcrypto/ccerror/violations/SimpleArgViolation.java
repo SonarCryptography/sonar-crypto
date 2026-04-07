@@ -8,7 +8,7 @@ import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
-public record SimpleViolation(
+public record SimpleArgViolation(
     CryptoRulesDefinition rulesDefinition, @Nullable CallInfo callInfo, String subMessage)
     implements Violation {
 
@@ -18,26 +18,26 @@ public record SimpleViolation(
     messageBuilder.append(subMessage);
   }
 
-  public static SimpleViolation general(CallInfo callInfo) {
+  public static SimpleArgViolation general(CallInfo callInfo) {
     return general(callInfo, null);
   }
 
-  public static SimpleViolation general(CallInfo callInfo, @Nullable String subMessage) {
+  public static SimpleArgViolation general(CallInfo callInfo, @Nullable String subMessage) {
     return of(CryptoRulesDefinitions.GENERAL, callInfo, subMessage);
   }
 
-  public static SimpleViolation of(RuleKind ruleKind, CallInfo callInfo) {
+  public static SimpleArgViolation of(RuleKind ruleKind, CallInfo callInfo) {
     return of(ruleKind, callInfo, null);
   }
 
-  public static SimpleViolation of(
+  public static SimpleArgViolation of(
       RuleKind ruleKind, CallInfo callInfo, @Nullable String subMessage) {
     return of(CryptoRulesDefinitions.fromRuleKind(ruleKind), callInfo, subMessage);
   }
 
-  public static SimpleViolation of(
+  public static SimpleArgViolation of(
       CryptoRulesDefinition rulesDefinition, CallInfo callInfo, @Nullable String subMessage) {
-    return new SimpleViolation(
+    return new SimpleArgViolation(
         rulesDefinition,
         callInfo,
         subMessage != null ? subMessage : "was cryptographically improper generated.");

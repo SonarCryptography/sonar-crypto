@@ -6,7 +6,7 @@ import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.IncompleteOperationError;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.CryptoRulesDefinitions;
-import org.sonarcrypto.ccerror.violations.SimpleViolation;
+import org.sonarcrypto.ccerror.violations.SimpleArgViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 import org.sonarcrypto.utils.sonar.TextUtils;
@@ -36,6 +36,7 @@ public class IncompleteOperationErrorConverter {
           .append(".");
     }
 
-    return new SimpleViolation(CryptoRulesDefinitions.API_MISUSE, CallInfo.none(), sb.toString());
+    return new SimpleArgViolation(
+        CryptoRulesDefinitions.API_MISUSE, CallInfo.none(), sb.toString());
   }
 }

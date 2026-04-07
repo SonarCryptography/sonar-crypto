@@ -7,7 +7,7 @@ import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.ccerror.RuleKindUtils;
-import org.sonarcrypto.ccerror.violations.SimpleViolation;
+import org.sonarcrypto.ccerror.violations.SimpleArgViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
@@ -25,7 +25,7 @@ public class RequiredPredicateErrorConverter {
       LOGGER.error(
           "Unsupported required predicate error {}! Generating general violation.",
           error.getClass().getName());
-      return SimpleViolation.general(CallInfo.none(), error.toErrorMarkerString());
+      return SimpleArgViolation.general(CallInfo.none(), error.toErrorMarkerString());
     }
   }
 
@@ -36,10 +36,10 @@ public class RequiredPredicateErrorConverter {
 
     if (firstViolatedPredicate == null) {
       LOGGER.error("Violated predicates are empty! Generating general violation.");
-      return SimpleViolation.general(CallInfo.none(), error.toErrorMarkerString());
+      return SimpleArgViolation.general(CallInfo.none(), error.toErrorMarkerString());
     }
 
-    return SimpleViolation.of(
+    return SimpleArgViolation.of(
         RuleKindUtils.detectRuleKind(firstViolatedPredicate.predicate()),
         CallInfo.of(firstViolatedPredicate.statement(), firstViolatedPredicate.index()));
   }
@@ -47,7 +47,7 @@ public class RequiredPredicateErrorConverter {
   public static Violation generateReqPredMessage(RequiredPredicateError error) {
     final var contradictedPredicates = error.getContradictedPredicates();
 
-    return SimpleViolation.general(
+    return SimpleArgViolation.general(
         CallInfo.of(contradictedPredicates.statement(), contradictedPredicates.index()));
   }
 }

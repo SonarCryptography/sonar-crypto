@@ -11,6 +11,7 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
 import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
+import org.sonarcrypto.utils.sonar.TextUtils;
 
 public class ConverterUtils {
   /**
@@ -26,10 +27,15 @@ public class ConverterUtils {
     final var name = calleeInfo.methodName();
 
     return switch (name) {
-      case "<init>" -> SignatureUtils.shortNameOf(calleeInfo.className()) + "'s constructor";
+      case "<init>" ->
+          TextUtils.code(SignatureUtils.shortNameOf(calleeInfo.className())) + "'s constructor";
       case "<clinit>" ->
-          SignatureUtils.shortNameOf(calleeInfo.className()) + "'s static constructor";
-      default -> SignatureUtils.shortNameOf(calleeInfo.className(), calleeInfo.methodName());
+          TextUtils.code(SignatureUtils.shortNameOf(calleeInfo.className()))
+              + "'s static constructor";
+      default ->
+          TextUtils.code(
+                  SignatureUtils.shortNameOf(calleeInfo.className(), calleeInfo.methodName()))
+              .toString();
     };
   }
 

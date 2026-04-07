@@ -88,7 +88,7 @@ public class ConstraintErrorConverter {
 
   static Violation generateViolatedNeverTypeOfConstraintMessage(
       ViolatedNeverTypeOfConstraint constraint) {
-    return new SimpleViolation(
+    return new SimpleArgViolation(
         CryptoRulesDefinitions.KEY_MATERIAL,
         CallInfo.of(constraint.parameter()),
         "should never be of the type " + quote(constraint.notAllowedType()) + ".");

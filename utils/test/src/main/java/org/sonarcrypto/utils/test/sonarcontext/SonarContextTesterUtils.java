@@ -17,6 +17,8 @@ public class SonarContextTesterUtils {
     final var fileSystem = context.fileSystem();
     final var baseDir = fileSystem.baseDirPath();
 
+    fileSystem.setWorkDir(fileSystem.baseDirPath());
+
     try (Stream<Path> fileWalker = Files.walk(baseDir)) {
       fileWalker
           .filter(file -> file.getFileName().toString().endsWith(".java"))
