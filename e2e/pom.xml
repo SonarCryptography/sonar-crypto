@@ -78,7 +78,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <id>check-plugin-jar</id>
@@ -90,7 +90,7 @@
                             <rules>
                                 <requireFilesExist>
                                     <files>
-                                        <file>${project.basedir}/../sonar-crypto-plugin/target/sonar-crypto-plugin-${project.version}.jar</file>
+                                        <file>${maven.multiModuleProjectDirectory}/sonar-crypto-plugin/target/sonar-crypto-plugin-${project.version}.jar</file>
                                     </files>
                                     <message>sonar-crypto-plugin JAR not found. Build it first: mvn install -pl sonar-crypto-plugin --also-make -DskipTests</message>
                                 </requireFilesExist>
