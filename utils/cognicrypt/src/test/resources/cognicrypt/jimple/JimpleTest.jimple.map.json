@@ -1,0 +1,105 @@
+{
+  "className" : "JimpleTest",
+  "sourceFileName" : "JimpleTest.java",
+  "mappings" : [ {
+    "jimpleLine" : 0,
+    "elementType" : "CLASS",
+    "elementSignature" : "JimpleTest",
+    "sourcePosition" : {
+      "firstLine" : 3,
+      "lastLine" : 40,
+      "firstCol" : 0,
+      "lastCol" : 1
+    }
+  }, {
+    "jimpleLine" : 1,
+    "elementType" : "FIELD",
+    "elementSignature" : "<JimpleTest: int value>",
+    "sourcePosition" : {
+      "firstLine" : 5,
+      "lastLine" : 5,
+      "firstCol" : 4,
+      "lastCol" : 20
+    }
+  }, {
+    "jimpleLine" : 3,
+    "elementType" : "METHOD",
+    "elementSignature" : "<JimpleTest: void <init>()>",
+    "sourcePosition" : {
+      "firstLine" : 7,
+      "lastLine" : 10,
+      "firstCol" : 4,
+      "lastCol" : 5
+    }
+  }, {
+    "jimpleLine" : 11,
+    "elementType" : "METHOD",
+    "elementSignature" : "<JimpleTest: void <init>(int)>",
+    "sourcePosition" : {
+      "firstLine" : 12,
+      "lastLine" : 15,
+      "firstCol" : 4,
+      "lastCol" : 5
+    }
+  }, {
+    "jimpleLine" : 21,
+    "elementType" : "METHOD",
+    "elementSignature" : "<JimpleTest: int getValue()>",
+    "sourcePosition" : {
+      "firstLine" : 17,
+      "lastLine" : 19,
+      "firstCol" : 4,
+      "lastCol" : 5
+    }
+  }, {
+    "jimpleLine" : 29,
+    "elementType" : "METHOD",
+    "elementSignature" : "<JimpleTest: void setValue(int)>",
+    "sourcePosition" : {
+      "firstLine" : 21,
+      "lastLine" : 23,
+      "firstCol" : 4,
+      "lastCol" : 5
+    }
+  }, {
+    "jimpleLine" : 38,
+    "elementType" : "METHOD",
+    "elementSignature" : "<JimpleTest: void main(java.lang.String[])>",
+    "sourcePosition" : {
+      "firstLine" : 25,
+      "lastLine" : 30,
+      "firstCol" : 4,
+      "lastCol" : 5
+    }
+  }, {
+    "jimpleLine" : 41,
+    "elementType" : "STATEMENT",
+    "elementSignature" : "$r1 = new JimpleTest",
+    "sourcePosition" : {
+      "firstLine" : 27,
+      "lastLine" : 27,
+      "firstCol" : 8,
+      "lastCol" : 30
+    }
+  }, {
+    "jimpleLine" : 42,
+    "elementType" : "STATEMENT",
+    "elementSignature" : "specialinvoke $r1.<JimpleTest: void <init>(int)>(42)",
+    "sourcePosition" : {
+      "firstLine" : 27,
+      "lastLine" : 27,
+      "firstCol" : 8,
+      "lastCol" : 30
+    }
+  }, {
+    "jimpleLine" : 43,
+    "elementType" : "STATEMENT",
+    "elementSignature" : "$i0 = virtualinvoke $r1.<JimpleTest: int getValue()>()",
+    "sourcePosition" : {
+      "firstLine" : 28,
+      "lastLine" : 28,
+      "firstCol" : 8,
+      "lastCol" : 35
+    }
+  } ]
+}
