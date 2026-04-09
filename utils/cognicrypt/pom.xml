@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>org.sonarcrypto</groupId>
-            <artifactId>jbc2jimple</artifactId>
+            <artifactId>jimple-mapper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

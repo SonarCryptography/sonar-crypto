@@ -213,7 +213,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
+                                        <outputDirectory>${maven.multiModuleProjectDirectory}/utils/cognicrypt/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
                                         <destFileName>jca.zip</destFileName>
                                     </artifactItem>
@@ -224,7 +224,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
+                                        <outputDirectory>${maven.multiModuleProjectDirectory}/utils/cognicrypt/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
                                         <destFileName>bc.zip</destFileName>
                                     </artifactItem>
@@ -235,7 +235,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
+                                        <outputDirectory>${maven.multiModuleProjectDirectory}/utils/cognicrypt/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
                                         <destFileName>tink.zip</destFileName>
                                     </artifactItem>
@@ -246,7 +246,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources/crysl_rules</outputDirectory>
+                                        <outputDirectory>${maven.multiModuleProjectDirectory}/utils/cognicrypt/src/main/resources/crysl_rules</outputDirectory>
                                         <includes>**</includes>
                                         <destFileName>bc-jca.zip</destFileName>
                                     </artifactItem>

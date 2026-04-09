@@ -54,22 +54,12 @@
         </dependency>
         <dependency>
             <groupId>org.sonarcrypto</groupId>
-            <artifactId>jbc2jimple</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.sonarcrypto</groupId>
             <artifactId>resource</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.sonarcrypto</groupId>
             <artifactId>cognicrypt</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.sonarcrypto</groupId>
-            <artifactId>maven</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
