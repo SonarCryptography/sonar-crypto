@@ -1,5 +1,7 @@
 package org.sonarcrypto.cryptorules.builder;
 
+import static java.util.Objects.requireNonNull;
+
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonar.api.rule.RuleStatus;
@@ -7,7 +9,6 @@ import org.sonarcrypto.RuleKind;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 import org.sonarcrypto.cryptorules.Severity;
 
-@SuppressWarnings("NotNullFieldNotInitialized")
 @NullMarked
 public class CryptoRulesDefinitionBuilderImpl
     implements CryptoRulesDefinitionBuilder.WithKey,
@@ -22,12 +23,12 @@ public class CryptoRulesDefinitionBuilderImpl
         CryptoRulesDefinitionBuilder.Build {
   public CryptoRulesDefinitionBuilderImpl() {}
 
-  private RuleKind ruleKind;
-  private String name;
-  private String description;
-  private String definitionKey;
-  private RuleStatus ruleStatus;
-  private Severity severity;
+  private @Nullable RuleKind ruleKind;
+  private @Nullable String name;
+  private @Nullable String description;
+  private @Nullable String definitionKey;
+  private @Nullable RuleStatus ruleStatus;
+  private @Nullable Severity severity;
   private @Nullable String assessSection;
   private @Nullable String howToFixSection;
   private @Nullable String resourceSection;
@@ -89,12 +90,12 @@ public class CryptoRulesDefinitionBuilderImpl
   @Override
   public CryptoRulesDefinition build() {
     return new CryptoRulesDefinition(
-        this.ruleKind,
-        this.name,
-        this.description,
+        requireNonNull(this.ruleKind),
+        requireNonNull(this.name),
+        requireNonNull(this.description),
         this.definitionKey,
-        this.ruleStatus,
-        this.severity,
+        requireNonNull(this.ruleStatus),
+        requireNonNull(this.severity),
         this.assessSection,
         this.howToFixSection,
         this.resourceSection);
