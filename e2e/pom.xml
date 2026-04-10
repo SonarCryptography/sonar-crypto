@@ -74,25 +74,27 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Ensure sonar-crypto-plugin JAR is built (packaged) before tests run -->
+            <!-- Ensure sonar-crypto-plugin JAR is built before tests run -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
-                        <id>build-plugin</id>
+                        <id>check-plugin-jar</id>
                         <phase>process-test-resources</phase>
                         <goals>
-                            <goal>run</goal>
+                            <goal>enforce</goal>
                         </goals>
                         <configuration>
-                            <target>
-                                <exec executable="mvn" dir="${project.basedir}/../sonar-crypto-plugin" failonerror="true">
-                                    <arg value="package"/>
-                                    <arg value="-DskipTests"/>
-                                </exec>
-                            </target>
+                            <rules>
+                                <requireFilesExist>
+                                    <files>
+                                        <file>${maven.multiModuleProjectDirectory}/sonar-crypto-plugin/target/sonar-crypto-plugin-${project.version}.jar</file>
+                                    </files>
+                                    <message>sonar-crypto-plugin JAR not found. Build it first: mvn install -pl sonar-crypto-plugin --also-make -DskipTests</message>
+                                </requireFilesExist>
+                            </rules>
                         </configuration>
                     </execution>
                 </executions>

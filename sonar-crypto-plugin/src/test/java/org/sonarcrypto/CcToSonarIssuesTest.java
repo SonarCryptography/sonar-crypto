@@ -39,66 +39,6 @@ class CcToSonarIssuesTest {
   }
 
   @Test
-  void find_input_file_returns_file_for_matching_class() throws IOException {
-    addJavaFile("com/example/MyClass.java", "package com.example;\npublic class MyClass {}");
-
-    InputFile result =
-        issueReporter.findInputFile(
-            sensorContext.fileSystem(), wrappedClass("com.example.MyClass"));
-
-    assertThat(result).isNotNull();
-    assertThat(result.filename()).isEqualTo("MyClass.java");
-  }
-
-  @Test
-  void find_input_file_returns_null_when_no_match() {
-    InputFile result =
-        issueReporter.findInputFile(
-            sensorContext.fileSystem(), wrappedClass("com.example.NonExistent"));
-
-    assertThat(result).isNull();
-  }
-
-  @Test
-  void find_input_file_handles_deeply_nested_packages() throws IOException {
-    addJavaFile(
-        "com/example/crypto/utils/Helper.java",
-        "package com.example.crypto.utils;\npublic class Helper {}");
-
-    InputFile result =
-        issueReporter.findInputFile(
-            sensorContext.fileSystem(), wrappedClass("com.example.crypto.utils.Helper"));
-
-    assertThat(result).isNotNull();
-    assertThat(result.filename()).isEqualTo("Helper.java");
-  }
-
-  @Test
-  void find_input_file_ignores_test_files() throws IOException {
-    // Add a test file (not MAIN type)
-    Path srcDir = tempDir.resolve("src/test/java/com/example");
-    Files.createDirectories(srcDir);
-    Path javaFile = srcDir.resolve("TestClass.java");
-    String content = "package com.example;\npublic class TestClass {}";
-    Files.writeString(javaFile, content);
-
-    InputFile testFile =
-        TestInputFileBuilder.create("mod", tempDir.toFile(), javaFile.toFile())
-            .setLanguage("java")
-            .setType(InputFile.Type.TEST)
-            .setCharset(StandardCharsets.UTF_8)
-            .setContents(content)
-            .build();
-    sensorContext.fileSystem().add(testFile);
-
-    InputFile result =
-        issueReporter.findInputFile(
-            sensorContext.fileSystem(), wrappedClass("com.example.TestClass"));
-
-    assertThat(result).isNull();
-  }
-
-  @Test
   void report_all_issues_creates_issues_for_found_files() throws IOException {
     addJavaFile("com/example/ClassA.java", "package com.example;\npublic class ClassA {}");
     addJavaFile("com/example/ClassB.java", "package com.example;\npublic class ClassB {}");
@@ -183,7 +123,8 @@ class CcToSonarIssuesTest {
     assertThat(sensorContext.allIssues()).hasSize(1);
 
     Issue issue = sensorContext.allIssues().iterator().next();
-    assertThat(issue.ruleKey()).hasToString(CryptoRulesDefinition.CC_RULE.toString());
+    assertThat(issue.ruleKey())
+        .hasToString(CryptoRulesDefinitions.ALGORITHM.getRuleKey().toString());
     assertThat(issue.primaryLocation().inputComponent()).isEqualTo(inputFile);
     assertThat(issue.primaryLocation().message())
         .isEqualTo("Cryptographic API misuse: Test error message");
@@ -214,7 +155,7 @@ class CcToSonarIssuesTest {
   void report_issue_should_prefix_message_with_api_misuse_text() throws IOException {
     InputFile inputFile = addJavaFile("Test.java", "public class Test {}");
 
-    String customMessage = "Weak encryption algorithm used";
+    String customMessage = "Weak encryption actualAlgorithm used";
     issueReporter.reportIssue(sensorContext, inputFile, 1, customMessage);
 
     Issue issue = sensorContext.allIssues().iterator().next();
@@ -248,8 +189,10 @@ class CcToSonarIssuesTest {
   }
 
   private static boomerang.scope.Method method(String name) {
-    boomerang.scope.Method m = mock(boomerang.scope.Method.class);
-    when(m.getName()).thenReturn(name);
-    return m;
+    var declaringClassMock = wrappedClass("com.example");
+    boomerang.scope.Method methodMock = mock(boomerang.scope.Method.class);
+    when(methodMock.getName()).thenReturn(name);
+    when(methodMock.getDeclaringClass()).thenReturn(declaringClassMock);
+    return methodMock;
   }
 }

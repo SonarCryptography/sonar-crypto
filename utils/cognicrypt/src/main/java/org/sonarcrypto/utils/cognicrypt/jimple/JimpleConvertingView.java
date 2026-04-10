@@ -1,4 +1,4 @@
-package org.sonarcrypto.utils.cognicrypt;
+package org.sonarcrypto.utils.cognicrypt.jimple;
 
 import boomerang.scope.sootup.BoomerangPreInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +11,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonarcrypto.utils.cognicrypt.LocationReplacerInterceptor;
 import org.sonarcrypto.utils.jimple.mapper.LineMapping;
 import org.sonarcrypto.utils.jimple.mapper.LineMappingCollection;
 import sootup.core.frontend.AbstractClassSource;

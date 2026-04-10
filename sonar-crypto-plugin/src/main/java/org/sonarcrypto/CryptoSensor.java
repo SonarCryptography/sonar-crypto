@@ -19,9 +19,9 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonarcrypto.utils.cognicrypt.JimpleScanner;
 import org.sonarcrypto.utils.cognicrypt.crysl.CryslRuleProvider;
 import org.sonarcrypto.utils.cognicrypt.crysl.Ruleset;
+import org.sonarcrypto.utils.cognicrypt.jimple.JimpleScanner;
 import org.sonarcrypto.utils.maven.MavenBuildException;
 import org.sonarcrypto.utils.maven.MavenProject;
 
@@ -42,7 +42,7 @@ public class CryptoSensor implements Sensor {
   public void execute(SensorContext sensorContext) {
     FileSystem fileSystem = sensorContext.fileSystem();
 
-    final Ruleset ruleset = Ruleset.BC;
+    final Ruleset ruleset = Ruleset.JCA;
     Path ruleDir;
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();

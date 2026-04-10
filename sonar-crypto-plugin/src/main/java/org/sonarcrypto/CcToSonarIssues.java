@@ -1,21 +1,22 @@
 package org.sonarcrypto;
 
+import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
+
 import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.Set;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
+import org.sonarcrypto.ccerror.CcErrorConverter;
 
 /** Converts CogniCrypt (CryptoAnalysis) errors to SonarQube issues. */
 @NullMarked
@@ -45,47 +46,34 @@ public class CcToSonarIssues {
         continue;
       }
 
+      final var errorConverter = new CcErrorConverter(context);
+      final var overriddenErrors = new ArrayList<AbstractError>(errors.size());
+      var atLeastOneErrorConverted = false;
+
       // Report each error in this class/method
       for (AbstractError error : errors) {
-        // TODO: Extract actual line number from error once API is confirmed
-        // The AbstractError may have methods like getErrorLocation(), getStatement(), etc.
-        // For now, report on line 1 as a placeholder
-        int lineNumber = 1;
-        String errorMessage =
-            String.format(
-                "Cryptographic error in method %s: %s",
-                method.getName(), error.getClass().getSimpleName());
-        reportIssue(context, inputFile, lineNumber, errorMessage);
+        if (!error.getPrecedingErrors().isEmpty()) {
+          // Ignore preceding errors
+          overriddenErrors.add(error);
+          continue;
+        }
+
+        if (errorConverter.convertError(inputFile, method, error)) {
+          atLeastOneErrorConverted = true;
+          continue;
+        }
+
+        overriddenErrors.add(error);
+      }
+
+      if (!atLeastOneErrorConverted) {
+        // Report overridden errors if no other error was reported,
+        // just in case that we do not miss errors.
+        for (final var error : overriddenErrors) {
+          errorConverter.convertError(inputFile, method, error);
+        }
       }
     }
-  }
-
-  /**
-   * Finds the InputFile corresponding to a WrappedClass.
-   *
-   * @param fileSystem the file system to search in
-   * @param wrappedClass the class to find the source file for
-   * @return the InputFile, or null if not found
-   */
-  @Nullable
-  public InputFile findInputFile(FileSystem fileSystem, WrappedClass wrappedClass) {
-    String fullyQualifiedName = wrappedClass.getFullyQualifiedName();
-
-    // Convert fully qualified class name to file path,
-    // e.g., "com.example.MyClass" -> "com/example/MyClass.java"
-    String relativePath = fullyQualifiedName.replace('.', '/') + ".java";
-
-    FilePredicates predicates = fileSystem.predicates();
-    Iterator<InputFile> files =
-        fileSystem
-            .inputFiles(
-                predicates.and(
-                    predicates.hasType(InputFile.Type.MAIN),
-                    predicates.hasLanguage("java"),
-                    predicates.matchesPathPattern("**/" + relativePath)))
-            .iterator();
-
-    return files.hasNext() ? files.next() : null;
   }
 
   /**
@@ -98,7 +86,7 @@ public class CcToSonarIssues {
    */
   public void reportIssue(
       SensorContext context, InputFile inputFile, int line, String errorMessage) {
-    NewIssue issue = context.newIssue().forRule(CryptoRulesDefinition.CC_RULE);
+    NewIssue issue = context.newIssue().forRule(CryptoRulesDefinitions.ALGORITHM.getRuleKey());
     NewIssueLocation location =
         issue
             .newLocation()
