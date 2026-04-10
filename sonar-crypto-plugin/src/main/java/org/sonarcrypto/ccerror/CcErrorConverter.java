@@ -1,6 +1,7 @@
 package org.sonarcrypto.ccerror;
 
 import static org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils.selectLocation;
+import static org.sonarcrypto.utils.sonar.TextUtils.code;
 
 import boomerang.scope.Method;
 import crypto.analysis.errors.*;
@@ -69,7 +70,7 @@ public class CcErrorConverter {
         new StringBuilder(
             String.format(
                 "Cryptographic weakness in method %s detected:\n",
-                SignatureUtils.shortNameOf(method)));
+                code(SignatureUtils.shortNameOf(method))));
 
     location.at(selectLocation(inputFile, error));
 
