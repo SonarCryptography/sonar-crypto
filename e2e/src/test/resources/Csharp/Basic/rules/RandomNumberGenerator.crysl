@@ -1,0 +1,22 @@
+// RandomNumberGenerator  (equivalent of SecureRandom — use for IV / key material)
+SPEC System.Security.Cryptography.RandomNumberGenerator
+
+OBJECTS
+    byte[] bytes;
+    int count;
+
+EVENTS
+    c1: _ = Create();
+    Create := c1;
+
+    gb1: GetBytes(bytes);
+    gb2: GetBytes(bytes, _, _);
+    gb3: bytes = GetBytes(count);
+    GetBytes := gb1 | gb2 | gb3;
+
+ORDER
+    Create?, GetBytes+
+
+ENSURES
+    randomized[bytes];
+

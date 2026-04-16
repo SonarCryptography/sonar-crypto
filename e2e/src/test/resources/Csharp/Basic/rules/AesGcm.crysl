@@ -1,0 +1,39 @@
+// AesGcm  (.NET 6+, authenticated encryption — preferred over Aes+CBC)
+SPEC System.Security.Cryptography.AesGcm
+
+OBJECTS
+    byte[] key;
+    byte[] nonce;
+    byte[] plaintext;
+    byte[] ciphertext;
+    byte[] tag;
+    byte[] associatedData;
+
+EVENTS
+    c1: AesGcm(key);
+    Con := c1;
+
+    e1: Encrypt(nonce, plaintext, ciphertext, tag);
+    e2: Encrypt(nonce, plaintext, ciphertext, tag, associatedData);
+    Encrypt := e1 | e2;
+
+    d1: Decrypt(nonce, ciphertext, tag, plaintext);
+    d2: Decrypt(nonce, ciphertext, tag, plaintext, associatedData);
+    Decrypt := d1 | d2;
+
+ORDER
+    Con, (Encrypt | Decrypt)+
+
+CONSTRAINTS
+    // GCM nonce must be exactly 12 bytes (96 bits) per NIST SP 800-38D
+    length[nonce] == 12;
+    // GCM authentication tag: 16 bytes (128 bits) is the recommended size
+    length[tag] == 16;
+
+REQUIRES
+    preparedKeyMaterial[key];
+    randomized[nonce];
+
+ENSURES
+    encrypted[ciphertext, plaintext];
+

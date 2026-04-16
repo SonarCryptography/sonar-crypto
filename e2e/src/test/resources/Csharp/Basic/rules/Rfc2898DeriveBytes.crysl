@@ -1,0 +1,41 @@
+// Rfc2898DeriveBytes  (PBKDF2 — safe key derivation from a password)
+SPEC System.Security.Cryptography.Rfc2898DeriveBytes
+
+OBJECTS
+    byte[] password;
+    byte[] salt;
+    System.String passwordStr;
+    int iterations;
+    System.String hashAlgorithm;
+    byte[] derivedKey;
+    int keyLen;
+
+EVENTS
+    c1: Rfc2898DeriveBytes(password, salt, iterations);
+    c2: Rfc2898DeriveBytes(password, salt, iterations, hashAlgorithm);
+    c3: Rfc2898DeriveBytes(passwordStr, salt, iterations);
+    c4: Rfc2898DeriveBytes(passwordStr, salt, iterations, hashAlgorithm);
+    Con := c1 | c2 | c3 | c4;
+
+    gb1: derivedKey = GetBytes(keyLen);
+    GetBytes := gb1;
+
+ORDER
+    Con, GetBytes+
+
+CONSTRAINTS
+    // Minimum 310,000 iterations recommended by OWASP (2023) for PBKDF2-SHA256
+    iterations >= 310000;
+    // Salt must be at least 16 bytes
+    length[salt] >= 16;
+    // Prefer SHA-256 or stronger
+    hashAlgorithm in {"SHA256", "SHA384", "SHA512"};
+    // Derived key length: 128 / 192 / 256 bits
+    keyLen in {16, 24, 32};
+
+REQUIRES
+    randomized[salt];
+
+ENSURES
+    preparedKeyMaterial[derivedKey];
+

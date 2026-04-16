@@ -1,0 +1,29 @@
+// ICryptoTransform  (result of Aes.CreateEncryptor / CreateDecryptor)
+SPEC System.Security.Cryptography.ICryptoTransform
+
+OBJECTS
+    byte[] inputBuffer;
+    int inputOffset;
+    int inputCount;
+    byte[] outputBuffer;
+    int outputOffset;
+    byte[] result;
+
+EVENTS
+    tb1: result = TransformBlock(inputBuffer, inputOffset, inputCount, outputBuffer, outputOffset);
+    TransformBlock := tb1;
+
+    tf1: result = TransformFinalBlock(inputBuffer, inputOffset, inputCount);
+    TransformFinal := tf1;
+
+ORDER
+    TransformBlock*, TransformFinal
+
+CONSTRAINTS
+    inputOffset >= 0;
+    inputCount > 0;
+    length[inputBuffer] >= inputOffset + inputCount;
+
+REQUIRES
+    generatedCipher[_];     // must come from a properly configured Aes instance
+

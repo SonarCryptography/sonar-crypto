@@ -1,0 +1,71 @@
+// Aes  (abstract base; also covers AesManaged / AesCng / AesCryptoServiceProvider)
+SPEC System.Security.Cryptography.Aes
+
+OBJECTS
+    System.Security.Cryptography.CipherMode mode;
+    System.Security.Cryptography.PaddingMode padding;
+    byte[] key;
+    byte[] iv;
+    int keySize;
+    System.Security.Cryptography.ICryptoTransform encryptor;
+    System.Security.Cryptography.ICryptoTransform decryptor;
+
+EVENTS
+    // Factory
+    c1: _ = Create();
+    Create := c1;
+
+    // Property setters (modelled as events because they affect security-relevant state)
+    sk1: set_Key(key);
+    SetKey := sk1;
+
+    siv1: set_IV(iv);
+    SetIV := siv1;
+
+    sm1: set_Mode(mode);
+    SetMode := sm1;
+
+    sp1: set_Padding(padding);
+    SetPadding := sp1;
+
+    sks1: set_KeySize(keySize);
+    SetKeySize := sks1;
+
+    // Transform creation
+    ce1: encryptor = CreateEncryptor();
+    ce2: encryptor = CreateEncryptor(key, iv);
+    CreateEnc := ce1 | ce2;
+
+    cd1: decryptor = CreateDecryptor();
+    cd2: decryptor = CreateDecryptor(key, iv);
+    CreateDec := cd1 | cd2;
+
+ORDER
+    Create, (SetKey | SetKeySize)?, SetMode?, SetPadding?, SetIV?,
+    (CreateEnc | CreateDec)+
+
+CONSTRAINTS
+    // ECB mode is insecure (no IV, patterns leak)
+    mode != System.Security.Cryptography.CipherMode.ECB;
+
+    // CBC without randomised IV leaks patterns — prefer GCM via AesGcm
+    mode in {System.Security.Cryptography.CipherMode.CBC,
+             System.Security.Cryptography.CipherMode.CFB,
+             System.Security.Cryptography.CipherMode.CTS,
+             System.Security.Cryptography.CipherMode.OFB};
+
+    // Key sizes: 128, 192, or 256 bits
+    keySize in {128, 192, 256};
+
+REQUIRES
+    // Key bytes must not be a hard-coded string literal
+    preparedKeyMaterial[key];
+    // IV must be randomly generated when CBC/CFB/OFB/CTS is used
+    mode in {System.Security.Cryptography.CipherMode.CBC,
+             System.Security.Cryptography.CipherMode.CFB,
+             System.Security.Cryptography.CipherMode.CTS,
+             System.Security.Cryptography.CipherMode.OFB} => randomized[iv];
+
+ENSURES
+    generatedCipher[this];
+
