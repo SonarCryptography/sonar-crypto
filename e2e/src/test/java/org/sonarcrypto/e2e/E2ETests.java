@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 
 class E2ETests extends OrchestratorTests {
   private static final String JAVA_MAVEN_BASIC_PATH = "src/test/resources/Java/Maven/Basic";
+  private static final Pattern FOUND_CRYPTO_ERRORS_PATTERN =
+      Pattern.compile("Found [1-9]\\d* cryptographic errors");
 
   @Test
   void java_maven_basic() {
@@ -30,7 +32,7 @@ class E2ETests extends OrchestratorTests {
       logIndices.add(log.indexOf("No Jimple files found at"));
     }
 
-    final Matcher matcher = Pattern.compile("Found [1-9]\\d* cryptographic errors").matcher(log);
+    final Matcher matcher = FOUND_CRYPTO_ERRORS_PATTERN.matcher(log);
     logIndices.add(matcher.find() ? matcher.start() : -1);
 
     for (int i = 0; i < logIndices.size() - 1; i++) {

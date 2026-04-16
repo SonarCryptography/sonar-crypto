@@ -1,6 +1,8 @@
 package org.sonarcrypto.utils.cognicrypt.crysl;
 
 import static java.lang.Math.*;
+import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
+import static org.sonarcrypto.utils.sonar.TextUtils.code;
 
 import boomerang.scope.sootup.jimple.JimpleUpStatement;
 import crypto.analysis.errors.AbstractError;
@@ -10,8 +12,6 @@ import org.jspecify.annotations.Nullable;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
-import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
-import org.sonarcrypto.utils.sonar.TextUtils;
 
 public class ConverterUtils {
   /**
@@ -27,15 +27,9 @@ public class ConverterUtils {
     final var name = calleeInfo.methodName();
 
     return switch (name) {
-      case "<init>" ->
-          TextUtils.code(SignatureUtils.shortNameOf(calleeInfo.className())) + "'s constructor";
-      case "<clinit>" ->
-          TextUtils.code(SignatureUtils.shortNameOf(calleeInfo.className()))
-              + "'s static constructor";
-      default ->
-          TextUtils.code(
-                  SignatureUtils.shortNameOf(calleeInfo.className(), calleeInfo.methodName()))
-              .toString();
+      case "<init>" -> code(shortNameOf(calleeInfo.className())) + "'s constructor";
+      case "<clinit>" -> code(shortNameOf(calleeInfo.className())) + "'s static constructor";
+      default -> code(shortNameOf(calleeInfo.className(), calleeInfo.methodName())).toString();
     };
   }
 

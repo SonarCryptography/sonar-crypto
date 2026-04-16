@@ -114,7 +114,7 @@ public class CryptoRulesDefinitions {
   public static final CryptoRulesDefinition MODE =
       CryptoRulesDefinition.builder()
           .withRuleKind(RuleKind.MODE)
-          .withName("Algorithm Mode")
+          .withName("Unsecure Mode")
           .withDescription(
               """
                <p>Wong or unsecure mode used.</p>
@@ -127,7 +127,7 @@ public class CryptoRulesDefinitions {
   public static final CryptoRulesDefinition PADDING =
       CryptoRulesDefinition.builder()
           .withRuleKind(RuleKind.PADDING)
-          .withName("Algorithm Padding")
+          .withName("Unsecure Padding")
           .withDescription(
               """
                <p>Wong or unsecure padding used.</p>
@@ -140,7 +140,7 @@ public class CryptoRulesDefinitions {
   public static final CryptoRulesDefinition KEY_MATERIAL =
       CryptoRulesDefinition.builder()
           .withRuleKind(RuleKind.KEY_MATERIAL)
-          .withName("Key Material")
+          .withName("Unsecure Key Material")
           .withDescription(
               """
               <p>Issues regarding the key material, such as an insufficient key length or
