@@ -33,7 +33,7 @@ public class LocationReplacerInterceptor implements BodyInterceptor {
                   statementMappings.get(stmt.getPositionInfo().getStmtPosition().getFirstLine());
               if (mapping != null) {
                 StmtPositionInfo newPosInfo =
-                    new SimpleStmtPositionInfo(mapping.getSourcePosition().getFirstLine());
+                    new SimpleStmtPositionInfo(mapping.getSourcePosition().toSootUpPosition());
                 PositionReplacer replacer = new PositionReplacer(newPosInfo);
                 stmt.accept(replacer);
                 if (replacer.result != null && replacer.result != stmt) {
