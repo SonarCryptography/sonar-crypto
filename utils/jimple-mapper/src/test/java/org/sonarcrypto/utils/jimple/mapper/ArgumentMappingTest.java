@@ -31,12 +31,12 @@ class ArgumentMappingTest {
     var differentIndex = new ArgumentMapping(2, pos);
     var differentPos = new ArgumentMapping(1, new SourcePosition(99, 99, 0, 0));
 
-    assertThat(a).isEqualTo(b);
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    assertThat(a).isEqualTo(b).hasSameHashCodeAs(b);
 
-    assertThat(a).isNotEqualTo(differentIndex);
-    assertThat(a).isNotEqualTo(differentPos);
-    assertThat(a).isNotEqualTo(null);
-    assertThat(a).isNotEqualTo("other type");
+    assertThat(a)
+        .isNotEqualTo(differentIndex)
+        .isNotEqualTo(differentPos)
+        .isNotEqualTo(null)
+        .isNotEqualTo("other type");
   }
 }
