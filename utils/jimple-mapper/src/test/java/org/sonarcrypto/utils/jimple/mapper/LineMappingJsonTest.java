@@ -125,7 +125,7 @@ class LineMappingJsonTest {
               "sourcePosition": { "firstLine": 31, "lastLine": 31, "firstCol": 24, "lastCol": 49 },
               "lhsPosition": { "firstLine": 31, "lastLine": 31, "firstCol": 24, "lastCol": 36 },
               "argumentMappings": [
-                { "argIndex": 1, "sourcePosition": { "firstLine": 31, "lastLine": 31, "firstCol": 43, "lastCol": 48 }, "approximated": true }
+                { "argIndex": 1, "sourcePosition": { "firstLine": 31, "lastLine": 31, "firstCol": 43, "lastCol": 48 } }
               ]
             },
             {
@@ -159,7 +159,6 @@ class LineMappingJsonTest {
     assertThat(argMappings).hasSize(1);
     assertThat(argMappings.get(0).getArgIndex()).isEqualTo(1);
     assertThat(argMappings.get(0).getSourcePosition().getFirstCol()).isEqualTo(43);
-    assertThat(argMappings.get(0).isApproximated()).isTrue();
 
     // Second mapping has no lhsPosition or argumentMappings
     LineMapping second = collection.getMappings().get(1);
