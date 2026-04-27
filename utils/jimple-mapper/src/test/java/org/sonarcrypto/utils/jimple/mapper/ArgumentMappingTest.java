@@ -31,9 +31,9 @@ class ArgumentMappingTest {
     var differentIndex = new ArgumentMapping(2, pos);
     var differentPos = new ArgumentMapping(1, new SourcePosition(99, 99, 0, 0));
 
-    assertThat(a).isEqualTo(b).hasSameHashCodeAs(b);
-
     assertThat(a)
+        .isEqualTo(b)
+        .hasSameHashCodeAs(b)
         .isNotEqualTo(differentIndex)
         .isNotEqualTo(differentPos)
         .isNotEqualTo(null)
