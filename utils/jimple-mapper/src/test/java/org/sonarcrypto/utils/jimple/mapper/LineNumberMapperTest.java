@@ -115,7 +115,7 @@ class LineNumberMapperTest {
   void testToString_includesLhsAndArgumentMappingsWhenPresent() {
     var sourcePos = new SourcePosition(10, 10, 3, 20);
     var lhsPos = new SourcePosition(10, 10, 3, 7);
-    var argMapping = new ArgumentMapping(1, new SourcePosition(10, 10, 11, 18), true);
+    var argMapping = new ArgumentMapping(1, new SourcePosition(10, 10, 11, 18));
     var mapping =
         new LineMapping(
             5,
