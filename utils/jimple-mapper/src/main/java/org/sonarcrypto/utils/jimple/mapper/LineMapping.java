@@ -2,6 +2,10 @@ package org.sonarcrypto.utils.jimple.mapper;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * Represents a single mapping entry from a Jimple line number to source code position. Designed
@@ -12,17 +16,34 @@ public class LineMapping {
   private final ElementType elementType;
   private final String elementSignature;
   private final SourcePosition sourcePosition;
+  @Nullable private final SourcePosition lhsPosition;
+  @Nullable private final List<ArgumentMapping> argumentMappings;
+
+  public LineMapping(
+      int jimpleLine,
+      ElementType elementType,
+      String elementSignature,
+      SourcePosition sourcePosition) {
+    this(jimpleLine, elementType, elementSignature, sourcePosition, null, null);
+  }
 
   @JsonCreator
   public LineMapping(
       @JsonProperty("jimpleLine") int jimpleLine,
       @JsonProperty("elementType") ElementType elementType,
       @JsonProperty("elementSignature") String elementSignature,
-      @JsonProperty("sourcePosition") SourcePosition sourcePosition) {
+      @JsonProperty("sourcePosition") SourcePosition sourcePosition,
+      @JsonProperty("lhsPosition") @Nullable SourcePosition lhsPosition,
+      @JsonProperty("argumentMappings") @Nullable List<ArgumentMapping> argumentMappings) {
     this.jimpleLine = jimpleLine;
     this.elementType = elementType;
     this.elementSignature = elementSignature;
     this.sourcePosition = sourcePosition;
+    this.lhsPosition = lhsPosition;
+    this.argumentMappings =
+        argumentMappings != null
+            ? Collections.unmodifiableList(new ArrayList<>(argumentMappings))
+            : null;
   }
 
   public int getJimpleLine() {
@@ -41,6 +62,21 @@ public class LineMapping {
     return sourcePosition;
   }
 
+  /** Position of the left-hand side of an assignment, or null if not applicable. */
+  @Nullable
+  public SourcePosition getLhsPosition() {
+    return lhsPosition;
+  }
+
+  /**
+   * Positions of individual arguments in a method call, or null if not available. Each entry maps a
+   * 1-based argument index to its source position.
+   */
+  @Nullable
+  public List<ArgumentMapping> getArgumentMappings() {
+    return argumentMappings;
+  }
+
   @Override
   public String toString() {
     return "LineMapping{"
@@ -53,6 +89,8 @@ public class LineMapping {
         + '\''
         + ", sourcePosition="
         + sourcePosition
+        + (lhsPosition != null ? ", lhsPosition=" + lhsPosition : "")
+        + (argumentMappings != null ? ", argumentMappings=" + argumentMappings : "")
         + '}';
   }
 

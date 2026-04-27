@@ -101,6 +101,44 @@ class LineNumberMapperTest {
   }
 
   @Test
+  void testStmtPosition_newFieldsDefaultToNull() {
+    LineNumberMapper mapper = new LineNumberMapper("com.example.TestClass");
+    mapper.recordStmtPosition(10, "x = 5", new FullPosition(18, 9, 18, 25));
+
+    LineMapping mapping = mapper.getCollection().getMappings().get(0);
+
+    assertThat(mapping.getLhsPosition()).isNull();
+    assertThat(mapping.getArgumentMappings()).isNull();
+  }
+
+  @Test
+  void testToString_includesLhsAndArgumentMappingsWhenPresent() {
+    var sourcePos = new SourcePosition(10, 10, 3, 20);
+    var lhsPos = new SourcePosition(10, 10, 3, 7);
+    var argMapping = new ArgumentMapping(1, new SourcePosition(10, 10, 11, 18));
+    var mapping =
+        new LineMapping(
+            5,
+            ElementType.STATEMENT,
+            "x = foo(bar)",
+            sourcePos,
+            lhsPos,
+            java.util.List.of(argMapping));
+
+    String str = mapping.toString();
+    assertThat(str).contains("lhsPosition=").contains("argumentMappings=");
+  }
+
+  @Test
+  void testToString_omitsLhsAndArgumentMappingsWhenAbsent() {
+    var mapping =
+        new LineMapping(5, ElementType.STATEMENT, "x = 5", new SourcePosition(10, 10, 3, 8));
+
+    String str = mapping.toString();
+    assertThat(str).doesNotContain("lhsPosition=").doesNotContain("argumentMappings=");
+  }
+
+  @Test
   void testNoPositionInformationIsRecorded() {
     // Even NoPositionInformation should be recorded for completeness
     LineNumberMapper mapper = new LineNumberMapper("com.example.TestClass");

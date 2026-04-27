@@ -65,6 +65,10 @@ e2e/src/test/resources/SonarPrivatePlugins/*.jar
 
 # Claude Code temporary files
 .claude/
+claude-*.txt
+.claude-plan.md
+.mcp.json
+.sonar-code-context
 
 # Extracted CrySL rules
 /utils/cognicrypt/src/main/resources/crysl_rules/*

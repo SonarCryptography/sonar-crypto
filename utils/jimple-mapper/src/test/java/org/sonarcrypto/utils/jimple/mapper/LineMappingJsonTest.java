@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import sootup.core.model.FullPosition;
@@ -106,6 +107,64 @@ class LineMappingJsonTest {
     assertThat(root.get("className").asText()).isEqualTo("com.example.TestClass");
     assertThat(root.get("sourceFileName").asText()).isEqualTo("TestClass.java");
     assertThat(root.get("mappings").size()).isEqualTo(2);
+  }
+
+  @Test
+  void testDeserializeNewFormat() throws IOException {
+    // The new format has an absolute sourceFileName, plus optional lhsPosition and argumentMappings
+    String json =
+        """
+        {
+          "className": "com.example.crypto.WeakCryptoExamples",
+          "sourceFileName": "/path/to/WeakCryptoExamples.java",
+          "mappings": [
+            {
+              "jimpleLine": 17,
+              "elementType": "STATEMENT",
+              "elementSignature": "_0 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>(\\"DES\\")",
+              "sourcePosition": { "firstLine": 31, "lastLine": 31, "firstCol": 24, "lastCol": 49 },
+              "lhsPosition": { "firstLine": 31, "lastLine": 31, "firstCol": 24, "lastCol": 36 },
+              "argumentMappings": [
+                { "argIndex": 1, "sourcePosition": { "firstLine": 31, "lastLine": 31, "firstCol": 43, "lastCol": 48 } }
+              ]
+            },
+            {
+              "jimpleLine": 18,
+              "elementType": "STATEMENT",
+              "elementSignature": "cipher = _0",
+              "sourcePosition": { "firstLine": 31, "lastLine": 31, "firstCol": 8, "lastCol": 50 }
+            }
+          ]
+        }
+        """;
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    LineMappingCollection collection = objectMapper.readValue(json, LineMappingCollection.class);
+
+    assertThat(collection.getClassName()).isEqualTo("com.example.crypto.WeakCryptoExamples");
+    assertThat(collection.getSourceFileName()).isEqualTo("/path/to/WeakCryptoExamples.java");
+    assertThat(collection.size()).isEqualTo(2);
+
+    // First mapping has lhsPosition and argumentMappings
+    LineMapping first = collection.getMappings().get(0);
+    assertThat(first.getJimpleLine()).isEqualTo(17);
+    assertThat(first.getSourcePosition().getFirstLine()).isEqualTo(31);
+    assertThat(first.getSourcePosition().getFirstCol()).isEqualTo(24);
+    assertThat(first.getSourcePosition().getLastCol()).isEqualTo(49);
+    assertThat(first.getLhsPosition()).isNotNull();
+    assertThat(first.getLhsPosition().getFirstCol()).isEqualTo(24);
+    assertThat(first.getLhsPosition().getLastCol()).isEqualTo(36);
+    assertThat(first.getArgumentMappings()).isNotNull();
+    List<ArgumentMapping> argMappings = first.getArgumentMappings();
+    assertThat(argMappings).hasSize(1);
+    assertThat(argMappings.get(0).getArgIndex()).isEqualTo(1);
+    assertThat(argMappings.get(0).getSourcePosition().getFirstCol()).isEqualTo(43);
+
+    // Second mapping has no lhsPosition or argumentMappings
+    LineMapping second = collection.getMappings().get(1);
+    assertThat(second.getJimpleLine()).isEqualTo(18);
+    assertThat(second.getLhsPosition()).isNull();
+    assertThat(second.getArgumentMappings()).isNull();
   }
 
   @Test
