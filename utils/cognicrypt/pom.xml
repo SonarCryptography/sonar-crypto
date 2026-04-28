@@ -56,6 +56,32 @@
 			<artifactId>sonar-plugin-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<!-- CrySL ruleset pom artifacts — optional so their transitive library JARs don't propagate to dependents;
+		     declared here so copy-dependencies can resolve and copy the library JARs into the ruleset subfolders. -->
+		<dependency>
+			<groupId>de.darmstadt.tu.crossing</groupId>
+			<artifactId>JavaCryptographicArchitecture</artifactId>
+			<type>pom</type>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>de.fraunhofer.iem</groupId>
+			<artifactId>BouncyCastle</artifactId>
+			<type>pom</type>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>de.darmstadt.tu.crossing</groupId>
+			<artifactId>Tink</artifactId>
+			<type>pom</type>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>de.paderborn.uni</groupId>
+			<artifactId>BouncyCastle-JCA</artifactId>
+			<type>pom</type>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 
     <build>
@@ -63,6 +89,47 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-bc-dep</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <includeArtifactIds>bcprov-jdk18on</includeArtifactIds>
+                            <excludeTransitive>true</excludeTransitive>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${project.basedir}/src/main/resources/crysl_rules/bc</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-bc-jca-dep</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <includeArtifactIds>bcprov-jdk18on</includeArtifactIds>
+                            <excludeTransitive>true</excludeTransitive>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${project.basedir}/src/main/resources/crysl_rules/bc-jca</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-tink-dep</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <includeArtifactIds>tink</includeArtifactIds>
+                            <excludeTransitive>true</excludeTransitive>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${project.basedir}/src/main/resources/crysl_rules/tink</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

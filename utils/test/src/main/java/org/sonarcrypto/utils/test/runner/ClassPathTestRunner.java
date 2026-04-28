@@ -30,9 +30,10 @@ public non-sealed class ClassPathTestRunner
       final String path, final Ruleset ruleset) throws IOException, URISyntaxException {
 
     final var provider = new CryslRuleProvider();
-    final var scanner =
-        new HeadlessJavaScanner(path, provider.extractRulesetToTempDir(ruleset).toString());
+    final var rulesetPaths = provider.extractRulesetToTempDir(ruleset);
+    final var scanner = new HeadlessJavaScanner(path, rulesetPaths.rulesetZip().toString());
     scanner.setFramework(SOOT_UP);
+    scanner.setAddClassPath(rulesetPaths.dependencyClasspath());
     scanner.scan();
     return scanner.getCollectedErrors();
   }
