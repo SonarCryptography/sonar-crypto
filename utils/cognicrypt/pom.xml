@@ -98,7 +98,6 @@
                         <phase>validate</phase>
                         <configuration>
                             <includeArtifactIds>bcprov-jdk18on</includeArtifactIds>
-                            <excludeTransitive>true</excludeTransitive>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/src/main/resources/crysl_rules/bc</outputDirectory>
                         </configuration>
@@ -111,7 +110,6 @@
                         <phase>validate</phase>
                         <configuration>
                             <includeArtifactIds>bcprov-jdk18on</includeArtifactIds>
-                            <excludeTransitive>true</excludeTransitive>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/src/main/resources/crysl_rules/bc-jca</outputDirectory>
                         </configuration>
@@ -124,7 +122,6 @@
                         <phase>validate</phase>
                         <configuration>
                             <includeArtifactIds>tink</includeArtifactIds>
-                            <excludeTransitive>true</excludeTransitive>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/src/main/resources/crysl_rules/tink</outputDirectory>
                         </configuration>
