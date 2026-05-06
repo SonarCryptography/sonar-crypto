@@ -6,9 +6,12 @@ import crypto.analysis.errors.RequiredPredicateError;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.RuleKindUtils;
-import org.sonarcrypto.ccerror.violations.SimpleArgViolation;
+import org.sonarcrypto.ccerror.violations.ArgViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
+import org.sonarcrypto.ccerror.violations.reasons.ImproperGeneratedReason;
+import org.sonarcrypto.ccerror.violations.reasons.UndefinedReason;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
@@ -25,7 +28,11 @@ public class RequiredPredicateErrorConverter {
       LOGGER.error(
           "Unsupported required predicate error {}! Generating general violation.",
           error.getClass().getName());
-      return SimpleArgViolation.general(CallInfo.none(), error.toErrorMarkerString());
+
+      return new ArgViolation(
+          CryptoRulesDefinitions.GENERAL,
+          CallInfo.none(),
+          new UndefinedReason(error.toErrorMarkerString()));
     }
   }
 
@@ -36,18 +43,25 @@ public class RequiredPredicateErrorConverter {
 
     if (firstViolatedPredicate == null) {
       LOGGER.error("Violated predicates are empty! Generating general violation.");
-      return SimpleArgViolation.general(CallInfo.none(), error.toErrorMarkerString());
+
+      return new ArgViolation(
+          CryptoRulesDefinitions.GENERAL,
+          CallInfo.none(),
+          new UndefinedReason(error.toErrorMarkerString()));
     }
 
-    return SimpleArgViolation.of(
+    return new ArgViolation(
         RuleKindUtils.detectRuleKind(firstViolatedPredicate.predicate()),
-        CallInfo.of(firstViolatedPredicate.statement(), firstViolatedPredicate.index()));
+        CallInfo.of(firstViolatedPredicate.statement(), firstViolatedPredicate.index()),
+        new ImproperGeneratedReason());
   }
 
   public static Violation generateReqPredMessage(RequiredPredicateError error) {
     final var contradictedPredicates = error.getContradictedPredicates();
 
-    return SimpleArgViolation.general(
-        CallInfo.of(contradictedPredicates.statement(), contradictedPredicates.index()));
+    return new ArgViolation(
+        CryptoRulesDefinitions.GENERAL,
+        CallInfo.of(contradictedPredicates.statement(), contradictedPredicates.index()),
+        new ImproperGeneratedReason());
   }
 }

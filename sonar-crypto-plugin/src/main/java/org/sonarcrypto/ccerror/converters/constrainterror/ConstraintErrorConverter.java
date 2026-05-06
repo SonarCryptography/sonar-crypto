@@ -2,7 +2,6 @@ package org.sonarcrypto.ccerror.converters.constrainterror;
 
 import static java.lang.Math.min;
 import static org.sonarcrypto.ccerror.RuleKindUtils.detectRuleKind;
-import static org.sonarcrypto.utils.sonar.TextUtils.quote;
 
 import crypto.analysis.errors.ConstraintError;
 import crypto.constraints.violations.ViolatedBinaryConstraint;
@@ -14,8 +13,10 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.CryptoRulesDefinitions;
-import org.sonarcrypto.ccerror.violations.*;
-import org.sonarcrypto.utils.cognicrypt.crysl.Args;
+import org.sonarcrypto.ccerror.violations.ArgViolation;
+import org.sonarcrypto.ccerror.violations.Violation;
+import org.sonarcrypto.ccerror.violations.reasons.ForbiddenTypeReason;
+import org.sonarcrypto.ccerror.violations.reasons.InvalidValuesReason;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
@@ -52,10 +53,10 @@ public class ConstraintErrorConverter {
     final var constraintVar = valueConstraint.getConstraint().getVar();
     final var splitter = constraintVar.getSplitter();
 
-    return new ArgsViolation(
+    return new ArgViolation(
         detectRuleKind(constraintVar),
         CallInfo.of(constraint.parameter()),
-        new Args(
+        new InvalidValuesReason(
             violatingValues.stream()
                 .map(
                     violatingValue -> {
@@ -88,10 +89,10 @@ public class ConstraintErrorConverter {
 
   static Violation generateViolatedNeverTypeOfConstraintMessage(
       ViolatedNeverTypeOfConstraint constraint) {
-    return new SimpleArgViolation(
+    return new ArgViolation(
         CryptoRulesDefinitions.KEY_MATERIAL,
         CallInfo.of(constraint.parameter()),
-        "should never be of the type " + quote(constraint.notAllowedType()) + ".");
+        new ForbiddenTypeReason(constraint.notAllowedType()));
   }
 
   static @Nullable Violation generateViolatedBinaryConstraintMessage(

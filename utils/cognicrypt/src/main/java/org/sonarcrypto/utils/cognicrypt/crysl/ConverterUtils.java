@@ -7,11 +7,17 @@ import static org.sonarcrypto.utils.sonar.TextUtils.code;
 import boomerang.scope.sootup.jimple.JimpleUpStatement;
 import crypto.analysis.errors.AbstractError;
 import crypto.utils.CrySLUtils;
+import crysl.rule.CrySLMethod;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import org.jspecify.annotations.Nullable;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
+import org.sonarcrypto.utils.sonar.TextUtils;
+import org.sonarcrypto.utils.sonar.TextUtils.Code;
 
 public class ConverterUtils {
   /**
@@ -114,5 +120,23 @@ public class ConverterUtils {
     }
 
     return inputFile.selectLine(max(error.getLineNumber(), 1));
+  }
+
+  public static String joinMethods(
+      @Nullable String prefix_when_multiple,
+      Collection<CrySLMethod> methods,
+      @Nullable String lastDelimiter) {
+    final var set = new HashSet<String>(methods.size());
+    final var methodList = new ArrayList<Code>(methods.size());
+
+    methods.stream()
+        .map(it -> shortNameOf(it.getDeclaringClassName(), it.getMethodName()))
+        .forEach(
+            it -> {
+              if (set.add(it)) methodList.add(code(it));
+            });
+
+    return (prefix_when_multiple != null && methodList.size() > 1 ? prefix_when_multiple + " " : "")
+        + TextUtils.join(methodList, lastDelimiter);
   }
 }
