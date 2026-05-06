@@ -1,7 +1,7 @@
 package org.sonarcrypto.ccerror;
 
 import static org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils.selectLocation;
-import static org.sonarcrypto.utils.sonar.TextUtils.code;
+import static org.sonarcrypto.utils.sonar.TextUtils.*;
 
 import boomerang.scope.Method;
 import crypto.analysis.errors.*;
@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
+import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.converters.ForbiddenMethodErrorConverter;
 import org.sonarcrypto.ccerror.converters.ImpreciseValueExtractionErrorConverter;
 import org.sonarcrypto.ccerror.converters.PredicateContradictionErrorConverter;
@@ -19,10 +20,10 @@ import org.sonarcrypto.ccerror.converters.constrainterror.ConstraintErrorConvert
 import org.sonarcrypto.ccerror.converters.constrainterror.RequiredPredicateErrorConverter;
 import org.sonarcrypto.ccerror.converters.ordererror.IncompleteOperationErrorConverter;
 import org.sonarcrypto.ccerror.converters.ordererror.TypestateErrorConverter;
-import org.sonarcrypto.ccerror.violations.SimpleArgViolation;
+import org.sonarcrypto.ccerror.violations.CallViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
+import org.sonarcrypto.ccerror.violations.reasons.UndefinedReason;
 import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
-import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
 public class CcErrorConverter {
@@ -60,7 +61,9 @@ public class CcErrorConverter {
     }
 
     if (violation == null) {
-      violation = SimpleArgViolation.general(CallInfo.none(), error.toErrorMarkerString());
+      violation =
+          new CallViolation(
+              CryptoRulesDefinitions.GENERAL, new UndefinedReason(error.toErrorMarkerString()));
     }
 
     final var issue = this.getContext().newIssue();
@@ -72,9 +75,10 @@ public class CcErrorConverter {
                 "Cryptographic weakness in method %s detected:\n",
                 code(SignatureUtils.shortNameOf(method))));
 
-    location.at(selectLocation(inputFile, error));
+    final var issueLocation = selectLocation(inputFile, error);
+    location.at(issueLocation);
 
-    issue.forRule(violation.rulesDefinition().getRuleKey());
+    issue.forRule(violation.getRulesDefinition().getRuleKey());
 
     if (messageBuilder.length() > NewIssueLocation.MESSAGE_MAX_SIZE) {
       messageBuilder.setLength(NewIssueLocation.MESSAGE_MAX_SIZE);
@@ -84,7 +88,15 @@ public class CcErrorConverter {
     final var message = messageBuilder.toString();
     location.message(message);
 
-    LOGGER.info("{}: {}", violation.rulesDefinition().getRuleKind(), message);
+    LOGGER.info(
+        "{} @ [{}:{}/{}:{}]\n{}: {}",
+        inputFile.filename(),
+        issueLocation.start().line(),
+        issueLocation.start().lineOffset(),
+        issueLocation.end().line(),
+        issueLocation.end().lineOffset(),
+        violation.getRulesDefinition().getRuleKind(),
+        violation.getReason());
 
     issue.at(location);
     issue.save();

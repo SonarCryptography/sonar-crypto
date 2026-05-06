@@ -38,13 +38,15 @@ public class CryptoRulesDefinitions {
           .withResourcesSection(
               """
               <ul>
-              <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a></li>
-              <ul>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a></li>
-              </ul>
-              <li><a href="https://en.wikipedia.org/wiki/Length_extension_attack">Length extension attack</a></li>
+                <li><a href="https://docs.oracle.com/en/java/javase/25/security/java-cryptography-architecture-jca-reference-guide.html">Java Cryptography Architecture (JCA) Reference Guide</a></li>
+                <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a>
+                  <ul>
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a></li>
+                  </ul>
+                </li>
+                <li><a href="https://en.wikipedia.org/wiki/Length_extension_attack">Length extension attack</a></li>
               </ul>
               """)
           .build();
@@ -77,10 +79,10 @@ public class CryptoRulesDefinitions {
               <p>Broken encryption algorithms, such DES, allow attackers to decrypt the content
               through brute-force attacks and to reverse-compute the secret key.</p>
 
-              <h2>Broken or Weak Encryption Modes</h2>
-              <p>The ECB mode of AES, for example, if used for encrypting multiple blocks,
-              allows attackers to infer the secret key
-              by finding patterns in the encrypted data.</p>
+              <h2>Dummy Algorithms</h2>
+              <p>The JCA, for example, provides an identity cipher (or <i>NULL cipher</i>)
+              that does not transform the input at all,
+              meaning that the output is the unaltered plain text.</p>
               """)
           .withHowToFixSection(
               """
@@ -100,13 +102,15 @@ public class CryptoRulesDefinitions {
           .withResourcesSection(
               """
               <ul>
-              <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a></li>
-              <ul>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a></li>
-              </ul>
-              <li><a href="https://en.wikipedia.org/wiki/Length_extension_attack">Length extension attack</a></li>
+                <li><a href="https://docs.oracle.com/en/java/javase/25/security/java-cryptography-architecture-jca-reference-guide.html">Java Cryptography Architecture (JCA) Reference Guide</a></li>
+                <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a>
+                  <ul>
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a></li>
+                  </ul>
+                </li>
+                <li><a href="https://en.wikipedia.org/wiki/Length_extension_attack">Length extension attack</a></li>
               </ul>
               """)
           .build();
@@ -122,6 +126,15 @@ public class CryptoRulesDefinitions {
           .withKey("mode")
           .withStatus(RuleStatus.READY)
           .withSeverity(Severity.CRITICAL)
+          .withAssessSection(
+              """
+              <p>Cryptographic issues are mostly a serious problem, as they allow attackers to break the encryption, e.g., to disclose the information or to sign data in your name.</p>
+
+              <h2>Broken or Weak Encryption Modes</h2>
+              <p>The ECB mode of AES, for example, if used for encrypting multiple blocks,
+              allows attackers to infer the secret key
+              by finding patterns in the encrypted data.</p>
+              """)
           .build();
 
   public static final CryptoRulesDefinition PADDING =
@@ -172,7 +185,9 @@ public class CryptoRulesDefinitions {
           .withHowToFixSection(
               """
               <h2>Key Generator</h2>
-              <p>Choose an appropriate method to generate the key.</p>
+              <p>Choose an appropriate method to generate the key.
+              Use a cryptographically secure pseudorandom number generator (CSPRNG)
+              to generate key material that is based on randomness.</p>
 
               <h2>Key Length</h2>
               <p>Choose an appropriate key length.
@@ -188,16 +203,18 @@ public class CryptoRulesDefinitions {
               </table>
 
               <h2>Inappropriate Type</h2>
-              <p>Use a value generated by a cryptographically secure pseudo-random number generator (CSPRNG)
-              to generate the value.
-              Constant values or strings should never be used.</p>
+              <p>Never use constant values or strings for key material.</p>
               """)
           .withResourcesSection(
               """
               <ul>
-              <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a></li>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+                <li><a href="https://docs.oracle.com/en/java/javase/25/security/java-cryptography-architecture-jca-reference-guide.html">Java Cryptography Architecture (JCA) Reference Guide</a></li>
+                <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series Project</a>
+                  <ul>
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+                  </ul>
+                </li>
               </ul>
               """)
           .build();
@@ -219,17 +236,32 @@ public class CryptoRulesDefinitions {
               as they allow attackers to break the encryption,
               e.g., to disclose the information or to sign data in your name.</p>
 
-              <h2>Forbidden Method</h2>
+              <h2>Cryptographically Unsecure Method</h2>
               <p>A call to a cryptographically unsecure method may result a weak encryption.</p>
+
+              <h2>Non-constant Time Computation</h2>
+              <p>Using functions that compute in non-constant time, such as `Object.equals`,
+              allow an attacker to gain information about the encryption, e.g.,
+              how many digits they guessed correctly.</p>
               """)
           .withHowToFixSection(
               """
-              <p>Use a cryptographically secure method.</p>
+              <h2>Cryptographically Secure Method</h2>
+              <p>Use a cryptographically secure method for the operation.</p>
+
+              <h2>Constant-Time Computation</h2>
+              <p>Use methods that compute values in a constant time,
+              such as `MessageDigest.isEqual` to compare two byte arrays.</p>
               """)
           .withResourcesSection(
               """
               <ul>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+                <li><a href="https://docs.oracle.com/en/java/javase/25/security/java-cryptography-architecture-jca-reference-guide.html">Java Cryptography Architecture (JCA) Reference Guide</a>
+                  <ul>
+                      <li><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/security/MessageDigest.html#isEqual(byte%5B%5D,byte%5B%5D)"><code>MessageDigest.isEqual</code></a></a></li>
+                  </ul>
+                </li>
+                <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
               </ul>
               """)
           .build();
@@ -252,8 +284,9 @@ public class CryptoRulesDefinitions {
               e.g., to disclose the information or to sign data in your name.</p>
 
               <h2>Uncaught Exception</h2>
-              <p>Exceptions concerning cryptography may contain sensitive information that
-              might be useful for the attacker to break the encryption.</p>
+              <p>Exceptions concerning cryptography, e.g., an invalid padding,
+              may contain sensitive information that might be useful for the attacker
+              to break the encryption.</p>
               """)
           .withHowToFixSection(
               """
@@ -262,7 +295,8 @@ public class CryptoRulesDefinitions {
           .withResourcesSection(
               """
               <ul>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+                <li><a href="https://docs.oracle.com/en/java/javase/25/security/java-cryptography-architecture-jca-reference-guide.html">Java Cryptography Architecture (JCA) Reference Guide</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Padding_oracle_attack">Padding oracle attack</a></li>
               </ul>
               """)
           .build();
@@ -297,7 +331,13 @@ public class CryptoRulesDefinitions {
           .withResourcesSection(
               """
               <ul>
-              <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+                <li><a href="https://docs.oracle.com/en/java/javase/25/security/java-cryptography-architecture-jca-reference-guide.html">Java Cryptography Architecture (JCA) Reference Guide</a></li>
+                <li><a href="https://cheatsheetseries.owasp.org/index.html">OWASP Cheat Sheet Series</a>
+                  <ul>
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
+                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a></li>
+                  </ul>
+                </li>
               </ul>
               """)
           .build();
