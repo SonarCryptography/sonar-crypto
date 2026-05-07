@@ -1,4 +1,4 @@
-package org.sonarcrypto.ccerror.violations.reasons;
+package org.sonarcrypto.ccerror.causes;
 
 import static org.sonarcrypto.utils.sonar.TextUtils.*;
 
@@ -6,11 +6,11 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 @NullMarked
-public final class ForbiddenTypeReason extends ValueReason {
+public final class ForbiddenTypeCause extends ValueCause {
 
   private final String disallowedType;
 
-  public ForbiddenTypeReason(String disallowedType) {
+  public ForbiddenTypeCause(String disallowedType) {
     this.disallowedType = disallowedType;
   }
 
@@ -32,7 +32,7 @@ public final class ForbiddenTypeReason extends ValueReason {
       return false;
     }
 
-    ForbiddenTypeReason that = (ForbiddenTypeReason) o;
+    ForbiddenTypeCause that = (ForbiddenTypeCause) o;
     return disallowedType.equals(that.disallowedType);
   }
 
@@ -43,6 +43,6 @@ public final class ForbiddenTypeReason extends ValueReason {
 
   @Override
   public String toString() {
-    return "ForbiddenTypeReason{" + "disallowedType=" + disallowedType + '}';
+    return "ForbiddenTypeCause{" + "disallowedType=" + disallowedType + '}';
   }
 }

@@ -13,10 +13,10 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.CryptoRulesDefinitions;
-import org.sonarcrypto.ccerror.violations.ArgViolation;
+import org.sonarcrypto.ccerror.causes.ForbiddenTypeCause;
+import org.sonarcrypto.ccerror.causes.InvalidValueCause;
+import org.sonarcrypto.ccerror.violations.ValueViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
-import org.sonarcrypto.ccerror.violations.reasons.ForbiddenTypeReason;
-import org.sonarcrypto.ccerror.violations.reasons.InvalidValuesReason;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
@@ -53,10 +53,10 @@ public class ConstraintErrorConverter {
     final var constraintVar = valueConstraint.getConstraint().getVar();
     final var splitter = constraintVar.getSplitter();
 
-    return new ArgViolation(
+    return new ValueViolation(
         detectRuleKind(constraintVar),
         CallInfo.of(constraint.parameter()),
-        new InvalidValuesReason(
+        new InvalidValueCause(
             violatingValues.stream()
                 .map(
                     violatingValue -> {
@@ -89,10 +89,10 @@ public class ConstraintErrorConverter {
 
   static Violation generateViolatedNeverTypeOfConstraintMessage(
       ViolatedNeverTypeOfConstraint constraint) {
-    return new ArgViolation(
+    return new ValueViolation(
         CryptoRulesDefinitions.KEY_MATERIAL,
         CallInfo.of(constraint.parameter()),
-        new ForbiddenTypeReason(constraint.notAllowedType()));
+        new ForbiddenTypeCause(constraint.notAllowedType()));
   }
 
   static @Nullable Violation generateViolatedBinaryConstraintMessage(

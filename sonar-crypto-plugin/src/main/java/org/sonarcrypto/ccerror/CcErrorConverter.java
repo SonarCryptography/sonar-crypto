@@ -12,6 +12,7 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonarcrypto.CryptoRulesDefinitions;
+import org.sonarcrypto.ccerror.causes.UndefinedCause;
 import org.sonarcrypto.ccerror.converters.ForbiddenMethodErrorConverter;
 import org.sonarcrypto.ccerror.converters.ImpreciseValueExtractionErrorConverter;
 import org.sonarcrypto.ccerror.converters.PredicateContradictionErrorConverter;
@@ -22,7 +23,6 @@ import org.sonarcrypto.ccerror.converters.ordererror.IncompleteOperationErrorCon
 import org.sonarcrypto.ccerror.converters.ordererror.TypestateErrorConverter;
 import org.sonarcrypto.ccerror.violations.CallViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
-import org.sonarcrypto.ccerror.violations.reasons.UndefinedReason;
 import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
 
 @NullMarked
@@ -63,7 +63,7 @@ public class CcErrorConverter {
     if (violation == null) {
       violation =
           new CallViolation(
-              CryptoRulesDefinitions.GENERAL, new UndefinedReason(error.toErrorMarkerString()));
+              CryptoRulesDefinitions.GENERAL, new UndefinedCause(error.toErrorMarkerString()));
     }
 
     final var issue = this.getContext().newIssue();

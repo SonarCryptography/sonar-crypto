@@ -3,23 +3,23 @@ package org.sonarcrypto.ccerror.violations;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.RuleKind;
-import org.sonarcrypto.ccerror.violations.reasons.Reason;
+import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
-public final class ArgViolation extends Violation {
+public final class ValueViolation extends Violation {
 
   private final @Nullable CallInfo callInfo;
 
-  public ArgViolation(
-      CryptoRulesDefinition rulesDefinition, @Nullable CallInfo callInfo, Reason reason) {
-    super(rulesDefinition, reason);
+  public ValueViolation(
+      CryptoRulesDefinition rulesDefinition, @Nullable CallInfo callInfo, Cause cause) {
+    super(rulesDefinition, cause);
     this.callInfo = callInfo;
   }
 
-  public ArgViolation(RuleKind ruleKind, @Nullable CallInfo callInfo, Reason reason) {
-    super(ruleKind, reason);
+  public ValueViolation(RuleKind ruleKind, @Nullable CallInfo callInfo, Cause cause) {
+    super(ruleKind, cause);
     this.callInfo = callInfo;
   }
 

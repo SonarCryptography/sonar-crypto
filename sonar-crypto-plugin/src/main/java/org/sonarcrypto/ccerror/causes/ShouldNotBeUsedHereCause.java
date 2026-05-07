@@ -1,9 +1,9 @@
-package org.sonarcrypto.ccerror.violations.reasons;
+package org.sonarcrypto.ccerror.causes;
 
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-public final class ShouldNotBeUsedHereReason extends ValueReason {
+public final class ShouldNotBeUsedHereCause extends ValueCause {
   @Override
   public void createMessage(StringBuilder messageBuilder) {
     messageBuilder.append("should not be used here.");
@@ -11,6 +11,6 @@ public final class ShouldNotBeUsedHereReason extends ValueReason {
 
   @Override
   public String toString() {
-    return "ShouldNotBeUsedHereReason";
+    return "ShouldNotBeUsedHereCause";
   }
 }
