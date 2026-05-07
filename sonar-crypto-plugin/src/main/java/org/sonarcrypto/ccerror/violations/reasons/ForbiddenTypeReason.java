@@ -6,7 +6,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 @NullMarked
-public final class ForbiddenTypeReason extends ArgsReason {
+public final class ForbiddenTypeReason extends ValueReason {
 
   private final String disallowedType;
 

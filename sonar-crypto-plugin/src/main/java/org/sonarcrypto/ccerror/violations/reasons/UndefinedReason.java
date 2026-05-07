@@ -4,7 +4,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 @NullMarked
-public final class UndefinedReason extends ArgsReason {
+public final class UndefinedReason extends ValueReason {
 
   private final String message;
 

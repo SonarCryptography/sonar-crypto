@@ -60,7 +60,7 @@ public class RequiredPredicateErrorConverter {
     final var contradictedPredicates = error.getContradictedPredicates();
 
     return new ArgViolation(
-        CryptoRulesDefinitions.GENERAL,
+        RuleKindUtils.detectRuleKind(contradictedPredicates.predicate()),
         CallInfo.of(contradictedPredicates.statement(), contradictedPredicates.index()),
         new ImproperGeneratedReason());
   }

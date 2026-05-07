@@ -3,11 +3,13 @@ package org.sonarcrypto.ccerror;
 import crysl.rule.CrySLObject;
 import crysl.rule.CrySLPredicate;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.RuleKind;
 
 @NullMarked
 public class RuleKindUtils {
+  private static final Pattern KEY_MATERIAL_PATTERN = Pattern.compile("(?>key|length|rand|seed)");
 
   public static RuleKind detectRuleKind(CrySLPredicate pred) {
     return detectRuleKind(pred.getPredName());
@@ -43,7 +45,7 @@ public class RuleKindUtils {
     if (name.contains("pad")) {
       return RuleKind.PADDING;
     }
-    if (name.contains("keylen") || name.contains("length") || name.contains("keymat")) {
+    if (KEY_MATERIAL_PATTERN.matcher(name).find()) {
       return RuleKind.KEY_MATERIAL;
     }
     return RuleKind.GENERAL;
