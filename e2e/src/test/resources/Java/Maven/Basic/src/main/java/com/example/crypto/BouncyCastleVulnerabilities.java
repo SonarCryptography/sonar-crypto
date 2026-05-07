@@ -30,6 +30,7 @@ public class BouncyCastleVulnerabilities {
     // Weak IV - VULNERABILITY
     private static final byte[] WEAK_IV = {0, 0, 0, 0, 0, 0, 0, 0};
 
+    // FIXME: Custom APIs are not supported, yet.
     /**
      * Uses DES with BouncyCastle - VULNERABILITY
      */
@@ -37,62 +38,68 @@ public class BouncyCastleVulnerabilities {
         // DES is weak and deprecated
         DESEngine desEngine = new DESEngine();
         PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(desEngine));
-        
+
         // Using hard-coded key - VULNERABILITY
         KeyParameter keyParam = new KeyParameter(HARDCODED_KEY, 0, 8); // DES uses 8 bytes
-        
+
         // Using weak IV - VULNERABILITY
         ParametersWithIV params = new ParametersWithIV(keyParam, WEAK_IV);
         cipher.init(true, params);
-        
+
         byte[] output = new byte[cipher.getOutputSize(plaintext.length)];
         int len = cipher.processBytes(plaintext, 0, plaintext.length, output, 0);
         cipher.doFinal(output, len);
-        
+
         return output;
     }
-
+    
+    // FIXME: Custom APIs are not supported, yet.
     /**
      * Uses RC4 stream cipher - VULNERABILITY
      */
     public byte[] encryptWithRC4(byte[] plaintext) {
         // RC4 is considered insecure
         RC4Engine rc4 = new RC4Engine();
-        
+
         // Using hard-coded key - VULNERABILITY
         KeyParameter keyParam = new KeyParameter(HARDCODED_KEY);
         rc4.init(true, keyParam);
-        
+
         byte[] ciphertext = new byte[plaintext.length];
         rc4.processBytes(plaintext, 0, plaintext.length, ciphertext, 0);
-        
+
         return ciphertext;
     }
 
+    // FIXME: Reports Blowfish as unsecure.
+    // FIXME: Finds the weak key, but for a different reason.
     /**
      * Uses Blowfish with small key - VULNERABILITY
      */
     public byte[] encryptWithWeakBlowfish(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance("Blowfish", "BC");
-        
+        // Blowfish is considered weak and insecure
+        Cipher cipher = Cipher.getInstance("Blowfish", "BC"); // CC: ALGORITHM/InvalidValue "Blowfish"
+
         // Using very short key - VULNERABILITY
         byte[] shortKey = "key".getBytes(); // Only 3 bytes - too short
-        SecretKeySpec keySpec = new SecretKeySpec(shortKey, "Blowfish");
-        
+        SecretKeySpec keySpec = new SecretKeySpec(shortKey, "Blowfish"); // CC: ALGORITHM/InvalidValue "Blowfish", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
+
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
         return cipher.doFinal(data);
     }
 
+    // FIXME: Reports IDEA as unsecure.
+    // FIXME: Finds the weak key, but for a different reason.
     /**
      * Uses IDEA cipher without proper key management - VULNERABILITY
      */
     public byte[] encryptWithIDEA(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance("IDEA", "BC");
-        
+        Cipher cipher = Cipher.getInstance("IDEA", "BC"); // CC: ALGORITHM/InvalidValue "IDEA"
+
         // Hard-coded key - VULNERABILITY
         byte[] ideaKey = "0123456789abcdef".getBytes(); // 16 bytes for IDEA
-        SecretKeySpec keySpec = new SecretKeySpec(ideaKey, "IDEA");
-        
+        SecretKeySpec keySpec = new SecretKeySpec(ideaKey, "IDEA"); // CC: ALGORITHM/InvalidValue "IDEA", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
+
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
         return cipher.doFinal(data);
     }
@@ -102,12 +109,12 @@ public class BouncyCastleVulnerabilities {
      */
     public byte[] encryptWithDeprecatedCipher(byte[] data) throws Exception {
         // Using old cipher transformation that may be vulnerable
-        Cipher cipher = Cipher.getInstance("DESede/ECB/NoPadding", "BC");
-        
+        Cipher cipher = Cipher.getInstance("DESede/ECB/NoPadding", "BC"); // CC: ALGORITHM/InvalidValue "DESede"
+
         // Hard-coded 3DES key - VULNERABILITY
         byte[] tripleDesKey = "MySecretKeyForTripleDES123!".getBytes();
-        SecretKeySpec keySpec = new SecretKeySpec(tripleDesKey, 0, 24, "DESede");
-        
+        SecretKeySpec keySpec = new SecretKeySpec(tripleDesKey, 0, 24, "DESede"); // CC: ALGORITHM/InvalidValue "DESede", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
+
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
         return cipher.doFinal(data);
     }
@@ -116,20 +123,21 @@ public class BouncyCastleVulnerabilities {
      * Uses weak parameters with AES - VULNERABILITY
      */
     public byte[] encryptAESWithWeakParams(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "BC");
-        
+        Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "BC"); // CC: MODE "CBC"
+
         // Using predictable key - VULNERABILITY
         byte[] predictableKey = new byte[16];
         for (int i = 0; i < 16; i++) {
             predictableKey[i] = (byte) i; // Sequential bytes - predictable
         }
-        
-        SecretKeySpec keySpec = new SecretKeySpec(predictableKey, "AES");
+
+        SecretKeySpec keySpec = new SecretKeySpec(predictableKey, "AES"); // CC: KEY_MATERIAL/ImproperGenerated
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-        
+
         return cipher.doFinal(data);
     }
 
+    // FIXME: Does not find anything, because the variables is not used in a cryptographic context.
     /**
      * Unsafe key derivation - VULNERABILITY
      */
@@ -144,10 +152,12 @@ public class BouncyCastleVulnerabilities {
      */
     public byte[] encryptWithNull(byte[] data) throws Exception {
         // NULL cipher - provides no security
-        Cipher cipher = Cipher.getInstance("NULL", "BC");
+        Cipher cipher = Cipher.getInstance("NULL", "BC"); // CC: ALGORITHM/InvalidValue "NULL", API_MISUSE/IncompleteOperation
         return data; // Returns plaintext
     }
 
+    // FIXME: Does CrySL support the use case of finding variables that are being printed?
+    // FIXME: Clarify, why logging the provider info is critical, as this info is publicly known.
     /**
      * Exposes BouncyCastle internal state - VULNERABILITY
      */
@@ -155,7 +165,7 @@ public class BouncyCastleVulnerabilities {
         // Exposing sensitive cryptographic state - VULNERABILITY
         System.out.println("Hard-coded key: " + new String(HARDCODED_KEY));
         System.out.println("Weak IV: " + java.util.Arrays.toString(WEAK_IV));
-        
+
         // Logging provider information that might leak sensitive data
         System.out.println("BC Provider: " + Security.getProvider("BC").getInfo());
     }
