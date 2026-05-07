@@ -8,7 +8,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 @NullMarked
-public final class InvalidValuesReason extends ArgsReason {
+public final class InvalidValuesReason extends ValueReason {
 
   private final List<String> actualValues;
   private final List<String> expectedValues;
