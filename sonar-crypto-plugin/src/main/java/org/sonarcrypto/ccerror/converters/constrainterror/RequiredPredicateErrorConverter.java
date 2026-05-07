@@ -8,10 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.RuleKindUtils;
-import org.sonarcrypto.ccerror.violations.ArgViolation;
+import org.sonarcrypto.ccerror.causes.ImproperGeneratedCause;
+import org.sonarcrypto.ccerror.causes.UndefinedCause;
+import org.sonarcrypto.ccerror.violations.ValueViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
-import org.sonarcrypto.ccerror.violations.reasons.ImproperGeneratedReason;
-import org.sonarcrypto.ccerror.violations.reasons.UndefinedReason;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
@@ -29,10 +29,10 @@ public class RequiredPredicateErrorConverter {
           "Unsupported required predicate error {}! Generating general violation.",
           error.getClass().getName());
 
-      return new ArgViolation(
+      return new ValueViolation(
           CryptoRulesDefinitions.GENERAL,
           CallInfo.none(),
-          new UndefinedReason(error.toErrorMarkerString()));
+          new UndefinedCause(error.toErrorMarkerString()));
     }
   }
 
@@ -44,24 +44,24 @@ public class RequiredPredicateErrorConverter {
     if (firstViolatedPredicate == null) {
       LOGGER.error("Violated predicates are empty! Generating general violation.");
 
-      return new ArgViolation(
+      return new ValueViolation(
           CryptoRulesDefinitions.GENERAL,
           CallInfo.none(),
-          new UndefinedReason(error.toErrorMarkerString()));
+          new UndefinedCause(error.toErrorMarkerString()));
     }
 
-    return new ArgViolation(
+    return new ValueViolation(
         RuleKindUtils.detectRuleKind(firstViolatedPredicate.predicate()),
         CallInfo.of(firstViolatedPredicate.statement(), firstViolatedPredicate.index()),
-        new ImproperGeneratedReason());
+        new ImproperGeneratedCause());
   }
 
   public static Violation generateReqPredMessage(RequiredPredicateError error) {
     final var contradictedPredicates = error.getContradictedPredicates();
 
-    return new ArgViolation(
+    return new ValueViolation(
         RuleKindUtils.detectRuleKind(contradictedPredicates.predicate()),
         CallInfo.of(contradictedPredicates.statement(), contradictedPredicates.index()),
-        new ImproperGeneratedReason());
+        new ImproperGeneratedCause());
   }
 }

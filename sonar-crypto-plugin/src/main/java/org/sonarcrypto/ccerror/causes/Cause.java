@@ -1,9 +1,9 @@
-package org.sonarcrypto.ccerror.violations.reasons;
+package org.sonarcrypto.ccerror.causes;
 
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-public abstract sealed class Reason permits ValueReason, CallReason {
+public abstract sealed class Cause permits ValueCause, CallCause {
 
   public abstract void createMessage(StringBuilder messageBuilder);
 }

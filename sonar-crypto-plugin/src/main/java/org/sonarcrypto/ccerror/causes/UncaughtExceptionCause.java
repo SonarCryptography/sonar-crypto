@@ -1,4 +1,4 @@
-package org.sonarcrypto.ccerror.violations.reasons;
+package org.sonarcrypto.ccerror.causes;
 
 import static org.sonarcrypto.utils.sonar.TextUtils.code;
 
@@ -7,11 +7,11 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 @NullMarked
-public final class UncaughtExceptionReason extends CallReason {
+public final class UncaughtExceptionCause extends CallCause {
 
   private final WrappedClass uncaughtException;
 
-  public UncaughtExceptionReason(WrappedClass uncaughtException) {
+  public UncaughtExceptionCause(WrappedClass uncaughtException) {
     this.uncaughtException = uncaughtException;
   }
 
@@ -32,7 +32,7 @@ public final class UncaughtExceptionReason extends CallReason {
       return false;
     }
 
-    UncaughtExceptionReason that = (UncaughtExceptionReason) o;
+    UncaughtExceptionCause that = (UncaughtExceptionCause) o;
     return uncaughtException.equals(that.uncaughtException);
   }
 
@@ -43,6 +43,6 @@ public final class UncaughtExceptionReason extends CallReason {
 
   @Override
   public String toString() {
-    return "UncaughtExceptionReason{" + "uncaughtException=" + uncaughtException + '}';
+    return "UncaughtExceptionCause{" + "uncaughtException=" + uncaughtException + '}';
   }
 }

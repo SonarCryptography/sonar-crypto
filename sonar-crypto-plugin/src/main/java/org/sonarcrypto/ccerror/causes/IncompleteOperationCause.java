@@ -1,4 +1,4 @@
-package org.sonarcrypto.ccerror.violations.reasons;
+package org.sonarcrypto.ccerror.causes;
 
 import static org.sonarcrypto.utils.sonar.TextUtils.code;
 
@@ -9,11 +9,11 @@ import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
 
 @NullMarked
-public final class IncompleteOperationReason extends CallReason {
+public final class IncompleteOperationCause extends CallCause {
   private final IncompleteObject incompleteObject;
   private final Collection<crysl.rule.CrySLMethod> expectedMethods;
 
-  public IncompleteOperationReason(
+  public IncompleteOperationCause(
       IncompleteObject incompleteObject, Collection<CrySLMethod> expectedMethods) {
     this.incompleteObject = incompleteObject;
     this.expectedMethods = expectedMethods;
@@ -47,7 +47,7 @@ public final class IncompleteOperationReason extends CallReason {
       return false;
     }
 
-    IncompleteOperationReason that = (IncompleteOperationReason) o;
+    IncompleteOperationCause that = (IncompleteOperationCause) o;
     return incompleteObject.equals(that.incompleteObject)
         && expectedMethods.equals(that.expectedMethods);
   }
@@ -61,7 +61,7 @@ public final class IncompleteOperationReason extends CallReason {
 
   @Override
   public String toString() {
-    return "IncompleteOperationReason{"
+    return "IncompleteOperationCause{"
         + "incompleteObject='"
         + incompleteObject
         + '\''

@@ -1,14 +1,14 @@
-package org.sonarcrypto.ccerror.violations.reasons;
+package org.sonarcrypto.ccerror.causes;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 @NullMarked
-public final class UndefinedReason extends ValueReason {
+public final class UndefinedCause extends ValueCause {
 
   private final String message;
 
-  public UndefinedReason(String message) {
+  public UndefinedCause(String message) {
     this.message = message;
   }
 
@@ -27,7 +27,7 @@ public final class UndefinedReason extends ValueReason {
       return false;
     }
 
-    UndefinedReason that = (UndefinedReason) o;
+    UndefinedCause that = (UndefinedCause) o;
     return message.equals(that.message);
   }
 
@@ -38,6 +38,6 @@ public final class UndefinedReason extends ValueReason {
 
   @Override
   public String toString() {
-    return "UndefinedReason{" + "message=" + message + '}';
+    return "UndefinedCause{" + "message=" + message + '}';
   }
 }

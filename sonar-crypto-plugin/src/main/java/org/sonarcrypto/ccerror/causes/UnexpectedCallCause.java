@@ -1,4 +1,4 @@
-package org.sonarcrypto.ccerror.violations.reasons;
+package org.sonarcrypto.ccerror.causes;
 
 import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
 import static org.sonarcrypto.utils.sonar.TextUtils.code;
@@ -11,11 +11,11 @@ import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.utils.sonar.TextUtils;
 
 @NullMarked
-public final class UnexpectedCallReason extends CallReason {
+public final class UnexpectedCallCause extends CallCause {
   private final DeclaredMethod unexpectedMethod;
   private final Collection<CrySLMethod> expectedMethods;
 
-  public UnexpectedCallReason(
+  public UnexpectedCallCause(
       DeclaredMethod unexpectedMethod, Collection<CrySLMethod> expectedMethods) {
     this.unexpectedMethod = unexpectedMethod;
     this.expectedMethods = expectedMethods;
@@ -65,7 +65,7 @@ public final class UnexpectedCallReason extends CallReason {
       return false;
     }
 
-    UnexpectedCallReason that = (UnexpectedCallReason) o;
+    UnexpectedCallCause that = (UnexpectedCallCause) o;
     return unexpectedMethod.equals(that.unexpectedMethod)
         && expectedMethods.equals(that.expectedMethods);
   }
@@ -79,7 +79,7 @@ public final class UnexpectedCallReason extends CallReason {
 
   @Override
   public String toString() {
-    return "UnexpectedCallReason{"
+    return "UnexpectedCallCause{"
         + "unexpectedMethod="
         + unexpectedMethod
         + ", expectedMethods="

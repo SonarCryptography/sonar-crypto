@@ -3,9 +3,9 @@ package org.sonarcrypto.ccerror.converters.ordererror;
 import crypto.analysis.errors.TypestateError;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.CryptoRulesDefinitions;
+import org.sonarcrypto.ccerror.causes.UnexpectedCallCause;
 import org.sonarcrypto.ccerror.violations.CallViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
-import org.sonarcrypto.ccerror.violations.reasons.UnexpectedCallReason;
 
 @NullMarked
 public class TypestateErrorConverter {
@@ -16,6 +16,6 @@ public class TypestateErrorConverter {
 
     return new CallViolation(
         CryptoRulesDefinitions.API_MISUSE,
-        new UnexpectedCallReason(unexpectedMethod, expectedMethods));
+        new UnexpectedCallCause(unexpectedMethod, expectedMethods));
   }
 }

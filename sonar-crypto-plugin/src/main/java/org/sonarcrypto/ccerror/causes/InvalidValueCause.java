@@ -1,4 +1,4 @@
-package org.sonarcrypto.ccerror.violations.reasons;
+package org.sonarcrypto.ccerror.causes;
 
 import static java.util.function.Predicate.not;
 import static org.sonarcrypto.utils.sonar.TextUtils.join;
@@ -8,12 +8,12 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 @NullMarked
-public final class InvalidValuesReason extends ValueReason {
+public final class InvalidValueCause extends ValueCause {
 
   private final List<String> actualValues;
   private final List<String> expectedValues;
 
-  public InvalidValuesReason(final List<String> actualValues, final List<String> expectedValues) {
+  public InvalidValueCause(final List<String> actualValues, final List<String> expectedValues) {
     this.actualValues = actualValues;
     this.expectedValues = expectedValues;
   }
@@ -61,7 +61,7 @@ public final class InvalidValuesReason extends ValueReason {
       return false;
     }
 
-    InvalidValuesReason that = (InvalidValuesReason) o;
+    InvalidValueCause that = (InvalidValueCause) o;
     return actualValues.equals(that.actualValues) && expectedValues.equals(that.expectedValues);
   }
 
@@ -74,7 +74,7 @@ public final class InvalidValuesReason extends ValueReason {
 
   @Override
   public String toString() {
-    return "ArgsReason{"
+    return "InvalidValueCause{"
         + "actualValues="
         + actualValues
         + ", expectedValues="
