@@ -22,6 +22,10 @@ public final class InvalidValueCause extends ValueCause {
     return this.actualValues;
   }
 
+  public List<String> getExpectedValues() {
+    return this.expectedValues;
+  }
+
   public void createMessage(StringBuilder messageBuilder) {
     final var violatingValues = actualValues.stream().filter(not(String::isEmpty)).toList();
     final var violatingValuesCount = violatingValues.size();
