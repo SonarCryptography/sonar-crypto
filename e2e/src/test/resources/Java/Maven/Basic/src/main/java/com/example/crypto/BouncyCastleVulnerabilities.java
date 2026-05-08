@@ -71,8 +71,6 @@ public class BouncyCastleVulnerabilities {
         return ciphertext;
     }
 
-    // FIXME: Reports Blowfish as unsecure.
-    // FIXME: Finds the weak key, but for a different reason.
     /**
      * Uses Blowfish with small key - VULNERABILITY
      */
@@ -80,7 +78,7 @@ public class BouncyCastleVulnerabilities {
         // Blowfish is considered weak and insecure
         Cipher cipher = Cipher.getInstance("Blowfish", "BC"); // CC: ALGORITHM/InvalidValue "Blowfish"
 
-        // Using very short key - VULNERABILITY
+        // Hard-coded key (here: very short key) - VULNERABILITY
         byte[] shortKey = "key".getBytes(); // Only 3 bytes - too short
         SecretKeySpec keySpec = new SecretKeySpec(shortKey, "Blowfish"); // CC: ALGORITHM/InvalidValue "Blowfish", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
 
@@ -88,8 +86,6 @@ public class BouncyCastleVulnerabilities {
         return cipher.doFinal(data);
     }
 
-    // FIXME: Reports IDEA as unsecure.
-    // FIXME: Finds the weak key, but for a different reason.
     /**
      * Uses IDEA cipher without proper key management - VULNERABILITY
      */
@@ -137,12 +133,13 @@ public class BouncyCastleVulnerabilities {
         return cipher.doFinal(data);
     }
 
-    // FIXME: Does not find anything, because the variables is not used in a cryptographic context.
     /**
-     * Unsafe key derivation - VULNERABILITY
+     * Unsafe key derivation - NO ISSUE
+     * <p>
+     * Note: This is not an issue for CC; this issue is found by SQ's analysis.
      */
     public byte[] deriveKeyUnsafely(String password, String salt) {
-        // Simple concatenation instead of proper key derivation - VULNERABILITY
+        // Simple concatenation instead of proper key derivation - vulnerability detected by SQ
         String combined = password + salt;
         return combined.getBytes(); // No proper key stretching
     }
@@ -156,13 +153,13 @@ public class BouncyCastleVulnerabilities {
         return data; // Returns plaintext
     }
 
-    // FIXME: Does CrySL support the use case of finding variables that are being printed?
-    // FIXME: Clarify, why logging the provider info is critical, as this info is publicly known.
     /**
-     * Exposes BouncyCastle internal state - VULNERABILITY
+     * Exposes BouncyCastle internal state - NO ISSUE
+     * <p>
+     * Note: This is not an issue for CC; this issue is found by SQ's analysis.
      */
     public void exposeInternalState() {
-        // Exposing sensitive cryptographic state - VULNERABILITY
+        // Exposing sensitive cryptographic state - vulnerability detected by SQ
         System.out.println("Hard-coded key: " + new String(HARDCODED_KEY));
         System.out.println("Weak IV: " + java.util.Arrays.toString(WEAK_IV));
 

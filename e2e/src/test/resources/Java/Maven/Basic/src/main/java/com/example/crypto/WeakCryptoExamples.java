@@ -67,17 +67,15 @@ public class WeakCryptoExamples {
         return sb.toString();
     }
 
-    // FIXME: Does not find anything, because `Random` is not used in a cryptographic context.
-    ///**
-    // * Uses insecure random number generator - VULNERABILITY
-    // */
-    //public byte[] generateWeakRandom() {
-    //    // Using java.util.Random instead of SecureRandom - VULNERABILITY
-    //    Random random = new Random();
-    //    byte[] randomBytes = new byte[16];
-    //    random.nextBytes(randomBytes);
-    //    return randomBytes;
-    //}
+    /**
+     * Uses insecure random number generator in non-cryptographic context - NO ISSUE
+     */
+    public byte[] generateWeakRandom() {
+        Random random = new Random();
+        byte[] randomBytes = new byte[16];
+        random.nextBytes(randomBytes);
+        return randomBytes;
+    }
 
     /**
      * Uses predictable seed for SecureRandom - VULNERABILITY
@@ -137,13 +135,14 @@ public class WeakCryptoExamples {
         return data; // Returns data unencrypted
     }
 
-    // FIXME: Does not find anything. Does CrySL support this use case?
-    ///**
-    // * Exposes sensitive data in logs - VULNERABILITY
-    // */
-    //public void logSensitiveData(String username, String password) {
-    //    // Logging sensitive information - VULNERABILITY
-    //    System.out.println("User credentials: " + username + ":" + password);
-    //    System.out.println("Hardcoded key: " + HARDCODED_KEY);
-    //}
+    /**
+     * Exposes sensitive data in logs - NO ISSUE
+     * <p>
+     * Note: This is not an issue for CC; this issue is found by SQ's analysis.
+     */
+    public void logSensitiveData(String username, String password) {
+        // Logging sensitive information - vulnerability detected by SQ
+        System.out.println("User credentials: " + username + ":" + password);
+        System.out.println("Hardcoded key: " + HARDCODED_KEY);
+    }
 }
