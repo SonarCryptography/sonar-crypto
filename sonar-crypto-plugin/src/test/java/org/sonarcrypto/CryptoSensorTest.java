@@ -59,6 +59,22 @@ class CryptoSensorTest {
 
     assertThat(context.allIssues()).isNotEmpty();
 
+    // final var groundTruth = new GroundTruthParser().parse(context.fileSystem());
+    //
+    // final long expectedCount =
+    //    groundTruth.values().stream()
+    //        .flatMap(it -> it.values().stream())
+    //        .map(Set::size)
+    //        .reduce(0, Integer::sum);
+    //
+    // final var actualCount =
+    //    context.allIssues().stream()
+    //        .map(it -> it.ruleKey().repository())
+    //        .filter(REPOSITORY_KEY::equals)
+    //        .count();
+    //
+    // assertThat(actualCount).isEqualTo(expectedCount);
+
     final var joiner = new StringJoiner("\n");
     logTester.logs().forEach(joiner::add);
 

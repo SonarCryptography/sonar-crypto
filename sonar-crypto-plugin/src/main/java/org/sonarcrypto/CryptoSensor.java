@@ -2,6 +2,7 @@ package org.sonarcrypto;
 
 import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -38,22 +39,22 @@ public class CryptoSensor implements Sensor {
     sensorDescriptor.onlyOnLanguages("java");
   }
 
-  @Override
-  public void execute(SensorContext sensorContext) {
-    FileSystem fileSystem = sensorContext.fileSystem();
-
+  protected Path extractRules() throws IOException {
     final Ruleset ruleset = Ruleset.JCA;
-    Path ruleDir;
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();
-      ruleDir = ruleProvider.extractRulesetToTempDir(ruleset);
+      return ruleProvider.extractRulesetToTempDir(ruleset);
     } catch (IOException | URISyntaxException e) {
-      LOGGER.error(
-          "I/O error extracting CrySL rules for ruleset '{}': {}", ruleset, e.getMessage(), e);
-      return;
+      final var message =
+          String.format(
+              "I/O error extracting CrySL rules for ruleset '%s': %s", ruleset, e.getMessage());
+      LOGGER.error(message);
+      throw new IOException(message, e);
     }
+  }
 
-    Table<WrappedClass, Method, Set<AbstractError>> errors;
+  protected Table<WrappedClass, Method, Set<AbstractError>> scan(
+      FileSystem fileSystem, Path ruleDir) {
     Path jimpleDir = fileSystem.workDir().toPath().resolve("bridge-output/jimple");
     if (hasJimpleFiles(jimpleDir)) {
       LOGGER.info(
@@ -61,7 +62,7 @@ public class CryptoSensor implements Sensor {
           jimpleDir.toAbsolutePath());
       var scanner = new JimpleScanner(jimpleDir.toString(), ruleDir.toString());
       scanner.scan();
-      errors = scanner.getCollectedErrors();
+      return scanner.getCollectedErrors();
     } else {
       String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
       LOGGER.info(
@@ -74,17 +75,34 @@ public class CryptoSensor implements Sensor {
         mi.compile();
       } catch (IOException | MavenBuildException e) {
         LOGGER.error("Failed to build Maven project", e);
-        return;
+        return HashBasedTable.create();
       }
       HeadlessJavaScanner scanner =
           new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
       scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
       scanner.scan();
-      errors = scanner.getCollectedErrors();
+      return scanner.getCollectedErrors();
     }
+  }
 
+  protected void report(
+      SensorContext sensorContext, Table<WrappedClass, Method, Set<AbstractError>> errors) {
     LOGGER.info("Found {} cryptographic errors", errors.size());
     issueReporter.reportAllIssues(sensorContext, errors);
+  }
+
+  @Override
+  public void execute(SensorContext sensorContext) {
+    final Path ruleDir;
+
+    try {
+      ruleDir = extractRules();
+    } catch (IOException e) {
+      // Logging is done by `extractRules`.
+      return;
+    }
+
+    report(sensorContext, scan(sensorContext.fileSystem(), ruleDir));
   }
 
   private static boolean hasJimpleFiles(Path jimpleDir) {
