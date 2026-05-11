@@ -31,7 +31,7 @@
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
         <sonar.plugin.api.version>13.5.0.4319</sonar.plugin.api.version>
-        <sonarqube.api.impl.version>26.4.0.121862</sonarqube.api.impl.version>
+        <sonarqube.api.impl.version>26.5.0.122743</sonarqube.api.impl.version>
         <packaging.plugin.version>1.25.1.3002</packaging.plugin.version>
         <slf4j.version>2.0.17</slf4j.version>
 
