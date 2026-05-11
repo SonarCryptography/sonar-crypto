@@ -119,7 +119,7 @@ public class BouncyCastleVulnerabilities {
      * Uses weak parameters with AES - VULNERABILITY
      */
     public byte[] encryptAESWithWeakParams(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "BC"); // CC: MODE "CBC"
+        Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "BC"); // CC: MODE/InvalidValue "CBC"
 
         // Using predictable key - VULNERABILITY
         byte[] predictableKey = new byte[16];

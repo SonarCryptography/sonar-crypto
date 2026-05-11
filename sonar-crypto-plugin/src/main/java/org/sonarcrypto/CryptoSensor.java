@@ -42,7 +42,7 @@ public class CryptoSensor implements Sensor {
   public void execute(SensorContext sensorContext) {
     FileSystem fileSystem = sensorContext.fileSystem();
 
-    final Ruleset ruleset = Ruleset.BC_JCA;
+    final Ruleset ruleset = Ruleset.JCA;
     Path ruleDir;
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();
