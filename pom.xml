@@ -15,9 +15,10 @@
     <modules>
         <module>e2e</module>
         <module>sonar-crypto-plugin</module>
+        <module>utils/maven</module>
+        <module>utils/downloadrules</module>
         <module>utils/cognicrypt</module>
         <module>utils/jbc2jimple</module>
-        <module>utils/maven</module>
         <module>utils/resource</module>
         <module>utils/sonar</module>
         <module>utils/test</module>
@@ -228,73 +229,12 @@
                             <!-- The JUnit api requires a concrete engine that is not explicitly used by this project -->
                             <ignoredUnusedDeclaredDependency>org.junit.jupiter:junit-jupiter-engine</ignoredUnusedDeclaredDependency>
                             <!-- CrySL ruleset pom artifacts have no classes; they are declared to resolve library deps transitively -->
-                            <ignoredUnusedDeclaredDependency>de.darmstadt.tu.crossing:JavaCryptographicArchitecture</ignoredUnusedDeclaredDependency>
-                            <ignoredUnusedDeclaredDependency>de.fraunhofer.iem:BouncyCastle</ignoredUnusedDeclaredDependency>
-                            <ignoredUnusedDeclaredDependency>de.darmstadt.tu.crossing:Tink</ignoredUnusedDeclaredDependency>
-                            <ignoredUnusedDeclaredDependency>de.paderborn.uni:BouncyCastle-JCA</ignoredUnusedDeclaredDependency>
                         </ignoredUnusedDeclaredDependencies>
                         <ignoredNonTestScopedDependencies>
                             <!-- Required for SootUp 2.0.0; once SootUp uses a new version, this can be removed -->
                             <ignoredNonTestScopedDependency>commons-io:commons-io</ignoredNonTestScopedDependency>
                         </ignoredNonTestScopedDependencies>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <id>copy-ruleset-zips</id>
-                            <goals>
-                                <goal>copy</goal>
-                            </goals>
-                            <phase>validate</phase>
-                            <configuration>
-                                <artifactItems>
-                                    <artifactItem>
-                                        <!-- https://github.com/CROSSINGTUD/Crypto-API-Rules -->
-                                        <groupId>de.darmstadt.tu.crossing</groupId>
-                                        <artifactId>JavaCryptographicArchitecture</artifactId>
-                                        <version>${crysl.jca.version}</version>
-                                        <classifier>ruleset</classifier>
-                                        <type>zip</type>
-                                        <overWrite>true</overWrite>
-                                        <outputDirectory>${maven.multiModuleProjectDirectory}/utils/cognicrypt/src/main/resources/crysl_rules/jca</outputDirectory>
-                                        <destFileName>jca.zip</destFileName>
-                                    </artifactItem>
-                                    <artifactItem>
-                                        <groupId>de.fraunhofer.iem</groupId>
-                                        <artifactId>BouncyCastle</artifactId>
-                                        <version>${crysl.bc.version}</version>
-                                        <classifier>ruleset</classifier>
-                                        <type>zip</type>
-                                        <overWrite>true</overWrite>
-                                        <outputDirectory>${maven.multiModuleProjectDirectory}/utils/cognicrypt/src/main/resources/crysl_rules/bc</outputDirectory>
-                                        <includes>**</includes>
-                                        <destFileName>bc.zip</destFileName>
-                                    </artifactItem>
-                                    <artifactItem>
-                                        <groupId>de.darmstadt.tu.crossing</groupId>
-                                        <artifactId>Tink</artifactId>
-                                        <version>${crysl.tink.version}</version>
-                                        <classifier>ruleset</classifier>
-                                        <type>zip</type>
-                                        <overWrite>true</overWrite>
-                                        <outputDirectory>${maven.multiModuleProjectDirectory}/utils/cognicrypt/src/main/resources/crysl_rules/tink</outputDirectory>
-                                        <includes>**</includes>
-                                        <destFileName>tink.zip</destFileName>
-                                    </artifactItem>
-                                    <artifactItem>
-                                        <groupId>de.paderborn.uni</groupId>
-                                        <artifactId>BouncyCastle-JCA</artifactId>
-                                        <version>${crysl.bc-jca.version}</version>
-                                        <classifier>ruleset</classifier>
-                                        <type>zip</type>
-                                        <overWrite>true</overWrite>
-                                        <outputDirectory>${maven.multiModuleProjectDirectory}/utils/cognicrypt/src/main/resources/crysl_rules/bc-jca</outputDirectory>
-                                        <includes>**</includes>
-                                        <destFileName>bc-jca.zip</destFileName>
-                                    </artifactItem>
-                                </artifactItems>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
 

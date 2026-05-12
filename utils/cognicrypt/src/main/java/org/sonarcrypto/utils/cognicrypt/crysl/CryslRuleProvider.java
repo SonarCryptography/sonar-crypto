@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
@@ -32,17 +33,21 @@ public class CryslRuleProvider {
     final var rulesFolderName = "crysl_rules";
     final var rulesetFolderName = rulesFolderName + "/" + ruleset;
     final var tempDir = Files.createTempDirectory(rulesFolderName);
+    final var tempRulesetDir = Files.createDirectory(tempDir.resolve(ruleset));
 
     final var extractedRulePaths =
-        ResourceExtractor.extract(rulesetFolderName, tempDir, ".zip", ruleset::equalsIgnoreCase);
+        ResourceExtractor.extract(
+            rulesetFolderName, tempRulesetDir, ".zip", ruleset::equalsIgnoreCase);
     if (extractedRulePaths.isEmpty()) throw new IOException("CrySL ruleset name not found");
     if (extractedRulePaths.size() > 1)
       LOGGER.error("Multiple rule sets matched to {}; using first rule set.", ruleset);
 
     final var extractedDependencyPaths =
-        ResourceExtractor.extract(rulesetFolderName, tempDir, ".jar", ignored -> true);
+        ResourceExtractor.extract(rulesetFolderName, tempRulesetDir, ".jar", ignored -> true);
+
     final var dependencyClasspath =
-        extractedDependencyPaths.stream().map(Path::toString).collect(Collectors.joining(":"));
+        new HashSet<>(extractedDependencyPaths)
+            .stream().map(Path::toString).collect(Collectors.joining(":"));
 
     return new RulesetPaths(extractedRulePaths.get(0), dependencyClasspath);
   }
