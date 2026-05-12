@@ -85,7 +85,23 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.build.directory}/generated-resources</directory>
+            </resource>
+        </resources>
+
         <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.14</version>
+                <configuration>
+                    <excludes>
+                        <exclude>crysl_rules/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.sonarcrypto</groupId>
                 <artifactId>downloadrules</artifactId>
@@ -101,7 +117,7 @@
                 <executions>
                     <execution>
                         <id>download-ruleset-with-dependencies</id>
-                        <phase>process-classes</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>download-ruleset-with-dependencies</goal>
                         </goals>

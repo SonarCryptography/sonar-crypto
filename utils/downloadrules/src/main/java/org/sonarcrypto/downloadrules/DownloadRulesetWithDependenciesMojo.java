@@ -64,7 +64,7 @@ public class DownloadRulesetWithDependenciesMojo extends AbstractMojo {
 
   @Parameter(
       property = "downloadrules.outputDirectory",
-      defaultValue = "${project.basedir}/src/main/resources/crysl_rules",
+      defaultValue = "${project.build.directory}/generated-resources/crysl_rules",
       required = true)
   private @Nullable File outputDirectory;
 
