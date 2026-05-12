@@ -33,6 +33,6 @@ public final class ValueViolation extends Violation {
     final var calleeInfo = getCallInfo();
 
     CallInfo.createMessage(calleeInfo, definitionKey, messageBuilder);
-    this.getReason().createMessage(messageBuilder);
+    this.getCause().createMessage(messageBuilder);
   }
 }

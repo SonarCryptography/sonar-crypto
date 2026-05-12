@@ -27,7 +27,7 @@ public abstract sealed class Violation permits ValueViolation, CallViolation {
     return this.rulesDefinition;
   }
 
-  public Cause getReason() {
+  public Cause getCause() {
     return this.cause;
   }
 

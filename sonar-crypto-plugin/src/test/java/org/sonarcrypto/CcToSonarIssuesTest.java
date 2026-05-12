@@ -5,23 +5,25 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import boomerang.scope.WrappedClass;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-import crypto.analysis.errors.AbstractError;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.internal.DefaultTextPointer;
+import org.sonar.api.batch.fs.internal.DefaultTextRange;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.batch.sensor.issue.Issue;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
+import org.sonarcrypto.ccerror.ConvertedError;
+import org.sonarcrypto.ccerror.causes.UndefinedCause;
+import org.sonarcrypto.ccerror.violations.CallViolation;
 
 class CcToSonarIssuesTest {
 
@@ -40,56 +42,78 @@ class CcToSonarIssuesTest {
 
   @Test
   void report_all_issues_creates_issues_for_found_files() throws IOException {
-    addJavaFile("com/example/ClassA.java", "package com.example;\npublic class ClassA {}");
-    addJavaFile("com/example/ClassB.java", "package com.example;\npublic class ClassB {}");
+    final var inputFile1 =
+        addJavaFile("com/example/ClassA.java", "package com.example;\npublic class ClassA {}");
+    final var inputFile2 =
+        addJavaFile("com/example/ClassB.java", "package com.example;\npublic class ClassB {}");
 
-    Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
-    table.put(
-        wrappedClass("com.example.ClassA"), method("doStuff"), Set.of(mock(AbstractError.class)));
-    table.put(
-        wrappedClass("com.example.ClassB"), method("encrypt"), Set.of(mock(AbstractError.class)));
+    final var errors =
+        List.of(
+            new ConvertedError(
+                inputFile1,
+                new DefaultTextRange(new DefaultTextPointer(1, 21), new DefaultTextPointer(1, 42)),
+                method("encrypt"),
+                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
+            new ConvertedError(
+                inputFile1,
+                new DefaultTextRange(
+                    new DefaultTextPointer(10, 39), new DefaultTextPointer(10, 56)),
+                method("decrypt"),
+                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
+            new ConvertedError(
+                inputFile2,
+                new DefaultTextRange(
+                    new DefaultTextPointer(21, 17), new DefaultTextPointer(21, 23)),
+                method("init"),
+                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))));
 
-    issueReporter.reportAllIssues(sensorContext, table);
+    issueReporter.reportAllIssues(sensorContext, errors);
 
     assertThat(sensorContext.allIssues()).hasSize(2);
   }
 
   @Test
-  void report_all_issues_skips_classes_without_source_files() {
-    Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
-    table.put(wrappedClass("com.example.Missing"), method("m"), Set.of(mock(AbstractError.class)));
-
-    issueReporter.reportAllIssues(sensorContext, table);
-
-    assertThat(sensorContext.allIssues()).isEmpty();
-    assertThat(logTester.logs())
-        .anyMatch(log -> log.contains("Could not find source file for class: com.example.Missing"));
-  }
-
-  @Test
   void report_all_issues_reports_errors_from_multiple_methods() throws IOException {
-    addJavaFile("com/example/Buggy.java", "package com.example;\npublic class Buggy {}");
+    final var inputFile =
+        addJavaFile("com/example/Buggy.java", "package com.example;\npublic class Buggy {}");
 
-    Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
-    WrappedClass clazz = wrappedClass("com.example.Buggy");
-    table.put(clazz, method("init"), Set.of(mock(AbstractError.class)));
-    table.put(clazz, method("encrypt"), Set.of(mock(AbstractError.class)));
-    table.put(clazz, method("decrypt"), Set.of(mock(AbstractError.class)));
+    final var errors =
+        List.of(
+            new ConvertedError(
+                inputFile,
+                new DefaultTextRange(new DefaultTextPointer(1, 21), new DefaultTextPointer(1, 42)),
+                method("encrypt"),
+                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
+            new ConvertedError(
+                inputFile,
+                new DefaultTextRange(
+                    new DefaultTextPointer(10, 39), new DefaultTextPointer(10, 56)),
+                method("decrypt"),
+                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
+            new ConvertedError(
+                inputFile,
+                new DefaultTextRange(
+                    new DefaultTextPointer(21, 17), new DefaultTextPointer(21, 23)),
+                method("init"),
+                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))));
 
-    issueReporter.reportAllIssues(sensorContext, table);
+    issueReporter.reportAllIssues(sensorContext, errors);
 
     assertThat(sensorContext.allIssues()).hasSize(3);
   }
 
   @Test
   void report_all_issues_includes_method_name_in_message() throws IOException {
-    addJavaFile("com/example/Foo.java", "package com.example;\npublic class Foo {}");
+    final var inputFile =
+        addJavaFile("com/example/Foo.java", "package com.example;\npublic class Foo {}");
+    final var error =
+        new ConvertedError(
+            inputFile,
+            new DefaultTextRange(new DefaultTextPointer(1, 21), new DefaultTextPointer(1, 42)),
+            method("encrypt"),
+            new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined")));
 
-    Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
-    table.put(
-        wrappedClass("com.example.Foo"), method("encrypt"), Set.of(mock(AbstractError.class)));
-
-    issueReporter.reportAllIssues(sensorContext, table);
+    issueReporter.reportAllIssues(sensorContext, List.of(error));
 
     Issue issue = sensorContext.allIssues().iterator().next();
     assertThat(issue.primaryLocation().message()).contains("encrypt");
@@ -97,9 +121,7 @@ class CcToSonarIssuesTest {
 
   @Test
   void report_all_issues_handles_empty_table() {
-    Table<WrappedClass, boomerang.scope.Method, Set<AbstractError>> table = HashBasedTable.create();
-
-    issueReporter.reportAllIssues(sensorContext, table);
+    issueReporter.reportAllIssues(sensorContext, List.of(/* empty */ ));
 
     assertThat(sensorContext.allIssues()).isEmpty();
   }
