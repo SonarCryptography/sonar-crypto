@@ -149,7 +149,7 @@ public class BouncyCastleVulnerabilities {
      */
     public byte[] encryptWithNull(byte[] data) throws Exception {
         // NULL cipher - provides no security
-        Cipher cipher = Cipher.getInstance("NULL", "BC"); // CC: ALGORITHM/InvalidValue "NULL", API_MISUSE/IncompleteOperation
+        Cipher cipher = Cipher.getInstance("NULL", "BC"); // CC: ALGORITHM/InvalidValue "NULL", API_MISUSE/IncompleteOperation "javax.crypto.Cipher"
         return data; // Returns plaintext
     }
 

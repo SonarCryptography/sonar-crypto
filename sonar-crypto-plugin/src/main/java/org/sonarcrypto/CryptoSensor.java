@@ -2,7 +2,6 @@ package org.sonarcrypto;
 
 import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -11,6 +10,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
@@ -20,6 +20,8 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonarcrypto.ccerror.CcErrorConverter;
+import org.sonarcrypto.ccerror.ConvertedError;
 import org.sonarcrypto.utils.cognicrypt.crysl.CryslRuleProvider;
 import org.sonarcrypto.utils.cognicrypt.crysl.Ruleset;
 import org.sonarcrypto.utils.cognicrypt.jimple.JimpleScanner;
@@ -53,8 +55,8 @@ public class CryptoSensor implements Sensor {
     }
   }
 
-  protected Table<WrappedClass, Method, Set<AbstractError>> scan(
-      FileSystem fileSystem, Path ruleDir) {
+  protected List<ConvertedError> scan(FileSystem fileSystem, Path ruleDir) {
+    Table<WrappedClass, Method, Set<AbstractError>> errors;
     Path jimpleDir = fileSystem.workDir().toPath().resolve("bridge-output/jimple");
     if (hasJimpleFiles(jimpleDir)) {
       LOGGER.info(
@@ -62,7 +64,7 @@ public class CryptoSensor implements Sensor {
           jimpleDir.toAbsolutePath());
       var scanner = new JimpleScanner(jimpleDir.toString(), ruleDir.toString());
       scanner.scan();
-      return scanner.getCollectedErrors();
+      errors = scanner.getCollectedErrors();
     } else {
       String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
       LOGGER.info(
@@ -75,18 +77,19 @@ public class CryptoSensor implements Sensor {
         mi.compile();
       } catch (IOException | MavenBuildException e) {
         LOGGER.error("Failed to build Maven project", e);
-        return HashBasedTable.create();
+        return List.of(/* Empty */ );
       }
       HeadlessJavaScanner scanner =
           new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
       scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
       scanner.scan();
-      return scanner.getCollectedErrors();
+      errors = scanner.getCollectedErrors();
     }
+
+    return new CcErrorConverter(fileSystem).convertErrors(errors);
   }
 
-  protected void report(
-      SensorContext sensorContext, Table<WrappedClass, Method, Set<AbstractError>> errors) {
+  protected void report(SensorContext sensorContext, List<ConvertedError> errors) {
     LOGGER.info("Found {} cryptographic errors", errors.size());
     issueReporter.reportAllIssues(sensorContext, errors);
   }

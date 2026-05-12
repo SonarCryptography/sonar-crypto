@@ -32,7 +32,7 @@ public class WeakCryptoExamples {
 
         // Using hard-coded key - VULNERABILITY
         SecretKeySpec keySpec = new SecretKeySpec(HARDCODED_KEY.getBytes(), "DES"); // CC: ALGORITHM/InvalidValue "DES", KEY_MATERIAL/ImproperGenerated, KEY_MATERIAL/ForbiddenType "java.lang.String"
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: KEY_MATERIAL/ImproperGenerated
 
         return cipher.doFinal(data);
     }
@@ -96,8 +96,8 @@ public class WeakCryptoExamples {
     public SecretKey generateWeakAESKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         // 64-bit key might be considered weak for some applications
-        keyGen.init(64); // CC: KEY_MATERIAL/ImproperGenerated "64"
-        return keyGen.generateKey();
+        keyGen.init(64); // CC: KEY_MATERIAL/InvalidValue "64"
+        return keyGen.generateKey(); // CC: KEY_MATERIAL/ImproperGenerated
     }
 
     /**
@@ -105,10 +105,10 @@ public class WeakCryptoExamples {
      */
     public byte[] encryptWithECB(byte[] data) throws Exception {
         // ECB mode is insecure - identical plaintext blocks produce identical ciphertext
-        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding"); // CC: MODE/InvalidValue "ECB", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
+        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding"); // CC: MODE/InvalidValue "ECB"
 
-        SecretKeySpec keySpec = new SecretKeySpec(HARDCODED_KEY.getBytes(), "AES");
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        SecretKeySpec keySpec = new SecretKeySpec(HARDCODED_KEY.getBytes(), "AES"); // CC: KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: KEY_MATERIAL/ImproperGenerated
 
         return cipher.doFinal(data);
     }
@@ -121,7 +121,7 @@ public class WeakCryptoExamples {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // CC: MODE/InvalidValue "CBC"
 
         SecretKeySpec keySpec = new SecretKeySpec(HARDCODED_KEY.getBytes(), "AES"); // CC: KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: KEY_MATERIAL/ImproperGenerated
 
         return cipher.doFinal(data);
     }

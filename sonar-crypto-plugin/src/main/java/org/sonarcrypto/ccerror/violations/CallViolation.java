@@ -18,6 +18,6 @@ public final class CallViolation extends Violation {
 
   @Override
   public void createMessage(StringBuilder messageBuilder) {
-    this.getReason().createMessage(messageBuilder);
+    this.getCause().createMessage(messageBuilder);
   }
 }
