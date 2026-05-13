@@ -28,8 +28,9 @@ public non-sealed class JimpleTestRunner
       final String path, final Ruleset ruleset) throws IOException, URISyntaxException {
 
     final var provider = new CryslRuleProvider();
-    final var scanner =
-        new JimpleScanner(path, provider.extractRulesetToTempDir(ruleset).toString());
+    final var rulesetPaths = provider.extractRulesetToTempDir(ruleset);
+    final var scanner = new JimpleScanner(path, rulesetPaths.rulesetZip().toString());
+    scanner.setAddClassPath(rulesetPaths.dependencyClasspath());
     scanner.scan();
     return scanner.getCollectedErrors();
   }

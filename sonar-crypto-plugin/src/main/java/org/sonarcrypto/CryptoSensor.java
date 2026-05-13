@@ -21,6 +21,7 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonarcrypto.utils.cognicrypt.crysl.CryslRuleProvider;
 import org.sonarcrypto.utils.cognicrypt.crysl.Ruleset;
+import org.sonarcrypto.utils.cognicrypt.crysl.RulesetPaths;
 import org.sonarcrypto.utils.cognicrypt.jimple.JimpleScanner;
 import org.sonarcrypto.utils.maven.MavenBuildException;
 import org.sonarcrypto.utils.maven.MavenProject;
@@ -43,10 +44,10 @@ public class CryptoSensor implements Sensor {
     FileSystem fileSystem = sensorContext.fileSystem();
 
     final Ruleset ruleset = Ruleset.JCA;
-    Path ruleDir;
+    RulesetPaths rulesetPaths;
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();
-      ruleDir = ruleProvider.extractRulesetToTempDir(ruleset);
+      rulesetPaths = ruleProvider.extractRulesetToTempDir(ruleset);
     } catch (IOException | URISyntaxException e) {
       LOGGER.error(
           "I/O error extracting CrySL rules for ruleset '{}': {}", ruleset, e.getMessage(), e);
@@ -59,7 +60,8 @@ public class CryptoSensor implements Sensor {
       LOGGER.info(
           "Using Jimple files from bridge output ({}) as analysis input.",
           jimpleDir.toAbsolutePath());
-      var scanner = new JimpleScanner(jimpleDir.toString(), ruleDir.toString());
+      var scanner = new JimpleScanner(jimpleDir.toString(), rulesetPaths.rulesetZip().toString());
+      scanner.setAddClassPath(rulesetPaths.dependencyClasspath());
       scanner.scan();
       errors = scanner.getCollectedErrors();
     } else {
@@ -77,8 +79,9 @@ public class CryptoSensor implements Sensor {
         return;
       }
       HeadlessJavaScanner scanner =
-          new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
+          new HeadlessJavaScanner(mi.getBuildDirectory(), rulesetPaths.rulesetZip().toString());
       scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
+      scanner.setAddClassPath(rulesetPaths.dependencyClasspath());
       scanner.scan();
       errors = scanner.getCollectedErrors();
     }

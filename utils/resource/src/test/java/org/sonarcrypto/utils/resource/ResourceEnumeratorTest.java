@@ -3,8 +3,12 @@ package org.sonarcrypto.utils.resource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import java.io.File;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
 import org.junit.jupiter.api.Test;
 
 public class ResourceEnumeratorTest {
@@ -38,6 +42,33 @@ public class ResourceEnumeratorTest {
 
     assertThat(list).isNotEmpty();
     assertThat(list).contains(Path.of("crysl_rules/jca.zip"));
+  }
+
+  @Test
+  void testEnumerateResourcesWithinAJarFromClasspath() throws Exception {
+    final var jarFile = Files.createTempFile("resource-enumerator", ".jar");
+    try (var outputStream = new JarOutputStream(Files.newOutputStream(jarFile))) {
+      outputStream.putNextEntry(new JarEntry("jar_only_rules/"));
+      outputStream.closeEntry();
+      outputStream.putNextEntry(new JarEntry("jar_only_rules/sample.zip"));
+      outputStream.write(new byte[] {1});
+      outputStream.closeEntry();
+    }
+
+    final var originalClassPath = System.getProperty("java.class.path");
+    System.setProperty(
+        "java.class.path", originalClassPath + File.pathSeparator + jarFile.toAbsolutePath());
+
+    try {
+      final var list =
+          new ResourceEnumerator()
+              .listResources(Path.of("jar_only_rules"), ".zip", "sample"::equals);
+
+      assertThat(list).contains(Path.of("jar_only_rules/sample.zip"));
+    } finally {
+      System.setProperty("java.class.path", originalClassPath);
+      Files.deleteIfExists(jarFile);
+    }
   }
 
   @Test
