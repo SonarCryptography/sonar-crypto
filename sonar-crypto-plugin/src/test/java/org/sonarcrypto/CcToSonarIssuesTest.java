@@ -51,25 +51,23 @@ class CcToSonarIssuesTest {
         List.of(
             new ConvertedError(
                 inputFile1,
-                new DefaultTextRange(new DefaultTextPointer(1, 21), new DefaultTextPointer(1, 42)),
+                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 19)),
                 method("encrypt"),
                 new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
             new ConvertedError(
                 inputFile1,
-                new DefaultTextRange(
-                    new DefaultTextPointer(10, 39), new DefaultTextPointer(10, 56)),
+                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 19)),
                 method("decrypt"),
                 new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
             new ConvertedError(
                 inputFile2,
-                new DefaultTextRange(
-                    new DefaultTextPointer(21, 17), new DefaultTextPointer(21, 23)),
+                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 19)),
                 method("init"),
                 new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))));
 
     issueReporter.reportAllIssues(sensorContext, errors);
 
-    assertThat(sensorContext.allIssues()).hasSize(2);
+    assertThat(sensorContext.allIssues()).hasSize(3);
   }
 
   @Test
@@ -81,19 +79,17 @@ class CcToSonarIssuesTest {
         List.of(
             new ConvertedError(
                 inputFile,
-                new DefaultTextRange(new DefaultTextPointer(1, 21), new DefaultTextPointer(1, 42)),
+                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 18)),
                 method("encrypt"),
                 new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
             new ConvertedError(
                 inputFile,
-                new DefaultTextRange(
-                    new DefaultTextPointer(10, 39), new DefaultTextPointer(10, 56)),
+                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 18)),
                 method("decrypt"),
                 new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
             new ConvertedError(
                 inputFile,
-                new DefaultTextRange(
-                    new DefaultTextPointer(21, 17), new DefaultTextPointer(21, 23)),
+                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 18)),
                 method("init"),
                 new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))));
 
@@ -109,7 +105,7 @@ class CcToSonarIssuesTest {
     final var error =
         new ConvertedError(
             inputFile,
-            new DefaultTextRange(new DefaultTextPointer(1, 21), new DefaultTextPointer(1, 42)),
+            new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 16)),
             method("encrypt"),
             new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined")));
 

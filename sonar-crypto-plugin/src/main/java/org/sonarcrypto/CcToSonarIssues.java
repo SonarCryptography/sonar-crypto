@@ -42,7 +42,11 @@ public class CcToSonarIssues {
 
       final var location = issue.newLocation().on(inputFile);
 
-      location.at(position);
+      try {
+        location.at(position);
+      } catch (IllegalArgumentException e) {
+        LOGGER.error("Invalid source code position in file {}!", inputFile, e);
+      }
 
       issue.forRule(violation.getRulesDefinition().getRuleKey());
 
