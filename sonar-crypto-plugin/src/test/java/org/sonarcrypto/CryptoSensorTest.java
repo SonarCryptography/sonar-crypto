@@ -11,9 +11,7 @@ import static org.sonarcrypto.utils.test.sonarcontext.SonarContextTesterUtils.in
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -71,13 +69,29 @@ class CryptoSensorTest {
     // groundTruth.forEach((key, value) -> System.out.println(key + " -> " + value));
 
     final var combinedMap = new TreeMap<GroundTruthParser.Location, Entry>();
+
+    final var expectedErrorCount =
+        new Object() {
+          long min = 0;
+          long max = 0;
+        };
+
     groundTruth.forEach(
         (location, gts) -> {
           final var entry =
               combinedMap.computeIfAbsent(
-                  location, _location -> new Entry(new HashSet<>(), new HashSet<>()));
+                  location, _location -> new Entry(new HashSet<>(), new HashMap<>()));
           gts.forEach(
-              it -> entry.expected.add(new Item(it.ruleKind(), it.causeType(), it.value())));
+              it -> {
+                expectedErrorCount.max++;
+
+                if (!it.isOptional()) {
+                  expectedErrorCount.min++;
+                }
+
+                entry.expected.put(
+                    new Item(it.ruleKind(), it.causeType(), it.value()), it.isOptional());
+              });
         });
 
     foundErrors.forEach(
@@ -86,7 +100,7 @@ class CryptoSensorTest {
               combinedMap.computeIfAbsent(
                   new GroundTruthParser.Location(
                       error.inputFile().filename(), error.position().start().line()),
-                  location1 -> new Entry(new HashSet<>(), new HashSet<>()));
+                  location1 -> new Entry(new HashSet<>(), new HashMap<>()));
           final var violation = error.violation();
           final var item =
               new Item(
@@ -101,16 +115,20 @@ class CryptoSensorTest {
     for (var entry : combinedMap.values()) {
       final var actual = entry.actual();
       final var actualCopy = new HashSet<>(actual);
-      final var expected = entry.expected();
+      final var expected = entry.expected().keySet();
       actual.removeAll(expected);
       expected.removeAll(actualCopy);
+    }
+
+    for (var entry : combinedMap.values()) {
+      entry.expected().entrySet().removeIf(Map.Entry::getValue);
     }
 
     for (var combined : combinedMap.entrySet()) {
       final var location = combined.getKey();
       final var entry = combined.getValue();
       final var actual = entry.actual();
-      final var expected = entry.expected();
+      final var expected = entry.expected().keySet();
 
       if (!actual.isEmpty() || !expected.isEmpty()) {
         invalidResult = true;
@@ -142,25 +160,31 @@ class CryptoSensorTest {
             .filter(REPOSITORY_KEY::equals)
             .count();
 
-    final long expectedCount = groundTruth.values().stream().map(Set::size).reduce(0, Integer::sum);
-
     assertThat(actualCount)
         .withFailMessage(
-            "Wrong number of issues reported!\nActual: %d\nExpected: %d",
-            actualCount, expectedCount)
-        .isEqualTo(expectedCount);
+            "Wrong number of issues reported!\nActual: %d\nExpected: %d..%d",
+            actualCount, expectedErrorCount.min, expectedErrorCount.max)
+        .isBetween(expectedErrorCount.min, expectedErrorCount.max);
   }
 
-  private record Entry(Set<Item> actual, Set<Item> expected) {}
+  private record Entry(Set<Item> actual, Map<Item, Boolean> expected) {}
 
-  public record Item(RuleKind ruleKind, Class<? extends Cause> causeType, @Nullable String value) {
+  public record Item(
+      RuleKind ruleKind,
+      Class<? extends Cause> causeType,
+      @Nullable String value,
+      boolean isOptional) {
+    public Item(RuleKind ruleKind, Class<? extends Cause> causeType, @Nullable String value) {
+      this(ruleKind, causeType, value, false);
+    }
+
     @Override
     public String toString() {
       final var sb =
           new StringBuilder()
               .append(ruleKind)
               .append('/')
-              .append(GroundTruthUtils.toString(causeType));
+              .append(GroundTruthUtils.toShortString(causeType));
 
       if (value != null) {
         sb.append(' ').append(quote(value));

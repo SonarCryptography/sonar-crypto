@@ -82,7 +82,7 @@ public class BouncyCastleVulnerabilities {
         byte[] shortKey = "key".getBytes(); // Only 3 bytes - too short
         SecretKeySpec keySpec = new SecretKeySpec(shortKey, "Blowfish"); // CC: ALGORITHM/InvalidValue "Blowfish", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
 
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: [?] KEY_MATERIAL/ImproperGenerated
         return cipher.doFinal(data);
     }
 
@@ -96,7 +96,7 @@ public class BouncyCastleVulnerabilities {
         byte[] ideaKey = "0123456789abcdef".getBytes(); // 16 bytes for IDEA
         SecretKeySpec keySpec = new SecretKeySpec(ideaKey, "IDEA"); // CC: ALGORITHM/InvalidValue "IDEA", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
 
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: [?] KEY_MATERIAL/ImproperGenerated
         return cipher.doFinal(data);
     }
 
@@ -111,7 +111,7 @@ public class BouncyCastleVulnerabilities {
         byte[] tripleDesKey = "MySecretKeyForTripleDES123!".getBytes();
         SecretKeySpec keySpec = new SecretKeySpec(tripleDesKey, 0, 24, "DESede"); // CC: ALGORITHM/InvalidValue "DESede", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
 
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: [?] KEY_MATERIAL/ImproperGenerated
         return cipher.doFinal(data);
     }
 
@@ -128,7 +128,7 @@ public class BouncyCastleVulnerabilities {
         }
 
         SecretKeySpec keySpec = new SecretKeySpec(predictableKey, "AES"); // CC: KEY_MATERIAL/ImproperGenerated
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: [?] KEY_MATERIAL/ImproperGenerated
 
         return cipher.doFinal(data);
     }
