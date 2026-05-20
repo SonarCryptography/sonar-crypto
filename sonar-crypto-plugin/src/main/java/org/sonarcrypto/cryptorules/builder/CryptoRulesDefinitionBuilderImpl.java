@@ -21,8 +21,6 @@ public class CryptoRulesDefinitionBuilderImpl
         CryptoRulesDefinitionBuilder.WithAssessSection,
         CryptoRulesDefinitionBuilder.WithResourcesSection,
         CryptoRulesDefinitionBuilder.Build {
-  public CryptoRulesDefinitionBuilderImpl() {}
-
   private @Nullable RuleKind ruleKind;
   private @Nullable String name;
   private @Nullable String description;

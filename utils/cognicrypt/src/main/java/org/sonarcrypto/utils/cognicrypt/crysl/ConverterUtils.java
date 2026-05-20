@@ -123,7 +123,7 @@ public class ConverterUtils {
   }
 
   public static String joinMethods(
-      @Nullable String prefix_when_multiple,
+      @Nullable String prefixWhenMultiple,
       Collection<CrySLMethod> methods,
       @Nullable String lastDelimiter) {
     final var set = new HashSet<String>(methods.size());
@@ -136,7 +136,7 @@ public class ConverterUtils {
               if (set.add(it)) methodList.add(code(it));
             });
 
-    return (prefix_when_multiple != null && methodList.size() > 1 ? prefix_when_multiple + " " : "")
+    return (prefixWhenMultiple != null && methodList.size() > 1 ? prefixWhenMultiple + " " : "")
         + TextUtils.join(methodList, lastDelimiter);
   }
 }

@@ -27,6 +27,8 @@ public class RuleKindUtils {
           return RuleKind.MODE;
         case 2:
           return RuleKind.PADDING;
+        default:
+          /* Fall through ... */
       }
     }
 

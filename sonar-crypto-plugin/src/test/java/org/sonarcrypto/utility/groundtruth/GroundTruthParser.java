@@ -168,7 +168,7 @@ public class GroundTruthParser {
       if (!entrymatcher.find()) {
         throw new GroundTruthParsingException(
             String.format(
-                "Invalid ground truth spec!\nFile: %s\nLine: %s", inputFile.filename(), line));
+                "Invalid ground truth spec!%nFile: %s%nLine: %s", inputFile.filename(), line));
       }
 
       final var isOptional = entrymatcher.group(1) != null;
@@ -179,7 +179,7 @@ public class GroundTruthParser {
       if (rule == null || cause == null) {
         throw new GroundTruthParsingException(
             String.format(
-                "Invalid ground truth entry!\nFile: %s\nLine: %s", inputFile.filename(), line));
+                "Invalid ground truth entry!%nFile: %s%nLine: %s", inputFile.filename(), line));
       }
 
       final RuleKind ruleKind;
@@ -188,20 +188,20 @@ public class GroundTruthParser {
         ruleKind = RuleKind.valueOf(rule);
       } catch (IllegalArgumentException _e) {
         throw new GroundTruthParsingException(
-            String.format("Invalid rule kind!\nFile: %s\nLine: %s", inputFile.filename(), line));
+            String.format("Invalid rule kind!%nFile: %s%nLine: %s", inputFile.filename(), line));
       }
 
       final var causeType = CAUSES.get(cause);
 
       if (causeType == null) {
         throw new GroundTruthParsingException(
-            String.format("Invalid cause type!\nFile: %s\nLine: %s", inputFile.filename(), line));
+            String.format("Invalid cause type!%nFile: %s%nLine: %s", inputFile.filename(), line));
       }
 
       if (!entrySet.add(new GroundTruthEntry(ruleKind, causeType, value, isOptional)))
         throw new GroundTruthParsingException(
             String.format(
-                "Duplicate ground truth entry!\nFile: %s\nLine: %s", inputFile.filename(), line));
+                "Duplicate ground truth entry!%nFile: %s%nLine: %s", inputFile.filename(), line));
     }
 
     parsedEntries.put(new Location(inputFile.filename(), line), entrySet);

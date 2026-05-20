@@ -37,7 +37,7 @@ public class CcToSonarIssues {
       final var messageBuilder =
           new StringBuilder(
               String.format(
-                  "Cryptographic weakness in method %s detected:\n",
+                  "Cryptographic weakness in method %s detected:%n",
                   code(SignatureUtils.shortNameOf(method))));
 
       final var location = issue.newLocation().on(inputFile);
@@ -59,7 +59,7 @@ public class CcToSonarIssues {
       location.message(message);
 
       LOGGER.info(
-          "{} @ [{}:{}/{}:{}]\n{}: {}",
+          "{} @ [{}:{}/{}:{}] {}: {}",
           inputFile.filename(),
           position.start().line(),
           position.start().lineOffset(),
