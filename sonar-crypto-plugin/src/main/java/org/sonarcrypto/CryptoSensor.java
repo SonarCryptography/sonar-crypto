@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
@@ -19,6 +20,8 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonarcrypto.ccerror.CcErrorConverter;
+import org.sonarcrypto.ccerror.ConvertedError;
 import org.sonarcrypto.utils.cognicrypt.crysl.CryslRuleProvider;
 import org.sonarcrypto.utils.cognicrypt.crysl.Ruleset;
 import org.sonarcrypto.utils.cognicrypt.jimple.JimpleScanner;
@@ -38,21 +41,21 @@ public class CryptoSensor implements Sensor {
     sensorDescriptor.onlyOnLanguages("java");
   }
 
-  @Override
-  public void execute(SensorContext sensorContext) {
-    FileSystem fileSystem = sensorContext.fileSystem();
-
+  protected Path extractRules() throws IOException {
     final Ruleset ruleset = Ruleset.JCA;
-    Path ruleDir;
     try {
       CryslRuleProvider ruleProvider = new CryslRuleProvider();
-      ruleDir = ruleProvider.extractRulesetToTempDir(ruleset);
+      return ruleProvider.extractRulesetToTempDir(ruleset);
     } catch (IOException | URISyntaxException e) {
-      LOGGER.error(
-          "I/O error extracting CrySL rules for ruleset '{}': {}", ruleset, e.getMessage(), e);
-      return;
+      final var message =
+          String.format(
+              "I/O error extracting CrySL rules for ruleset '%s': %s", ruleset, e.getMessage());
+      LOGGER.error(message);
+      throw new IOException(message, e);
     }
+  }
 
+  protected List<ConvertedError> scan(FileSystem fileSystem, Path ruleDir) {
     Table<WrappedClass, Method, Set<AbstractError>> errors;
     Path jimpleDir = fileSystem.workDir().toPath().resolve("bridge-output/jimple");
     if (hasJimpleFiles(jimpleDir)) {
@@ -74,7 +77,7 @@ public class CryptoSensor implements Sensor {
         mi.compile();
       } catch (IOException | MavenBuildException e) {
         LOGGER.error("Failed to build Maven project", e);
-        return;
+        return List.of(/* Empty */ );
       }
       HeadlessJavaScanner scanner =
           new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
@@ -83,8 +86,26 @@ public class CryptoSensor implements Sensor {
       errors = scanner.getCollectedErrors();
     }
 
+    return new CcErrorConverter(fileSystem).convertErrors(errors);
+  }
+
+  protected void report(SensorContext sensorContext, List<ConvertedError> errors) {
     LOGGER.info("Found {} cryptographic errors", errors.size());
     issueReporter.reportAllIssues(sensorContext, errors);
+  }
+
+  @Override
+  public void execute(SensorContext sensorContext) {
+    final Path ruleDir;
+
+    try {
+      ruleDir = extractRules();
+    } catch (IOException e) {
+      // Logging is done by `extractRules`.
+      return;
+    }
+
+    report(sensorContext, scan(sensorContext.fileSystem(), ruleDir));
   }
 
   private static boolean hasJimpleFiles(Path jimpleDir) {
