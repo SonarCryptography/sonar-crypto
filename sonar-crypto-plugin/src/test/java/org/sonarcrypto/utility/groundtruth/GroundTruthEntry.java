@@ -1,0 +1,33 @@
+package org.sonarcrypto.utility.groundtruth;
+
+import static org.sonarcrypto.utility.groundtruth.GroundTruthUtils.toShortString;
+import static org.sonarcrypto.utils.sonar.TextUtils.quote;
+
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.sonarcrypto.RuleKind;
+import org.sonarcrypto.ccerror.causes.Cause;
+
+@NullMarked
+public record GroundTruthEntry(
+    RuleKind ruleKind,
+    Class<? extends Cause> causeType,
+    @Nullable String value,
+    boolean isOptional) {
+  @Override
+  public String toString() {
+    final var sb = new StringBuilder();
+
+    if (isOptional) {
+      sb.append("[?] ");
+    }
+
+    sb.append(ruleKind).append('/').append(toShortString(causeType));
+
+    if (value != null) {
+      sb.append(' ').append(quote(value));
+    }
+
+    return sb.toString();
+  }
+}

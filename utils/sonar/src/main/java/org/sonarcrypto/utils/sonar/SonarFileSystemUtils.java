@@ -2,11 +2,13 @@ package org.sonarcrypto.utils.sonar;
 
 import boomerang.scope.WrappedClass;
 import java.util.Iterator;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 
+@NullMarked
 public class SonarFileSystemUtils {
   /**
    * Finds the InputFile corresponding to a WrappedClass.

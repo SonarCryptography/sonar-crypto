@@ -43,7 +43,7 @@ public class CryptoRulesDefinition implements RulesDefinition {
       @Nullable String howToFixSection,
       @Nullable String resourceSection) {
     this.ruleKind = ruleKind;
-    this.ruleKey = RuleKey.of(REPOSITORY_KEY, "CC" + (ruleKind.ordinal() + 1));
+    this.ruleKey = RuleKey.of(REPOSITORY_KEY, ruleKind.toSQRuleName());
     this.name = name;
     this.description = description;
     this.definitionKey = definitionKey;
