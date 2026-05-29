@@ -27,6 +27,11 @@ public class JimpleScanner extends CryptoScanner {
 
     settings.setApplicationPath(applicationPath);
     settings.setRulesetPath(rulesetDirectory);
+    settings.setCallGraph(ScannerSettings.CallGraphAlgorithm.RTA);
+  }
+
+  public void setAddClassPath(String addClassPath) {
+    settings.setAddClassPath(addClassPath);
   }
 
   public void scan() {

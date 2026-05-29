@@ -1,16 +1,15 @@
 package org.sonarcrypto.utils.resource;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.IOException;
+import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.jar.JarFile;
@@ -60,9 +59,10 @@ public class ResourceEnumerator {
   public List<Path> listResources(
       final Path resourceFolder, final String fileNameEndsWith, final Predicate<String> filter)
       throws IOException, URISyntaxException {
-    final var resources = new ArrayList<Path>();
+    final var resources = new LinkedHashSet<Path>();
     final var classLoader = this.getClass().getClassLoader();
-    final var resourceUrls = classLoader.getResources(resourceFolder.toString());
+    final var normalizedResourceFolder = normalizeResourcePath(resourceFolder);
+    final var resourceUrls = classLoader.getResources(normalizedResourceFolder);
 
     while (resourceUrls.hasMoreElements()) {
       final var resourceUrl = resourceUrls.nextElement();
@@ -78,7 +78,44 @@ public class ResourceEnumerator {
       }
     }
 
-    return resources;
+    resources.addAll(listClassPathResources(resourceFolder, fileNameEndsWith, filter));
+    return List.copyOf(resources);
+  }
+
+  private List<Path> listClassPathResources(
+      final Path resourceFolder, final String fileNameEndsWith, final Predicate<String> filter)
+      throws IOException {
+    final var resources = new LinkedHashSet<Path>();
+    final var classPath = System.getProperty("java.class.path", "");
+    if (classPath.isBlank()) {
+      return List.of();
+    }
+
+    final var resourceFolderString = resourceFolder.toString();
+    for (final var entry : classPath.split(java.io.File.pathSeparator)) {
+      if (entry.isBlank()) {
+        continue;
+      }
+
+      final var classPathEntry = Path.of(entry);
+      if (Files.isDirectory(classPathEntry)) {
+        final var resourceDirectory = classPathEntry.resolve(resourceFolderString);
+        if (Files.isDirectory(resourceDirectory)) {
+          resources.addAll(
+              listFilesystemResources(
+                  resourceDirectory.toUri(), resourceFolder, fileNameEndsWith, filter));
+        }
+        continue;
+      }
+
+      if (Files.isRegularFile(classPathEntry) && entry.endsWith(".jar")) {
+        try (final var jarFile = new JarFile(classPathEntry.toFile())) {
+          resources.addAll(listJarResources(jarFile, resourceFolder, fileNameEndsWith, filter));
+        }
+      }
+    }
+
+    return List.copyOf(resources);
   }
 
   private List<Path> listFilesystemResources(
@@ -122,53 +159,65 @@ public class ResourceEnumerator {
       final String fileNameEndsWith,
       final Predicate<String> filter)
       throws IOException {
+    final var connection = (JarURLConnection) jarUrl.openConnection();
+    connection.setUseCaches(false);
+
+    try (final var jarFile = connection.getJarFile()) {
+      return listJarResources(jarFile, baseDir, fileNameEndsWith, filter);
+    }
+  }
+
+  private List<Path> listJarResources(
+      final JarFile jarFile,
+      final Path baseDir,
+      final String fileNameEndsWith,
+      final Predicate<String> filter) {
     final var resources = new ArrayList<Path>();
-    final var jarUrlString = jarUrl.getPath();
+    final var baseDirString = normalizeDirectoryResourcePath(baseDir);
+    final var entries = jarFile.entries();
+    var processedEntries = 0;
 
-    var baseDirString = baseDir.toString();
-
-    // Ensure that base dir ends with a slash
-    if (!baseDirString.endsWith("/")) baseDirString += "/";
-
-    // Parse JAR URL: format is "jar:file:/path/to/jar.jar!/{entry}"
-    var jarPath = jarUrlString.substring(5, jarUrlString.indexOf("!"));
-
-    // Decode URL-encoded characters (e.g., spaces as %20)
-    jarPath = URLDecoder.decode(jarPath, UTF_8);
-
-    try (final var jarFile = new JarFile(jarPath)) {
-      final var entries = jarFile.entries();
-      var processedEntries = 0;
-
-      while (entries.hasMoreElements()) {
-        if (++processedEntries > jarEntitiesThreshold) {
-          LOGGER.error(
-              "Too many entries in JAR file: Stopped after {} entries!", jarEntitiesThreshold);
-
-          break;
-        }
-
-        final var entry = entries.nextElement();
-        final var entryName = entry.getName();
-
-        if (!entryName.startsWith(baseDirString)
-            || entry.isDirectory()
-            || !entryName.endsWith(fileNameEndsWith)
-            || entryName.endsWith(".gitkeep")) continue;
-
-        var indexOfLastSlash = entryName.lastIndexOf('/');
-        indexOfLastSlash = indexOfLastSlash < 0 ? 0 : indexOfLastSlash + 1;
-
-        final var entryNameWithoutEnding =
-            entryName.substring(indexOfLastSlash, entryName.length() - fileNameEndsWith.length());
-
-        // Filter entries under the base directory (and skip directories)
-        if (!filter.test(entryNameWithoutEnding)) continue;
-
-        resources.add(Path.of(entryName));
+    while (entries.hasMoreElements()) {
+      if (++processedEntries > jarEntitiesThreshold) {
+        LOGGER.error(
+            "Too many entries in JAR file: Stopped after {} entries!", jarEntitiesThreshold);
+        break;
       }
+
+      final var entry = entries.nextElement();
+      final var entryName = entry.getName();
+
+      if (!entryName.startsWith(baseDirString)
+          || entry.isDirectory()
+          || !entryName.endsWith(fileNameEndsWith)
+          || entryName.endsWith(".gitkeep")) {
+        continue;
+      }
+
+      var indexOfLastSlash = entryName.lastIndexOf('/');
+      indexOfLastSlash = indexOfLastSlash < 0 ? 0 : indexOfLastSlash + 1;
+
+      final var entryNameWithoutEnding =
+          entryName.substring(indexOfLastSlash, entryName.length() - fileNameEndsWith.length());
+      if (!filter.test(entryNameWithoutEnding)) {
+        continue;
+      }
+
+      resources.add(Path.of(entryName));
     }
 
     return resources;
+  }
+
+  private static String normalizeResourcePath(Path resourceFolder) {
+    return resourceFolder.toString().replace('\\', '/');
+  }
+
+  private static String normalizeDirectoryResourcePath(Path resourceFolder) {
+    var resourcePath = normalizeResourcePath(resourceFolder);
+    if (!resourcePath.endsWith("/")) {
+      resourcePath += "/";
+    }
+    return resourcePath;
   }
 }

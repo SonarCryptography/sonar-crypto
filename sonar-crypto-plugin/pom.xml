@@ -139,7 +139,7 @@
                         <configuration>
                             <shadedArtifactAttached>false</shadedArtifactAttached>
                             <minimizeJar>true</minimizeJar>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
 
                             <!-- Basic filters to avoid some merge conflicts from duplicate files.
                             The remaining warnings should not concern the JAR's execution -->

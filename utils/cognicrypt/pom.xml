@@ -51,19 +51,80 @@
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
-		<dependency>
-			<groupId>org.sonarsource.api.plugin</groupId>
-			<artifactId>sonar-plugin-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.sonarsource.api.plugin</groupId>
+            <artifactId>sonar-plugin-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <!-- CrySL ruleset POM artifacts; the downloadrules plugin derives the matching ruleset ZIP
+             coordinates from these dependencies and resolves/copies the library JARs into the ruleset subfolders. -->
+        <dependency>
+            <groupId>de.darmstadt.tu.crossing</groupId>
+            <artifactId>JavaCryptographicArchitecture</artifactId>
+            <type>pom</type>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>BouncyCastle</artifactId>
+            <type>pom</type>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>de.darmstadt.tu.crossing</groupId>
+            <artifactId>Tink</artifactId>
+            <type>pom</type>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>de.paderborn.uni</groupId>
+            <artifactId>BouncyCastle-JCA</artifactId>
+            <type>pom</type>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.build.directory}/generated-resources</directory>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.14</version>
+                <configuration>
+                    <excludes>
+                        <exclude>crysl_rules/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarcrypto</groupId>
+                <artifactId>downloadrules</artifactId>
+                <version>${project.version}</version>
+                <configuration>
+                    <rulesetFolderMappings>
+                        <rulesetFolderMapping>de.fraunhofer.iem:BouncyCastle=bc</rulesetFolderMapping>
+                        <rulesetFolderMapping>de.paderborn.uni:BouncyCastle-JCA=bc-jca</rulesetFolderMapping>
+                        <rulesetFolderMapping>de.darmstadt.tu.crossing:JavaCryptographicArchitecture=jca</rulesetFolderMapping>
+                        <rulesetFolderMapping>de.darmstadt.tu.crossing:Tink=tink</rulesetFolderMapping>
+                    </rulesetFolderMappings>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>download-ruleset-with-dependencies</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>download-ruleset-with-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
+
 </project>

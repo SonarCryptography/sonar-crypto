@@ -6,6 +6,7 @@ import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -24,6 +25,7 @@ import org.sonarcrypto.ccerror.CcErrorConverter;
 import org.sonarcrypto.ccerror.ConvertedError;
 import org.sonarcrypto.utils.cognicrypt.crysl.CryslRuleProvider;
 import org.sonarcrypto.utils.cognicrypt.crysl.Ruleset;
+import org.sonarcrypto.utils.cognicrypt.crysl.RulesetPaths;
 import org.sonarcrypto.utils.cognicrypt.jimple.JimpleScanner;
 import org.sonarcrypto.utils.maven.MavenBuildException;
 import org.sonarcrypto.utils.maven.MavenProject;
@@ -41,11 +43,10 @@ public class CryptoSensor implements Sensor {
     sensorDescriptor.onlyOnLanguages("java");
   }
 
-  protected Path extractRules() throws IOException {
+  protected RulesetPaths extractRules() throws IOException {
     final Ruleset ruleset = Ruleset.JCA;
     try {
-      CryslRuleProvider ruleProvider = new CryslRuleProvider();
-      return ruleProvider.extractRulesetToTempDir(ruleset);
+      return new CryslRuleProvider().extractRulesetToTempDir(ruleset);
     } catch (IOException | URISyntaxException e) {
       final var message =
           String.format(
@@ -55,18 +56,20 @@ public class CryptoSensor implements Sensor {
     }
   }
 
-  protected List<ConvertedError> scan(FileSystem fileSystem, Path ruleDir) {
+  protected List<ConvertedError> scan(FileSystem fileSystem, RulesetPaths extractedRules) {
     Table<WrappedClass, Method, Set<AbstractError>> errors;
     Path jimpleDir = fileSystem.workDir().toPath().resolve("bridge-output/jimple");
+    String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
     if (hasJimpleFiles(jimpleDir)) {
       LOGGER.info(
           "Using Jimple files from bridge output ({}) as analysis input.",
           jimpleDir.toAbsolutePath());
-      var scanner = new JimpleScanner(jimpleDir.toString(), ruleDir.toString());
+      var scanner = new JimpleScanner(jimpleDir.toString(), extractedRules.rulesetZip().toString());
+      scanner.setAddClassPath(
+          resolveAnalysisClassPath(mavenProjectPath, extractedRules.dependencyClasspath()));
       scanner.scan();
       errors = scanner.getCollectedErrors();
     } else {
-      String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
       LOGGER.info(
           "No Jimple files found at {}. Compiling project at {} as analysis input.",
           jimpleDir.toAbsolutePath(),
@@ -80,8 +83,10 @@ public class CryptoSensor implements Sensor {
         return List.of(/* Empty */ );
       }
       HeadlessJavaScanner scanner =
-          new HeadlessJavaScanner(mi.getBuildDirectory(), ruleDir.toString());
+          new HeadlessJavaScanner(mi.getBuildDirectory(), extractedRules.rulesetZip().toString());
       scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
+      scanner.setAddClassPath(
+          joinClassPaths(extractedRules.dependencyClasspath(), mi.getFullClassPath()));
       scanner.scan();
       errors = scanner.getCollectedErrors();
     }
@@ -96,7 +101,7 @@ public class CryptoSensor implements Sensor {
 
   @Override
   public void execute(SensorContext sensorContext) {
-    final Path ruleDir;
+    final RulesetPaths ruleDir;
 
     try {
       ruleDir = extractRules();
@@ -117,5 +122,36 @@ public class CryptoSensor implements Sensor {
     } catch (IOException e) {
       return false;
     }
+  }
+
+  private static String resolveAnalysisClassPath(
+      String mavenProjectPath, String rulesetDependencyClasspath) {
+    try {
+      var mavenProject = new MavenProject(mavenProjectPath);
+      mavenProject.compile();
+      return joinClassPaths(rulesetDependencyClasspath, mavenProject.getFullClassPath());
+    } catch (IOException | MavenBuildException e) {
+      LOGGER.warn(
+          "Failed to resolve Maven dependency classpath for {}. Falling back to ruleset dependencies only.",
+          mavenProjectPath,
+          e);
+      return rulesetDependencyClasspath;
+    }
+  }
+
+  private static String joinClassPaths(String... classPaths) {
+    final var joiner = new StringBuilder();
+
+    for (var classPath : classPaths) {
+      if (classPath == null || classPath.isBlank()) {
+        continue;
+      }
+      if (joiner.length() > 0) {
+        joiner.append(File.pathSeparator);
+      }
+      joiner.append(classPath.trim());
+    }
+
+    return joiner.toString();
   }
 }
