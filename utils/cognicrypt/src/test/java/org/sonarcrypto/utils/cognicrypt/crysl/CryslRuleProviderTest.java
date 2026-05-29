@@ -50,6 +50,16 @@ public class CryslRuleProviderTest {
   }
 
   @Test
+  void testDuplicateMatchingRulesetsStillExtract() throws Exception {
+    var provider = new CryslRuleProvider();
+
+    var rulesetPaths = provider.extractRulesetToTempDir(Ruleset.BC);
+
+    assertThat(new File(rulesetPaths.rulesetZip().toUri())).exists();
+    assertThat(rulesetPaths.dependencyClasspath()).contains("bcprov-jdk18on");
+  }
+
+  @Test
   void testRuleNotFound() {
     var provider = new CryslRuleProvider();
     assertThatThrownBy(

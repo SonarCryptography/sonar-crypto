@@ -72,6 +72,51 @@ public class ResourceEnumeratorTest {
   }
 
   @Test
+  void testEnumerateResourcesWithBlankClasspath() throws Exception {
+    final var originalClassPath = System.getProperty("java.class.path");
+    System.setProperty("java.class.path", "");
+
+    try {
+      final var list =
+          new ResourceEnumerator()
+              .listResources(Path.of("does_not_exist"), ".zip", ignored -> true);
+
+      assertThat(list).isEmpty();
+    } finally {
+      System.setProperty("java.class.path", originalClassPath);
+    }
+  }
+
+  @Test
+  void testEnumerateResourcesWithinAJarSkipsNonMatchingEntries() throws Exception {
+    final var jarFile = Files.createTempFile("resource-enumerator-negative", ".jar");
+    try (var outputStream = new JarOutputStream(Files.newOutputStream(jarFile))) {
+      outputStream.putNextEntry(new JarEntry("crysl_rules/"));
+      outputStream.closeEntry();
+      outputStream.putNextEntry(new JarEntry("crysl_rules/readme.txt"));
+      outputStream.write(new byte[] {1});
+      outputStream.closeEntry();
+      outputStream.putNextEntry(new JarEntry("other_rules/sample.zip"));
+      outputStream.write(new byte[] {1});
+      outputStream.closeEntry();
+    }
+
+    try {
+      final var list =
+          new ResourceEnumerator()
+              .listJarResources(
+                  URI.create("jar:" + jarFile.toUri() + "!/crysl_rules").toURL(),
+                  Path.of("crysl_rules"),
+                  ".zip",
+                  ignored -> true);
+
+      assertThat(list).isEmpty();
+    } finally {
+      Files.deleteIfExists(jarFile);
+    }
+  }
+
+  @Test
   void testInvalidEntitiesThreshold() {
     assertThatThrownBy(() -> new ResourceEnumerator(0))
         .isInstanceOf(IllegalArgumentException.class);

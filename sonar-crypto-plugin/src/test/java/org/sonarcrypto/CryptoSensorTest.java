@@ -1,6 +1,7 @@
 package org.sonarcrypto;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,6 +11,9 @@ import static org.sonarcrypto.utils.sonar.TextUtils.quote;
 import static org.sonarcrypto.utils.test.sonarcontext.SonarContextTesterUtils.initializeFileSystem;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import org.jspecify.annotations.NullMarked;
@@ -165,6 +169,54 @@ class CryptoSensorTest {
             "Wrong number of issues reported!\nActual: %d\nExpected: %d..%d",
             actualCount, expectedErrorCount.min, expectedErrorCount.max)
         .isBetween(expectedErrorCount.min, expectedErrorCount.max);
+  }
+
+  @Test
+  void scan_prefers_jimple_input_when_bridge_output_exists() throws IOException {
+    CryptoSensor sensor = new CryptoSensor();
+    SensorContextTester context = SensorContextTester.create(tempDir);
+    context.fileSystem().setWorkDir(tempDir);
+
+    final var jimpleDir = tempDir.resolve("bridge-output/jimple");
+    Files.createDirectories(jimpleDir);
+    Files.writeString(jimpleDir.resolve("Invalid.jimple"), "invalid jimple");
+
+    assertThatThrownBy(() -> sensor.scan(context.fileSystem(), sensor.extractRules()))
+        .isInstanceOfAny(AssertionError.class, RuntimeException.class);
+    assertThat(logTester.logs())
+        .anyMatch(it -> it.contains("Using Jimple files from bridge output"))
+        .anyMatch(it -> it.contains("Falling back to ruleset dependencies only."));
+  }
+
+  @Test
+  void resolveAnalysisClassPath() throws Exception {
+    final var result =
+        (String)
+            invokePrivateStatic(
+                "resolveAnalysisClassPath",
+                new Class<?>[] {String.class, String.class},
+                Path.of("../e2e/src/test/resources/Java/Maven/Basic")
+                    .toAbsolutePath()
+                    .normalize()
+                    .toString(),
+                "rules.jar");
+
+    assertThat(result).startsWith("rules.jar" + java.io.File.pathSeparator);
+    assertThat(result).contains("bcprov-jdk18on");
+  }
+
+  private static Object invokePrivateStatic(
+      String methodName, Class<?>[] parameterTypes, Object... args) throws Exception {
+    Method method = CryptoSensor.class.getDeclaredMethod(methodName, parameterTypes);
+    method.setAccessible(true);
+    try {
+      return method.invoke(null, args);
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof Exception cause) {
+        throw cause;
+      }
+      throw e;
+    }
   }
 
   private record Entry(Set<Item> actual, Map<Item, Boolean> expected) {}
