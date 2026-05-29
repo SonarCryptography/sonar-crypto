@@ -1,0 +1,9 @@
+[submodule "external/Crypto-API-Rules"]
+	path = external/Crypto-API-Rules
+	url = https://github.com/SonarCryptography/Crypto-API-Rules.git
+[submodule "external/Boomerang"]
+	path = external/Boomerang
+	url = https://github.com/SonarCryptography/Boomerang.git
+[submodule "external/CryptoAnalysis"]
+	path = external/CryptoAnalysis
+	url = https://github.com/SonarCryptography/CryptoAnalysis.git
