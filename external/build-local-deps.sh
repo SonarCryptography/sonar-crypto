@@ -13,6 +13,7 @@ CRYPTO_API_RULES=(
   "JavaCryptographicArchitecture"
   "BouncyCastle"
   "BouncyCastle-JCA"
+  "JCA-BouncyCastle-JCA"
   "Tink"
 )
 
