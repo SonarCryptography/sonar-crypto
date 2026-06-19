@@ -44,7 +44,7 @@ public class CryptoSensor implements Sensor {
   }
 
   protected RulesetPaths extractRules() throws IOException {
-    final Ruleset ruleset = Ruleset.JCA;
+    final Ruleset ruleset = Ruleset.JCA_BC_JCA;
     try {
       return new CryslRuleProvider().extractRulesetToTempDir(ruleset);
     } catch (IOException | URISyntaxException e) {

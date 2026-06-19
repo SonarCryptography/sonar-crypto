@@ -5,16 +5,19 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public enum Ruleset {
 
-  /** Bouncy Castle */
+  /** Bouncy Castle with its own API */
   BC("bc"),
 
-  /** Bouncy Castle and JCA */
+  /** Bouncy Castle for JCA */
   BC_JCA("bc-jca"),
 
   /** JCA */
   JCA("jca"),
 
-  /** Google Tink */
+  /** JCA with Bouncy Castle for JCA */
+  JCA_BC_JCA("jca-bc-jca"),
+
+  /** Google Tink with its own API */
   TINK("tink");
 
   private final String rulesetName;
