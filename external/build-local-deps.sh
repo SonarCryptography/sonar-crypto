@@ -29,6 +29,12 @@ require_repo() {
     printf '[build-local-deps] Missing expected repository: %s (%s)\n' "${repo_name}" "${repo_dir}" >&2
     exit 1
   fi
+  if [[ ! -f "${repo_dir}/pom.xml" ]]; then
+    printf '[build-local-deps] Repository %s exists but has no pom.xml (%s)\n' "${repo_name}" "${repo_dir}" >&2
+    printf '[build-local-deps] This usually means git submodules are not checked out.\n' >&2
+    printf '[build-local-deps] Run: git submodule update --init --recursive\n' >&2
+    exit 1
+  fi
 }
 
 build_repo() {
