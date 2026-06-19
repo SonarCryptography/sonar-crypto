@@ -66,7 +66,7 @@ if [[ -z "${BOOMERANG_VERSION}" ]]; then
 fi
 log "Resolved Boomerang project version: ${BOOMERANG_VERSION}"
 
-build_cryptoanalysis 4.3.2 #"${BOOMERANG_VERSION}" TODO Actually use the resolved version once CryptoAnalysis supports it
+build_cryptoanalysis "${BOOMERANG_VERSION}"
 
 
 log "Local dependency build finished"

@@ -245,7 +245,7 @@
         <profile>
             <id>build-local-deps</id>
             <properties>
-                <cryptoanalysis.version>5.0.2-sonarcrypto-SNAPSHOT</cryptoanalysis.version>
+                <cryptoanalysis.version>5.0.2-SNAPSHOT</cryptoanalysis.version>
             </properties>
             <build>
                 <plugins>
