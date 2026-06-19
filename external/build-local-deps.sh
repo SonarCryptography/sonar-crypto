@@ -6,6 +6,16 @@ REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
 BOOMERANG_DIR="${SCRIPT_DIR}/Boomerang"
 CRYPTOANALYSIS_DIR="${SCRIPT_DIR}/CryptoAnalysis"
+CRYPTO_API_RULES_DIR="${SCRIPT_DIR}/Crypto-API-Rules"
+
+# Ruleset subdirectories under Crypto-API-Rules, in install order
+CRYPTO_API_RULES=(
+  "JavaCryptographicArchitecture"
+  "BouncyCastle"
+  "BouncyCastle-JCA"
+  "JCA-BouncyCastle-JCA"
+  "Tink"
+)
 
 log() {
   printf '[build-local-deps] %s\n' "$1"
@@ -17,6 +27,12 @@ require_repo() {
 
   if [[ ! -d "${repo_dir}" ]]; then
     printf '[build-local-deps] Missing expected repository: %s (%s)\n' "${repo_name}" "${repo_dir}" >&2
+    exit 1
+  fi
+  if [[ ! -f "${repo_dir}/pom.xml" ]]; then
+    printf '[build-local-deps] Repository %s exists but has no pom.xml (%s)\n' "${repo_name}" "${repo_dir}" >&2
+    printf '[build-local-deps] This usually means git submodules are not checked out.\n' >&2
+    printf '[build-local-deps] Run: git submodule update --init --recursive\n' >&2
     exit 1
   fi
 }
@@ -66,8 +82,13 @@ if [[ -z "${BOOMERANG_VERSION}" ]]; then
 fi
 log "Resolved Boomerang project version: ${BOOMERANG_VERSION}"
 
-build_cryptoanalysis 4.3.2 #"${BOOMERANG_VERSION}" TODO Actually use the resolved version once CryptoAnalysis supports it
+build_cryptoanalysis "${BOOMERANG_VERSION}"
 
+for ruleset in "${CRYPTO_API_RULES[@]}"; do
+  ruleset_dir="${CRYPTO_API_RULES_DIR}/${ruleset}"
+  require_repo "${ruleset_dir}" "Crypto-API-Rules/${ruleset}"
+  build_repo "${ruleset_dir}" "Crypto-API-Rules/${ruleset}"
+done
 
 log "Local dependency build finished"
 
