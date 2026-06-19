@@ -6,6 +6,15 @@ REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
 BOOMERANG_DIR="${SCRIPT_DIR}/Boomerang"
 CRYPTOANALYSIS_DIR="${SCRIPT_DIR}/CryptoAnalysis"
+CRYPTO_API_RULES_DIR="${SCRIPT_DIR}/Crypto-API-Rules"
+
+# Ruleset subdirectories under Crypto-API-Rules, in install order
+CRYPTO_API_RULES=(
+  "JavaCryptographicArchitecture"
+  "BouncyCastle"
+  "BouncyCastle-JCA"
+  "Tink"
+)
 
 log() {
   printf '[build-local-deps] %s\n' "$1"
@@ -68,6 +77,10 @@ log "Resolved Boomerang project version: ${BOOMERANG_VERSION}"
 
 build_cryptoanalysis "${BOOMERANG_VERSION}"
 
+require_repo "${CRYPTO_API_RULES_DIR}" "Crypto-API-Rules"
+for ruleset in "${CRYPTO_API_RULES[@]}"; do
+  build_repo "${CRYPTO_API_RULES_DIR}/${ruleset}" "Crypto-API-Rules/${ruleset}"
+done
 
 log "Local dependency build finished"
 
