@@ -84,9 +84,10 @@ log "Resolved Boomerang project version: ${BOOMERANG_VERSION}"
 
 build_cryptoanalysis "${BOOMERANG_VERSION}"
 
-require_repo "${CRYPTO_API_RULES_DIR}" "Crypto-API-Rules"
 for ruleset in "${CRYPTO_API_RULES[@]}"; do
-  build_repo "${CRYPTO_API_RULES_DIR}/${ruleset}" "Crypto-API-Rules/${ruleset}"
+  ruleset_dir="${CRYPTO_API_RULES_DIR}/${ruleset}"
+  require_repo "${ruleset_dir}" "Crypto-API-Rules/${ruleset}"
+  build_repo "${ruleset_dir}" "Crypto-API-Rules/${ruleset}"
 done
 
 log "Local dependency build finished"

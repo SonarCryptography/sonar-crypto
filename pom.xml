@@ -246,45 +246,40 @@
                     </configuration>
                 </plugin>
             </plugins>
-
         </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>build-local-dependencies</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>${session.executionRootDirectory}</workingDirectory>
+                            <executable>bash</executable>
+                            <arguments>
+                                <argument>${session.executionRootDirectory}/external/build-local-deps.sh</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <profiles>
         <profile>
             <id>build-local-deps</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
                 <cryptoanalysis.version>5.0.2-SNAPSHOT</cryptoanalysis.version>
             </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.6.3</version>
-                        <inherited>false</inherited>
-                        <executions>
-                            <execution>
-                                <id>build-local-dependencies</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <workingDirectory>${session.executionRootDirectory}</workingDirectory>
-                                    <executable>bash</executable>
-                                    <arguments>
-                                        <argument>${session.executionRootDirectory}/external/build-local-deps.sh</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
         <profile>
             <id>coverage</id>
