@@ -253,6 +253,9 @@
     <profiles>
         <profile>
             <id>build-local-deps</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <properties>
                 <cryptoanalysis.version>5.0.2-SNAPSHOT</cryptoanalysis.version>
             </properties>
