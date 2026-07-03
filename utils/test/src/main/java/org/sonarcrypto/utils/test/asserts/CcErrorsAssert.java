@@ -11,7 +11,7 @@ import java.util.*;
 import org.assertj.core.api.AbstractCollectionAssert;
 import org.assertj.core.api.ObjectAssert;
 import org.jspecify.annotations.NullMarked;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,7 +138,7 @@ public class CcErrorsAssert {
 
     LOGGER.error(stringBuilder.toString());
 
-    Assert.assertEquals(message, 0, diffMap.size());
+    Assertions.assertEquals(0, diffMap.size(), message);
   }
 
   private static HashMap<String, Set<AbstractError>> makeComparable(
