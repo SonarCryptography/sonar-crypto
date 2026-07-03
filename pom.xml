@@ -39,7 +39,7 @@
         <crysl.tink.version>3.1.4</crysl.tink.version>
         <crysl.bc-jca.version>3.1.6</crysl.bc-jca.version>
         <crysl.jca-bc-jca.version>1.0.0</crysl.jca-bc-jca.version>
-        <cryptoanalysis.version>5.0.1</cryptoanalysis.version>
+        <cryptoanalysis.version>5.0.2-SNAPSHOT</cryptoanalysis.version>
         <slf4j.version>2.0.18</slf4j.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
