@@ -82,6 +82,12 @@
             <type>pom</type>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>de.darmstadt.tu.crossing</groupId>
+            <artifactId>JCA-BouncyCastle-JCA</artifactId>
+            <type>pom</type>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
@@ -112,6 +118,7 @@
                         <rulesetFolderMapping>de.paderborn.uni:BouncyCastle-JCA=bc-jca</rulesetFolderMapping>
                         <rulesetFolderMapping>de.darmstadt.tu.crossing:JavaCryptographicArchitecture=jca</rulesetFolderMapping>
                         <rulesetFolderMapping>de.darmstadt.tu.crossing:Tink=tink</rulesetFolderMapping>
+                        <rulesetFolderMapping>de.darmstadt.tu.crossing:JCA-BouncyCastle-JCA=jca-bc-jca</rulesetFolderMapping>
                     </rulesetFolderMappings>
                 </configuration>
                 <executions>
@@ -126,5 +133,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>

@@ -6,8 +6,8 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
 import org.jspecify.annotations.NullMarked;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @NullMarked
 public class Jcb2JimpleConverterTest {
@@ -23,7 +23,7 @@ public class Jcb2JimpleConverterTest {
 
     FileUtils.deleteDirectory(outputDir.toFile());
 
-    Assert.assertTrue(fileExists);
+    Assertions.assertTrue(fileExists);
   }
 
   @SuppressWarnings("DataFlowIssue")
@@ -44,6 +44,6 @@ public class Jcb2JimpleConverterTest {
 
     FileUtils.deleteDirectory(outputDir.toFile());
 
-    Assert.assertTrue(fileExists);
+    Assertions.assertTrue(fileExists);
   }
 }
