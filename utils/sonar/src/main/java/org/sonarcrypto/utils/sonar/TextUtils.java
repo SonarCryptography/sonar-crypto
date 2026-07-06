@@ -9,6 +9,9 @@ import org.jspecify.annotations.Nullable;
 
 @NullMarked
 public class TextUtils {
+  private TextUtils() {
+    // Utility class
+  }
 
   /** Joins items of an iterable to a comma separated string, e.g. {@code "Foo, Bar, and Baz"}. */
   public static String join(Iterable<?> values, @Nullable String lastDelimiter) {
@@ -86,19 +89,19 @@ public class TextUtils {
 
   // We need a class, because records can only have public constructors
   public static final class Code {
-    private final String code;
+    private final String wrappedCode;
 
-    Code(String code) {
-      this.code = code;
+    Code(String wrappedCode) {
+      this.wrappedCode = wrappedCode;
     }
 
     @Override
     public String toString() {
-      return code;
+      return wrappedCode;
     }
 
     public String code() {
-      return code;
+      return wrappedCode;
     }
 
     @Override
@@ -110,12 +113,12 @@ public class TextUtils {
         return false;
       }
       var that = (Code) obj;
-      return Objects.equals(this.code, that.code);
+      return Objects.equals(this.wrappedCode, that.wrappedCode);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(code);
+      return Objects.hash(wrappedCode);
     }
   }
 }

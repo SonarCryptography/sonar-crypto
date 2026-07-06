@@ -19,8 +19,6 @@ import sootup.core.frontend.OverridingBodySource;
 import sootup.core.frontend.OverridingClassSource;
 import sootup.core.frontend.ResolveException;
 import sootup.core.inputlocation.AnalysisInputLocation;
-import sootup.core.jimple.common.stmt.*;
-import sootup.core.jimple.javabytecode.stmt.*;
 import sootup.core.model.*;
 import sootup.core.types.ClassType;
 import sootup.java.core.*;
@@ -47,13 +45,12 @@ public class JimpleConvertingView extends JavaView {
     } else {
       if (classSource instanceof JavaSootClassSource) {
         theClass = (JavaSootClass) classSource.buildClass(SourceType.Application);
-      } else if (classSource instanceof OverridingClassSource) {
+      } else if (classSource instanceof OverridingClassSource overridingClassSource) {
         WrappingSootClassSource wrappingSootClassSource =
-            new WrappingSootClassSource((OverridingClassSource) classSource);
+            new WrappingSootClassSource(overridingClassSource);
         theClass = wrappingSootClassSource.buildClass(SourceType.Application);
       } else {
-        throw new RuntimeException(
-            "Unsupported class source type: " + classSource.getClass().getName());
+        throw new UnsupportedClassSourceException(classSource.getClass().getName());
       }
       cache.putClass(classType, theClass);
     }
@@ -71,10 +68,10 @@ public class JimpleConvertingView extends JavaView {
         .map(Optional::get)
         .map(
             classSource -> {
-              if (classSource instanceof JavaSootClassSource) {
-                return (JavaSootClassSource) classSource;
-              } else if (classSource instanceof OverridingClassSource) {
-                return new WrappingSootClassSource((OverridingClassSource) classSource);
+              if (classSource instanceof JavaSootClassSource javaSootClassSource) {
+                return javaSootClassSource;
+              } else if (classSource instanceof OverridingClassSource overridingClassSource) {
+                return new WrappingSootClassSource(overridingClassSource);
               } else {
                 return null;
               }
@@ -181,7 +178,7 @@ public class JimpleConvertingView extends JavaView {
                       Collections.emptyList(),
                       methodPosition);
                 } else {
-                  throw new RuntimeException(
+                  throw new UnsupportedBodySourceException(
                       "Wrapped body source is not an OverridingBodySource, cannot apply BoomerangPreInterceptor.");
                 }
               })

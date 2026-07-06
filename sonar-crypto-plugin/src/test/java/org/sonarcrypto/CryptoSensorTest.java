@@ -2,7 +2,7 @@ package org.sonarcrypto;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -70,7 +70,6 @@ class CryptoSensorTest {
     sensor.report(context, foundErrors);
 
     final var groundTruth = new GroundTruthParser().parse(context.fileSystem());
-    // groundTruth.forEach((key, value) -> System.out.println(key + " -> " + value));
 
     final var combinedMap = new TreeMap<GroundTruthParser.Location, Entry>();
 
@@ -84,7 +83,7 @@ class CryptoSensorTest {
         (location, gts) -> {
           final var entry =
               combinedMap.computeIfAbsent(
-                  location, _location -> new Entry(new HashSet<>(), new HashMap<>()));
+                  location, ignored -> new Entry(new HashSet<>(), new HashMap<>()));
           gts.forEach(
               it -> {
                 expectedErrorCount.max++;
@@ -201,8 +200,9 @@ class CryptoSensorTest {
                     .toString(),
                 "rules.jar");
 
-    assertThat(result).startsWith("rules.jar" + java.io.File.pathSeparator);
-    assertThat(result).contains("bcprov-jdk18on");
+    assertThat(result)
+        .startsWith("rules.jar" + java.io.File.pathSeparator)
+        .contains("bcprov-jdk18on");
   }
 
   private static Object invokePrivateStatic(

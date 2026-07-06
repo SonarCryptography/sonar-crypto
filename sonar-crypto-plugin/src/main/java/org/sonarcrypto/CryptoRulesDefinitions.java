@@ -7,6 +7,11 @@ import org.sonarcrypto.cryptorules.Severity;
 
 @NullMarked
 public class CryptoRulesDefinitions {
+
+  private CryptoRulesDefinitions() {
+    // Private constructor to prevent instantiation
+  }
+
   public static final CryptoRulesDefinition GENERAL =
       CryptoRulesDefinition.builder()
           .withRuleKind(RuleKind.GENERAL)

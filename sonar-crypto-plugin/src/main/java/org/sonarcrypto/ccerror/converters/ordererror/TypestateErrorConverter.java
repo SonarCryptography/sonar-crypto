@@ -9,6 +9,10 @@ import org.sonarcrypto.ccerror.violations.Violation;
 
 @NullMarked
 public class TypestateErrorConverter {
+  private TypestateErrorConverter() {
+    // Private constructor to prevent instantiation
+  }
+
   public static Violation convert(TypestateError error) {
 
     final var unexpectedMethod = error.getErrorStatement().getInvokeExpr().getDeclaredMethod();

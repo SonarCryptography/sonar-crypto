@@ -21,6 +21,11 @@ import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
 public class ConstraintErrorConverter {
+
+  private ConstraintErrorConverter() {
+    // Private constructor to prevent instantiation
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(ConstraintErrorConverter.class);
 
   public static @Nullable Violation convert(ConstraintError error) {

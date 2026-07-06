@@ -1,5 +1,6 @@
 package org.sonarcrypto.ccerror.violations;
 
+import java.util.Objects;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.RuleKind;
@@ -34,5 +35,18 @@ public final class ValueViolation extends Violation {
 
     CallInfo.createMessage(calleeInfo, definitionKey, messageBuilder);
     this.getCause().createMessage(messageBuilder);
+  }
+
+  @Override
+  public boolean equals(@Nullable Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
+    ValueViolation that = (ValueViolation) o;
+    return Objects.equals(callInfo, that.callInfo);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), callInfo);
   }
 }

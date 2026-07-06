@@ -9,6 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileUtilities {
+  private FileUtilities() {
+    // Private constructor to prevent instantiation
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(FileUtilities.class);
 
   public static final String SONAR_SECURITY_JAVA_FRONTEND = "sonar-security-java-frontend-plugin";

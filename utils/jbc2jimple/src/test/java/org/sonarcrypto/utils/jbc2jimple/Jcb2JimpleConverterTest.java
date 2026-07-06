@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @NullMarked
-public class Jcb2JimpleConverterTest {
+class Jcb2JimpleConverterTest {
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testConvert() throws IOException, URISyntaxException {
+  void testConvert() throws IOException, URISyntaxException {
     final var classPath = Path.of(this.getClass().getClassLoader().getResource("classes").toURI());
     final var outputDir = Files.createTempDirectory("jbc2jimple");
 
@@ -28,7 +28,7 @@ public class Jcb2JimpleConverterTest {
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testCli() throws IOException, URISyntaxException {
+  void testCli() throws IOException, URISyntaxException {
     final var classPath = Path.of(this.getClass().getClassLoader().getResource("classes").toURI());
     final var outputDir = Files.createTempDirectory("jbc2jimple");
     final var args = new ArrayList<String>();

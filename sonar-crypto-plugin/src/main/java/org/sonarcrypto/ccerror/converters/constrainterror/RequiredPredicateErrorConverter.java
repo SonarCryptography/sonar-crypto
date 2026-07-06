@@ -16,6 +16,11 @@ import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
 public class RequiredPredicateErrorConverter {
+
+  private RequiredPredicateErrorConverter() {
+    // Private constructor to prevent instantiation
+  }
+
   private static final Logger LOGGER =
       LoggerFactory.getLogger(RequiredPredicateErrorConverter.class);
 

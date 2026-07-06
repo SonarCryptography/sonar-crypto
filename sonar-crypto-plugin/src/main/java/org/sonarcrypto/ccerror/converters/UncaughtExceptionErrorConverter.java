@@ -9,6 +9,10 @@ import org.sonarcrypto.ccerror.violations.Violation;
 
 @NullMarked
 public class UncaughtExceptionErrorConverter {
+  private UncaughtExceptionErrorConverter() {
+    // Private constructor to prevent instantiation
+  }
+
   public static Violation convert(UncaughtExceptionError error) {
     return new CallViolation(
         CryptoRulesDefinitions.UNCAUGHT_EXCEPTION,

@@ -11,7 +11,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import org.junit.jupiter.api.Test;
 
-public class ResourceEnumeratorTest {
+class ResourceEnumeratorTest {
 
   @Test
   void testEnumerateResourcesFromFiles() throws Exception {
@@ -22,8 +22,8 @@ public class ResourceEnumeratorTest {
                 ".zip",
                 s -> "test_rules1".equals(s) || "test_rules2".equals(s));
 
-    assertThat(list).hasSize(2);
     assertThat(list)
+        .hasSize(2)
         .contains(Path.of("crysl_rules/test_rules1.zip"), Path.of("crysl_rules/test_rules2.zip"));
   }
 
@@ -40,8 +40,7 @@ public class ResourceEnumeratorTest {
                 ".zip",
                 "jca"::equals);
 
-    assertThat(list).isNotEmpty();
-    assertThat(list).contains(Path.of("crysl_rules/jca.zip"));
+    assertThat(list).isNotEmpty().contains(Path.of("crysl_rules/jca.zip"));
   }
 
   @Test
@@ -135,6 +134,6 @@ public class ResourceEnumeratorTest {
                 ".zip",
                 s -> true);
 
-    assertThat(list.size()).isLessThanOrEqualTo(1);
+    assertThat(list).hasSizeLessThanOrEqualTo(1);
   }
 }

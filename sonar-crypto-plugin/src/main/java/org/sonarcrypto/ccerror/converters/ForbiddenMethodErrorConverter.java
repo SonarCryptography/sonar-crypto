@@ -9,6 +9,10 @@ import org.sonarcrypto.ccerror.violations.Violation;
 
 @NullMarked
 public class ForbiddenMethodErrorConverter {
+  private ForbiddenMethodErrorConverter() {
+    // Private constructor to prevent instantiation
+  }
+
   public static Violation convert(ForbiddenMethodError error) {
 
     return new CallViolation(

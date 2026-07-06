@@ -58,15 +58,17 @@ public class CcToSonarIssues {
       final var message = messageBuilder.toString();
       location.message(message);
 
-      LOGGER.info(
-          "{} @ [{}:{}/{}:{}] {}: {}",
-          inputFile.filename(),
-          position.start().line(),
-          position.start().lineOffset(),
-          position.end().line(),
-          position.end().lineOffset(),
-          violation.getRulesDefinition().getRuleKind(),
-          violation.getCause());
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info(
+            "{} @ [{}:{}/{}:{}] {}: {}",
+            inputFile.filename(),
+            position.start().line(),
+            position.start().lineOffset(),
+            position.end().line(),
+            position.end().lineOffset(),
+            violation.getRulesDefinition().getRuleKind(),
+            violation.getCause());
+      }
 
       issue.at(location);
       issue.save();

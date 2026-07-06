@@ -17,6 +17,10 @@ import org.slf4j.LoggerFactory;
 
 @NullMarked
 public class CcErrorsAssert {
+  private CcErrorsAssert() {
+    // Utility class
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(CcErrorsAssert.class);
 
   /**
@@ -87,58 +91,61 @@ public class CcErrorsAssert {
       diffMap.put(otherMethodSignature, new Diff(new HashSet<>(otherErrors), Set.of()));
     }
 
+    if (LOGGER.isErrorEnabled() && !diffMap.isEmpty()) {
+      logResults(diffMap);
+    }
+
+    Assertions.assertEquals(0, diffMap.size(), message);
+  }
+
+  private static void logResults(HashMap<String, Diff> diffMap) {
     final var stringBuilder = new StringBuilder();
 
-    if (!diffMap.isEmpty()) {
+    stringBuilder.append("#### Diff Results #########################################");
+    stringBuilder.append(System.lineSeparator());
 
-      stringBuilder.append("#### Diff Results #########################################");
+    var printSeparator = false;
+
+    for (final var entry : diffMap.entrySet()) {
+      final var methodSignature = entry.getKey();
+      final var diff = entry.getValue();
+
+      if (printSeparator) {
+        stringBuilder.append("-----------------------------------------------------------");
+        stringBuilder.append(System.lineSeparator());
+      } else {
+        printSeparator = true;
+      }
+
+      stringBuilder.append("Method: ").append(methodSignature);
       stringBuilder.append(System.lineSeparator());
+      stringBuilder.append("    - Missing in first result:");
 
-      var printSeparator = false;
+      if (diff.missingInFirst.isEmpty()) {
+        stringBuilder.append("        <empty>");
+      }
 
-      for (final var entry : diffMap.entrySet()) {
-        final var methodSignature = entry.getKey();
-        final var diff = entry.getValue();
-
-        if (printSeparator) {
-          stringBuilder.append("-----------------------------------------------------------");
-          stringBuilder.append(System.lineSeparator());
-        } else {
-          printSeparator = true;
-        }
-
-        stringBuilder.append("Method: ").append(methodSignature);
-        stringBuilder.append(System.lineSeparator());
-        stringBuilder.append("    - Missing in first result:");
-
-        if (diff.missingInFirst.isEmpty()) {
-          stringBuilder.append("        <empty>");
-        }
-
-        for (final var error : diff.missingInFirst) {
-          stringBuilder.append("        - ").append(error);
-        }
-
-        stringBuilder.append(System.lineSeparator());
-        stringBuilder.append("    - Missing in second result:");
-
-        if (diff.missingInSecond.isEmpty()) {
-          stringBuilder.append("        <empty>");
-        }
-
-        for (final var error : diff.missingInSecond) {
-          stringBuilder.append("        - ").append(error);
-        }
+      for (final var error : diff.missingInFirst) {
+        stringBuilder.append("        - ").append(error);
       }
 
       stringBuilder.append(System.lineSeparator());
-      stringBuilder.append("###########################################################");
-      stringBuilder.append(System.lineSeparator());
+      stringBuilder.append("    - Missing in second result:");
+
+      if (diff.missingInSecond.isEmpty()) {
+        stringBuilder.append("        <empty>");
+      }
+
+      for (final var error : diff.missingInSecond) {
+        stringBuilder.append("        - ").append(error);
+      }
     }
 
-    LOGGER.error(stringBuilder.toString());
+    stringBuilder.append(System.lineSeparator());
+    stringBuilder.append("###########################################################");
+    stringBuilder.append(System.lineSeparator());
 
-    Assertions.assertEquals(0, diffMap.size(), message);
+    LOGGER.error(stringBuilder.toString());
   }
 
   private static HashMap<String, Set<AbstractError>> makeComparable(
@@ -155,7 +162,7 @@ public class CcErrorsAssert {
 
       if (map.putIfAbsent(fqn, errors) != null) {
         // Should never happen
-        throw new RuntimeException("Fatal error: Duplicate key for map: " + fqn);
+        throw new IllegalArgumentException("Fatal error: Duplicate key for map: " + fqn);
       }
     }
 

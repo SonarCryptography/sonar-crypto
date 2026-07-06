@@ -7,6 +7,7 @@ import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
@@ -41,9 +42,8 @@ public class CcErrorConverter {
     return this.fileSystem;
   }
 
-  public ArrayList<ConvertedError> convertErrors(
+  public List<ConvertedError> convertErrors(
       Table<WrappedClass, Method, Set<AbstractError>> issuesFromCC) {
-    FileSystem fileSystem = this.fileSystem;
 
     final var violations = new ArrayList<ConvertedError>();
 

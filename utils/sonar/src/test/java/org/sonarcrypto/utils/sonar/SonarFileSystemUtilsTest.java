@@ -16,7 +16,7 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 
-public class SonarFileSystemUtilsTest {
+class SonarFileSystemUtilsTest {
   @TempDir Path tempDir;
   private SensorContextTester sensorContext;
 
