@@ -31,8 +31,8 @@
 
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
-        <sonar.plugin.api.version>13.6.0.4371</sonar.plugin.api.version>
-        <sonarqube.api.impl.version>26.5.0.122743</sonarqube.api.impl.version>
+        <sonar.plugin.api.version>13.8.0.4399</sonar.plugin.api.version>
+        <sonarqube.api.impl.version>26.6.0.123539</sonarqube.api.impl.version>
         <packaging.plugin.version>1.25.1.3002</packaging.plugin.version>
         <crysl.jca.version>3.1.4</crysl.jca.version>
         <crysl.bc.version>3.1.5</crysl.bc.version>
@@ -86,7 +86,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.5.32</version>
+                <version>1.5.37</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -154,13 +154,13 @@
             <dependency>
                 <groupId>org.sonarsource.orchestrator</groupId>
                 <artifactId>sonar-orchestrator-junit5</artifactId>
-                <version>6.1.0.3962</version>
+                <version>6.3.0.4464</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>6.0.3</version>
+                <version>6.1.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -195,7 +195,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.5</version>
+                    <version>3.5.6</version>
                 </plugin>
                 <plugin>
                     <groupId>com.googlecode.maven-download-plugin</groupId>
@@ -288,7 +288,7 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.14</version>
+                        <version>0.8.15</version>
                         <executions>
                             <execution>
                                 <id>prepare-agent</id>
