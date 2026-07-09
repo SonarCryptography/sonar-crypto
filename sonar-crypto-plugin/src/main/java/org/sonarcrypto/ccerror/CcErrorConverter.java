@@ -60,38 +60,14 @@ public class CcErrorConverter {
         continue;
       }
 
-      final var overriddenErrors = new ArrayList<AbstractError>(errors.size());
-      var atLeastOneErrorConverted = false;
-
       // Report each error in this class/method
       for (AbstractError error : errors) {
-        if (!atLeastOneErrorConverted && !error.getPrecedingErrors().isEmpty()) {
-          // Ignore preceding errors
-          overriddenErrors.add(error);
-          continue;
-        }
-
         violations.add(
             new ConvertedError(
                 inputFile,
                 ConverterUtils.selectLocation(inputFile, error),
                 method,
                 convertError(error)));
-
-        atLeastOneErrorConverted = true;
-      }
-
-      if (!atLeastOneErrorConverted) {
-        // Report overridden errors if no other error was reported,
-        // just in case that we do not miss any.
-        for (final var error : overriddenErrors) {
-          violations.add(
-              new ConvertedError(
-                  inputFile,
-                  ConverterUtils.selectLocation(inputFile, error),
-                  method,
-                  convertError(error)));
-        }
       }
     }
 
