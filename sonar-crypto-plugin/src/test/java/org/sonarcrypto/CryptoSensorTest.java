@@ -28,6 +28,7 @@ import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.utility.groundtruth.GroundTruthParser;
 import org.sonarcrypto.utility.groundtruth.GroundTruthUtils;
 import org.sonarcrypto.utility.groundtruth.ValueSupport;
+import org.sonarcrypto.utils.maven.MavenBuildException;
 
 @NullMarked
 class CryptoSensorTest {
@@ -60,7 +61,7 @@ class CryptoSensorTest {
   }
 
   @Test
-  void testExecuteMavenProject() throws IOException {
+  void testExecuteMavenProject() throws IOException, MavenBuildException {
     CryptoSensor sensor = new CryptoSensor();
     SensorContextTester context =
         SensorContextTester.create(Path.of("../e2e/src/test/resources/Java/Maven/Basic"));
