@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.sonarcrypto.cryptorules.CryptoRulesDefinition.REPOSITORY_KEY;
+import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
 import static org.sonarcrypto.utils.sonar.TextUtils.quote;
 import static org.sonarcrypto.utils.test.sonarcontext.SonarContextTesterUtils.initializeFileSystem;
 
@@ -21,6 +22,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
@@ -28,6 +30,7 @@ import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.utility.groundtruth.GroundTruthParser;
 import org.sonarcrypto.utility.groundtruth.GroundTruthUtils;
 import org.sonarcrypto.utility.groundtruth.ValueSupport;
+import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
 import org.sonarcrypto.utils.maven.MavenBuildException;
 
 @NullMarked
@@ -100,10 +103,18 @@ class CryptoSensorTest {
 
     foundErrors.forEach(
         error -> {
+          // Find the InputFile corresponding to this class
+          InputFile inputFile = findInputFile(context.fileSystem(), error.className());
+
+          assertThat(inputFile)
+              .withFailMessage("Input file for class not found!\nError: %s")
+              .isNotNull();
+
+          final var position = ConverterUtils.selectLocation(inputFile, error.position());
+
           final var entry =
               combinedMap.computeIfAbsent(
-                  new GroundTruthParser.Location(
-                      error.inputFile().filename(), error.position().start().line()),
+                  new GroundTruthParser.Location(inputFile.filename(), position.start().line()),
                   location1 -> new Entry(new HashSet<>(), new HashMap<>()));
           final var violation = error.violation();
           final var item =

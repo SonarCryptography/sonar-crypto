@@ -1,7 +1,9 @@
 package org.sonarcrypto;
 
+import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
 import static org.sonarcrypto.utils.sonar.TextUtils.code;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
@@ -12,6 +14,7 @@ import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonarcrypto.ccerror.ConvertedError;
 import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
+import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
 
 /** Converts CogniCrypt (CryptoAnalysis) errors to SonarQube issues. */
 @NullMarked
@@ -27,8 +30,16 @@ public class CcToSonarIssues {
   public void reportAllIssues(SensorContext context, List<ConvertedError> errors) {
 
     for (final var entry : errors) {
-      final var inputFile = entry.inputFile();
-      final var position = entry.position();
+
+      // Find the InputFile corresponding to this class
+      InputFile inputFile = findInputFile(context.fileSystem(), entry.className());
+
+      if (inputFile == null) {
+        LOGGER.error("Could not find source file for class: {}", entry.className().fqn());
+        continue;
+      }
+
+      final var position = ConverterUtils.selectLocation(inputFile, entry.position());
       final var method = entry.method();
       final var violation = entry.violation();
 
@@ -57,6 +68,32 @@ public class CcToSonarIssues {
       violation.createMessage(messageBuilder);
       final var message = messageBuilder.toString();
       location.message(message);
+
+      final var flow = violation.getFlow();
+
+      if (!flow.isEmpty()) {
+        final var flowLocations = new ArrayList<NewIssueLocation>(flow.size());
+
+        for (final var flowEntry : flow) {
+          InputFile flowFile = findInputFile(context.fileSystem(), flowEntry.className());
+
+          if (flowFile == null) {
+            LOGGER.error(
+                "Could not find source file for execution flow class: {}",
+                flowEntry.className().fqn());
+            continue;
+          }
+
+          final var flowLocation = issue.newLocation().on(flowFile);
+          final var flowPosition = ConverterUtils.selectLocation(flowFile, flowEntry.position());
+
+          flowLocation.message(flowEntry.message());
+          flowLocation.at(flowPosition);
+          flowLocations.add(flowLocation);
+        }
+
+        issue.addFlow(flowLocations, NewIssue.FlowType.EXECUTION, null);
+      }
 
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info(

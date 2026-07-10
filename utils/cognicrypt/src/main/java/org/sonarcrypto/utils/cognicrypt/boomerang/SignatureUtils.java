@@ -5,6 +5,7 @@ import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.sonarcrypto.utils.sonar.FqClassName;
 
 @NullMarked
 public class SignatureUtils {
@@ -21,12 +22,20 @@ public class SignatureUtils {
     return shortNameOf(method.getDeclaringClass(), method.getName());
   }
 
-  private static String shortNameOf(WrappedClass declaringClass, String methodName) {
+  public static String shortNameOf(FqClassName declaringClass, String methodName) {
+    return shortNameOf(declaringClass.fqn(), methodName);
+  }
+
+  public static String shortNameOf(WrappedClass declaringClass, String methodName) {
     return shortNameOf(declaringClass.getFullyQualifiedName(), methodName);
   }
 
   public static String shortNameOf(WrappedClass clazz) {
     return shortNameOf(clazz.getFullyQualifiedName(), null);
+  }
+
+  public static String shortNameOf(FqClassName clazz) {
+    return shortNameOf(clazz.fqn(), null);
   }
 
   public static String shortNameOf(String fqn) {

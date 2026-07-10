@@ -15,8 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.internal.DefaultTextPointer;
-import org.sonar.api.batch.fs.internal.DefaultTextRange;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.batch.sensor.issue.Issue;
@@ -24,6 +22,8 @@ import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 import org.sonarcrypto.ccerror.ConvertedError;
 import org.sonarcrypto.ccerror.causes.UndefinedCause;
 import org.sonarcrypto.ccerror.violations.CallViolation;
+import org.sonarcrypto.utils.sonar.FqClassName;
+import sootup.core.model.FullPosition;
 
 class CcToSonarIssuesTest {
 
@@ -42,28 +42,29 @@ class CcToSonarIssuesTest {
 
   @Test
   void report_all_issues_creates_issues_for_found_files() throws IOException {
-    final var inputFile1 =
-        addJavaFile("com/example/ClassA.java", "package com.example;\npublic class ClassA {}");
-    final var inputFile2 =
-        addJavaFile("com/example/ClassB.java", "package com.example;\npublic class ClassB {}");
+    addJavaFile("com/example/ClassA.java", "package com.example;\npublic class ClassA {}");
+    addJavaFile("com/example/ClassB.java", "package com.example;\npublic class ClassB {}");
 
     final var errors =
         List.of(
             new ConvertedError(
-                inputFile1,
-                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 19)),
+                new FqClassName("com.example.ClassA"),
+                new FullPosition(1, 13, 1, 19),
                 method("encrypt"),
-                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
+                new CallViolation(
+                    RuleKind.GENERAL, new UndefinedCause("Undefined"), List.of(/* empty*/ ))),
             new ConvertedError(
-                inputFile1,
-                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 19)),
+                new FqClassName("com.example.ClassA"),
+                new FullPosition(1, 13, 1, 19),
                 method("decrypt"),
-                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
+                new CallViolation(
+                    RuleKind.GENERAL, new UndefinedCause("Undefined"), List.of(/* empty*/ ))),
             new ConvertedError(
-                inputFile2,
-                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 19)),
+                new FqClassName("com.example.ClassB"),
+                new FullPosition(1, 13, 1, 19),
                 method("init"),
-                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))));
+                new CallViolation(
+                    RuleKind.GENERAL, new UndefinedCause("Undefined"), List.of(/* empty*/ ))));
 
     issueReporter.reportAllIssues(sensorContext, errors);
 
@@ -72,26 +73,28 @@ class CcToSonarIssuesTest {
 
   @Test
   void report_all_issues_reports_errors_from_multiple_methods() throws IOException {
-    final var inputFile =
-        addJavaFile("com/example/Buggy.java", "package com.example;\npublic class Buggy {}");
+    addJavaFile("com/example/Buggy.java", "package com.example;\npublic class Buggy {}");
 
     final var errors =
         List.of(
             new ConvertedError(
-                inputFile,
-                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 18)),
+                new FqClassName("com.example.Buggy"),
+                new FullPosition(1, 13, 1, 18),
                 method("encrypt"),
-                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
+                new CallViolation(
+                    RuleKind.GENERAL, new UndefinedCause("Undefined"), List.of(/* empty */ ))),
             new ConvertedError(
-                inputFile,
-                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 18)),
+                new FqClassName("com.example.Buggy"),
+                new FullPosition(1, 13, 1, 18),
                 method("decrypt"),
-                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))),
+                new CallViolation(
+                    RuleKind.GENERAL, new UndefinedCause("Undefined"), List.of(/* empty */ ))),
             new ConvertedError(
-                inputFile,
-                new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 18)),
+                new FqClassName("com.example.Buggy"),
+                new FullPosition(1, 13, 1, 18),
                 method("init"),
-                new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined"))));
+                new CallViolation(
+                    RuleKind.GENERAL, new UndefinedCause("Undefined"), List.of(/* empty */ ))));
 
     issueReporter.reportAllIssues(sensorContext, errors);
 
@@ -100,14 +103,14 @@ class CcToSonarIssuesTest {
 
   @Test
   void report_all_issues_includes_method_name_in_message() throws IOException {
-    final var inputFile =
-        addJavaFile("com/example/Foo.java", "package com.example;\npublic class Foo {}");
+    addJavaFile("com/example/Foo.java", "package com.example;\npublic class Foo {}");
     final var error =
         new ConvertedError(
-            inputFile,
-            new DefaultTextRange(new DefaultTextPointer(1, 13), new DefaultTextPointer(1, 16)),
+            new FqClassName("com.example.Foo"),
+            new FullPosition(1, 13, 1, 16),
             method("encrypt"),
-            new CallViolation(RuleKind.GENERAL, new UndefinedCause("Undefined")));
+            new CallViolation(
+                RuleKind.GENERAL, new UndefinedCause("Undefined"), List.of(/* empty */ )));
 
     issueReporter.reportAllIssues(sensorContext, List.of(error));
 

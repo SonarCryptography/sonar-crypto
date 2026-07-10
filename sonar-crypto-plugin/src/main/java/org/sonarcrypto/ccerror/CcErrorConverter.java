@@ -1,6 +1,6 @@
 package org.sonarcrypto.ccerror;
 
-import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
+import static org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils.intoPosition;
 
 import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
@@ -10,10 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.jspecify.annotations.NullMarked;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.batch.fs.InputFile;
 import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.causes.UndefinedCause;
 import org.sonarcrypto.ccerror.converters.ForbiddenMethodErrorConverter;
@@ -26,12 +23,10 @@ import org.sonarcrypto.ccerror.converters.ordererror.IncompleteOperationErrorCon
 import org.sonarcrypto.ccerror.converters.ordererror.TypestateErrorConverter;
 import org.sonarcrypto.ccerror.violations.CallViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
-import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
+import org.sonarcrypto.utils.sonar.FqClassName;
 
 @NullMarked
 public class CcErrorConverter {
-  private static final Logger LOGGER = LoggerFactory.getLogger(CcErrorConverter.class);
-
   private final FileSystem fileSystem;
 
   public CcErrorConverter(FileSystem fileSystem) {
@@ -52,20 +47,12 @@ public class CcErrorConverter {
       Method method = cell.getColumnKey();
       Set<AbstractError> errors = cell.getValue();
 
-      // Find the InputFile corresponding to this class
-      InputFile inputFile = findInputFile(fileSystem, wrappedClass);
-      if (inputFile == null) {
-        LOGGER.error(
-            "Could not find source file for class: {}", wrappedClass.getFullyQualifiedName());
-        continue;
-      }
-
       // Report each error in this class/method
       for (AbstractError error : errors) {
         violations.add(
             new ConvertedError(
-                inputFile,
-                ConverterUtils.selectLocation(inputFile, error),
+                new FqClassName(wrappedClass.getFullyQualifiedName()),
+                intoPosition(error),
                 method,
                 convertError(error)));
       }
@@ -98,7 +85,9 @@ public class CcErrorConverter {
     if (violation == null) {
       violation =
           new CallViolation(
-              CryptoRulesDefinitions.GENERAL, new UndefinedCause(error.toErrorMarkerString()));
+              CryptoRulesDefinitions.GENERAL,
+              new UndefinedCause(error.toErrorMarkerString()),
+              List.of(/* empty */ ));
     }
 
     return violation;

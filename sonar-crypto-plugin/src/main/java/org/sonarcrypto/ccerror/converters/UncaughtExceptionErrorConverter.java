@@ -1,6 +1,7 @@
 package org.sonarcrypto.ccerror.converters;
 
 import crypto.analysis.errors.UncaughtExceptionError;
+import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.causes.UncaughtExceptionCause;
@@ -16,6 +17,7 @@ public class UncaughtExceptionErrorConverter {
   public static Violation convert(UncaughtExceptionError error) {
     return new CallViolation(
         CryptoRulesDefinitions.UNCAUGHT_EXCEPTION,
-        new UncaughtExceptionCause(error.getException()));
+        new UncaughtExceptionCause(error.getException()),
+        List.of(/* empty */ ));
   }
 }

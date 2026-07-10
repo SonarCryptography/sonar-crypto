@@ -2,6 +2,7 @@ package org.sonarcrypto.ccerror.converters.ordererror;
 
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.IncompleteOperationError;
+import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.causes.IncompleteOperationCause;
@@ -26,6 +27,7 @@ public class IncompleteOperationErrorConverter {
 
     return new CallViolation(
         CryptoRulesDefinitions.API_MISUSE,
-        new IncompleteOperationCause(incompleteObject, expectedMethods));
+        new IncompleteOperationCause(incompleteObject, expectedMethods),
+        List.of(/* empty */ ));
   }
 }

@@ -8,6 +8,7 @@ import crypto.constraints.violations.ViolatedBinaryConstraint;
 import crypto.constraints.violations.ViolatedConstraint;
 import crypto.constraints.violations.ViolatedNeverTypeOfConstraint;
 import crypto.constraints.violations.ViolatedValueConstraint;
+import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -89,7 +90,8 @@ public class ConstraintErrorConverter {
                       return splitStringValue[min(splitIndex, MAX_SPLIT_LEN - 1)];
                     })
                 .toList(),
-            validValueRange));
+            validValueRange),
+        List.of(/* empty */ ));
   }
 
   static Violation generateViolatedNeverTypeOfConstraintMessage(
@@ -97,7 +99,8 @@ public class ConstraintErrorConverter {
     return new ValueViolation(
         CryptoRulesDefinitions.KEY_MATERIAL,
         CallInfo.of(constraint.parameter()),
-        new ForbiddenTypeCause(constraint.notAllowedType()));
+        new ForbiddenTypeCause(constraint.notAllowedType()),
+        List.of(/* empty */ ));
   }
 
   static @Nullable Violation generateViolatedBinaryConstraintMessage(
