@@ -32,8 +32,6 @@ public final class ForbiddenMethodCause extends CallCause {
 
   @Override
   public void createMessage(StringBuilder messageBuilder) {
-    final var forbiddenMethod = this.getForbiddenMethod();
-    final var alternatives = this.getAlternatives();
 
     messageBuilder
         .append("Call to the prohibited method ")

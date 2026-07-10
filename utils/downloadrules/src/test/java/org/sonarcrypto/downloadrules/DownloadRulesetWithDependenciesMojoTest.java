@@ -70,7 +70,7 @@ class DownloadRulesetWithDependenciesMojoTest {
                 artifact,
                 rulesetDirectory);
 
-    assertThat(copiedPath.getFileName().toString()).isEqualTo("artifact-1.0.jar");
+    assertThat(copiedPath.getFileName()).hasToString("artifact-1.0.jar");
     assertThat(Files.readString(copiedPath)).isEqualTo("jar-content");
   }
 

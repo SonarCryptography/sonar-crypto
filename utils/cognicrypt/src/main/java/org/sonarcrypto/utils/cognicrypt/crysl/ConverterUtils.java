@@ -20,6 +20,11 @@ import org.sonarcrypto.utils.sonar.TextUtils;
 import org.sonarcrypto.utils.sonar.TextUtils.Code;
 
 public class ConverterUtils {
+
+  private ConverterUtils() {
+    // Utility class
+  }
+
   /**
    * Stringifies the callee from a callee info, e.g., {@code `Foo.bar`}. Constructor and static
    * constructor are handled differently, e.g., {@code `Foo`'s constructor}. If the callee info is

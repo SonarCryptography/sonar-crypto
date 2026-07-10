@@ -31,8 +31,6 @@ public final class UnexpectedCallCause extends CallCause {
 
   @Override
   public void createMessage(StringBuilder messageBuilder) {
-    final var unexpectedMethod = getUnexpectedMethod();
-    final var expectedMethods = getExpectedMethods();
 
     messageBuilder
         .append("Unexpected call to method ")

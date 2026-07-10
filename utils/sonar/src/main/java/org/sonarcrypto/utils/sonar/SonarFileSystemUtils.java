@@ -10,6 +10,10 @@ import org.sonar.api.batch.fs.InputFile;
 
 @NullMarked
 public class SonarFileSystemUtils {
+  private SonarFileSystemUtils() {
+    // Utility class
+  }
+
   /**
    * Finds the InputFile corresponding to a WrappedClass.
    *

@@ -12,6 +12,9 @@ import org.sonar.api.batch.sensor.internal.SensorContextTester;
 
 @NullMarked
 public class SonarContextTesterUtils {
+  private SonarContextTesterUtils() {
+    // Utility class
+  }
 
   public static void initializeFileSystem(SensorContextTester context) throws IOException {
     final var fileSystem = context.fileSystem();

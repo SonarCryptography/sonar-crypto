@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
@@ -86,7 +87,8 @@ public class CryptoSensor implements Sensor {
           new HeadlessJavaScanner(mi.getBuildDirectory(), extractedRules.rulesetZip().toString());
       scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
       scanner.setAddClassPath(
-          joinClassPaths(extractedRules.dependencyClasspath(), mi.getFullClassPath()));
+          joinClassPaths(
+              extractedRules.dependencyClasspath(), Objects.requireNonNull(mi.getFullClassPath())));
       scanner.scan();
       errors = scanner.getCollectedErrors();
     }
@@ -129,7 +131,8 @@ public class CryptoSensor implements Sensor {
     try {
       var mavenProject = new MavenProject(mavenProjectPath);
       mavenProject.compile();
-      return joinClassPaths(rulesetDependencyClasspath, mavenProject.getFullClassPath());
+      return joinClassPaths(
+          rulesetDependencyClasspath, Objects.requireNonNull(mavenProject.getFullClassPath()));
     } catch (IOException | MavenBuildException e) {
       LOGGER.warn(
           "Failed to resolve Maven dependency classpath for {}. Falling back to ruleset dependencies only.",
@@ -146,7 +149,7 @@ public class CryptoSensor implements Sensor {
       if (classPath == null || classPath.isBlank()) {
         continue;
       }
-      if (joiner.length() > 0) {
+      if (!joiner.isEmpty()) {
         joiner.append(File.pathSeparator);
       }
       joiner.append(classPath.trim());

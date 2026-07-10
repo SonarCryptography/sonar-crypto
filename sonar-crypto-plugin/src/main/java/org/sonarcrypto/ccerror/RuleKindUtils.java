@@ -9,6 +9,10 @@ import org.sonarcrypto.RuleKind;
 
 @NullMarked
 public class RuleKindUtils {
+  private RuleKindUtils() {
+    // Utility class
+  }
+
   private static final Pattern KEY_MATERIAL_PATTERN = Pattern.compile("(?>key|length|rand|seed)");
 
   public static RuleKind detectRuleKind(CrySLPredicate pred) {

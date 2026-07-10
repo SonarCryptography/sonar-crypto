@@ -13,6 +13,10 @@ import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 public class ResourceExtractor {
+  private ResourceExtractor() {
+    // Utility class
+  }
+
   /**
    * Extracts files from resources into a target directory.
    *

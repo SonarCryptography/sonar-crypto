@@ -11,6 +11,10 @@ import org.sonarcrypto.ccerror.violations.Violation;
 
 @NullMarked
 public class ImpreciseValueExtractionErrorConverter {
+  private ImpreciseValueExtractionErrorConverter() {
+    // Private constructor to prevent instantiation
+  }
+
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ImpreciseValueExtractionErrorConverter.class);
 

@@ -8,19 +8,18 @@ import java.io.IOException;
 import java.util.zip.ZipFile;
 import org.junit.jupiter.api.Test;
 
-public class CryslRuleProviderTest {
+class CryslRuleProviderTest {
 
   @Test
   void testRulesFound() throws Exception {
     var provider = new CryslRuleProvider();
     var rulesetPaths = provider.extractRulesetToTempDir(Ruleset.BC);
     var myZip = new File(rulesetPaths.rulesetZip().toUri());
-    assertThat(myZip.exists());
-    assertThat(myZip.isFile());
+    assertThat(myZip).exists().isFile();
 
     try (var zip = new ZipFile(myZip)) {
       var dirEntry = zip.getEntry("BouncyCastle");
-      assertThat(dirEntry.isDirectory());
+      assertThat(dirEntry.isDirectory()).isTrue();
 
       var entry = zip.getEntry("BouncyCastle/RSAEngine.crysl");
       assertThat(entry).as("File should exist").isNotNull();

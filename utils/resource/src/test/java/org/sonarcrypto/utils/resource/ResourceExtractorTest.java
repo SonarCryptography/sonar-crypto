@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 
-public class ResourceExtractorTest {
+class ResourceExtractorTest {
 
   @Test
   void extractTest() throws Exception {

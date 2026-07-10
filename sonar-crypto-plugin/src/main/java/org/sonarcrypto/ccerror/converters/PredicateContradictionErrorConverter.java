@@ -10,6 +10,10 @@ import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
 
 @NullMarked
 public class PredicateContradictionErrorConverter {
+  private PredicateContradictionErrorConverter() {
+    // Private constructor to prevent instantiation
+  }
+
   public static Violation convert(PredicateContradictionError error) {
     final var contradictedPredicate = error.getContradictedPredicate();
 

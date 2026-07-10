@@ -8,6 +8,11 @@ import org.jspecify.annotations.Nullable;
 
 @NullMarked
 public class SignatureUtils {
+
+  private SignatureUtils() {
+    // Utility class
+  }
+
   public static String shortNameOf(DeclaredMethod method) {
     return shortNameOf(method.getDeclaringClass(), method.getName());
   }

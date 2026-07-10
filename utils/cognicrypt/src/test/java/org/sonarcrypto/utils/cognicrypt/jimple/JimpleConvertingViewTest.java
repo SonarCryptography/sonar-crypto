@@ -26,8 +26,7 @@ class JimpleConvertingViewTest {
     // Create the JimpleConvertingView
     JimpleConvertingView view = new JimpleConvertingView(inputLocation);
 
-    assertThat(view).isNotNull();
-    assertThat(view).isInstanceOf(JavaView.class);
+    assertThat(view).isNotNull().isInstanceOf(JavaView.class);
   }
 
   @Test
@@ -128,8 +127,7 @@ class JimpleConvertingViewTest {
     List<AnalysisInputLocation> inputLocations = List.of(jimpleInputLocation, runtimeInputLocation);
     JimpleConvertingView view = new JimpleConvertingView(inputLocations);
 
-    assertThat(view).isNotNull();
-    assertThat(view).isInstanceOf(JavaView.class);
+    assertThat(view).isNotNull().isInstanceOf(JavaView.class);
 
     // Verify we can access both Jimple classes and runtime classes
     ClassType jimpleTestType = view.getIdentifierFactory().getClassType("JimpleTest");

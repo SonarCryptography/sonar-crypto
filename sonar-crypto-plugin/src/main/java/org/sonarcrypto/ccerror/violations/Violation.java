@@ -13,12 +13,12 @@ public abstract sealed class Violation permits ValueViolation, CallViolation {
 
   private final Cause cause;
 
-  public Violation(CryptoRulesDefinition rulesDefinition, Cause cause) {
+  protected Violation(CryptoRulesDefinition rulesDefinition, Cause cause) {
     this.rulesDefinition = rulesDefinition;
     this.cause = cause;
   }
 
-  public Violation(RuleKind ruleKind, Cause cause) {
+  protected Violation(RuleKind ruleKind, Cause cause) {
     this.rulesDefinition = CryptoRulesDefinitions.fromRuleKind(ruleKind);
     this.cause = cause;
   }

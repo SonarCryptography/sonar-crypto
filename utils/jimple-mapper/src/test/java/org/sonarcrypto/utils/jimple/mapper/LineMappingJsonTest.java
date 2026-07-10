@@ -74,9 +74,7 @@ class LineMappingJsonTest {
     collection.writeJson(writer);
     String json = writer.toString();
 
-    assertThat(json).isNotNull();
-    assertThat(json).contains("com.example.TestClass");
-    assertThat(json).contains("TestClass.java");
+    assertThat(json).isNotNull().contains("com.example.TestClass").contains("TestClass.java");
   }
 
   @Test
@@ -177,7 +175,6 @@ class LineMappingJsonTest {
     String json = collection.toJson();
 
     // Pretty printed JSON should contain newlines
-    assertThat(json).contains("\n");
-    assertThat(json).contains("  "); // Should have indentation
+    assertThat(json).contains("\n").contains("  "); // Should have indentation
   }
 }

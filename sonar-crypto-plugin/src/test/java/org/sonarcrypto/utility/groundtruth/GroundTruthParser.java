@@ -186,7 +186,7 @@ public class GroundTruthParser {
 
       try {
         ruleKind = RuleKind.valueOf(rule);
-      } catch (IllegalArgumentException _e) {
+      } catch (IllegalArgumentException ignored) {
         throw new GroundTruthParsingException(
             String.format("Invalid rule kind!%nFile: %s%nLine: %s", inputFile.filename(), line));
       }

@@ -10,6 +10,10 @@ import org.sonarcrypto.ccerror.violations.Violation;
 
 @NullMarked
 public class IncompleteOperationErrorConverter {
+  private IncompleteOperationErrorConverter() {
+    // Private constructor to prevent instantiation
+  }
+
   public static Violation convert(IncompleteOperationError error) {
 
     final IncompleteOperationCause.IncompleteObject incompleteObject =

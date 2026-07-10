@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.Test;
 
-public class MavenProjectTest {
+class MavenProjectTest {
 
   private static final String MAVEN_PROJECT_PATH =
       FilenameUtils.normalize(
