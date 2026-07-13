@@ -177,10 +177,11 @@ class CryptoSensorTest {
     context.fileSystem().setWorkDir(tempDir);
 
     final var jimpleDir = tempDir.resolve("bridge-output/jimple");
+    final var filesystem = context.fileSystem();
+    final var rules = sensor.extractRules();
     Files.createDirectories(jimpleDir);
     Files.writeString(jimpleDir.resolve("Invalid.jimple"), "invalid jimple");
-
-    assertThatThrownBy(() -> sensor.scan(context.fileSystem(), sensor.extractRules()))
+    assertThatThrownBy(() -> sensor.scan(filesystem, rules))
         .isInstanceOfAny(AssertionError.class, RuntimeException.class);
     assertThat(logTester.logs())
         .anyMatch(it -> it.contains("Using Jimple files from bridge output"))

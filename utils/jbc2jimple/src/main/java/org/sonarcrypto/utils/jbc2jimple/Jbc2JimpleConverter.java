@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import org.jspecify.annotations.NullMarked;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonarcrypto.utils.jimple.mapper.LineMappingCollection;
 import org.sonarcrypto.utils.jimple.mapper.LineNumberMapper;
 import org.sonarcrypto.utils.jimple.printer.JimplePrinter;
@@ -26,6 +28,8 @@ import sootup.java.core.views.JavaView;
 
 @NullMarked
 public class Jbc2JimpleConverter {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Jbc2JimpleConverter.class);
 
   private Map<String, LineMappingCollection> lineMappings = new HashMap<>();
 
@@ -160,18 +164,16 @@ public class Jbc2JimpleConverter {
     parser.setOptionsCaseInsensitive(true);
 
     if (parser.execute(args) != ExitCode.OK) {
-      System.err.println("Error while parsing the CLI arguments");
+      LOGGER.error("Error while parsing the CLI arguments");
       System.exit(1);
     }
 
-    System.out.println("Java class path:         " + cliArgs.classPath);
-    System.out.println("Jimple output directory: " + cliArgs.outputPath);
+    LOGGER.info("Java class path:         {}", cliArgs.classPath);
+    LOGGER.info("Jimple output directory: {}", cliArgs.outputPath);
 
-    System.out.println();
-    System.out.println("Converting classes ...");
+    LOGGER.info("Converting classes ...");
 
     final var count = new Jbc2JimpleConverter().convert(cliArgs.classPath, cliArgs.outputPath);
-    System.out.println();
-    System.out.println("Done. " + count + " class file(s) converted.");
+    LOGGER.info("Done. {} class file(s) converted.", count);
   }
 }

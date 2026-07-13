@@ -187,7 +187,15 @@ public class DownloadRulesetWithDependenciesMojo extends AbstractMojo {
       throw new MojoExecutionException("Missing required rulesetFolderMappings configuration");
     }
 
+    final var mappings = getStringStringLinkedHashMap();
+    return Map.copyOf(mappings);
+  }
+
+  private LinkedHashMap<String, String> getStringStringLinkedHashMap() {
     final var mappings = new LinkedHashMap<String, String>();
+    if (rulesetFolderMappings == null) {
+      return mappings;
+    }
     for (final var mapping : rulesetFolderMappings) {
       final var separatorIndex = mapping.indexOf('=');
       if (separatorIndex <= 0 || separatorIndex == mapping.length() - 1) {
@@ -199,7 +207,7 @@ public class DownloadRulesetWithDependenciesMojo extends AbstractMojo {
 
       mappings.put(mapping.substring(0, separatorIndex), mapping.substring(separatorIndex + 1));
     }
-    return Map.copyOf(mappings);
+    return mappings;
   }
 
   private static boolean isRulesetPomDependency(Dependency dependency) {
@@ -313,10 +321,9 @@ public class DownloadRulesetWithDependenciesMojo extends AbstractMojo {
 
       if ("pom".equals(normalizedType(dependency))) {
         collectDependencyTrailRoots(buildPomProject(dependency), dependencyTrailRoots, visitedPoms);
-        continue;
+      } else {
+        dependencyTrailRoots.add(dependency.getGroupId() + ":" + dependency.getArtifactId());
       }
-
-      dependencyTrailRoots.add(dependency.getGroupId() + ":" + dependency.getArtifactId());
     }
   }
 

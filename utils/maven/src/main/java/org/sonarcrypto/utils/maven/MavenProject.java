@@ -120,9 +120,11 @@ public class MavenProject {
       try (var in = new FileInputStream(classPathFile)) {
         fullProjectClassPath = IOUtils.toString(in, StandardCharsets.UTF_8);
       }
-      if (!classPathFile.delete()) {
+      try {
+        Files.delete(classPathFile.toPath());
+      } catch (IOException e) {
         LOGGER.warn(
-            "Failed to delete temporary classpath file: {}", classPathFile.getAbsolutePath());
+            "Failed to delete temporary classpath file: {}", classPathFile.getAbsolutePath(), e);
       }
     } catch (IOException e) {
       throw new MavenBuildException(
