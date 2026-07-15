@@ -1,5 +1,6 @@
 package com.example.crypto;
 
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -144,5 +145,13 @@ public class WeakCryptoExamples {
         // Logging sensitive information - vulnerability detected by SQ
         System.out.println("User credentials: " + username + ":" + password);
         System.out.println("Hardcoded key: " + HARDCODED_KEY);
+    }
+    
+    /**
+     * Encrypting data with an uninitialized `Cipher` instance - VULNERABILITY
+     */
+    public byte[] uninitializedCipherInstance(byte[] data) throws GeneralSecurityException {
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        return cipher.doFinal(data); // CC: API_MISUSE/UnexpectedCall "Cipher.doFinal"
     }
 }
