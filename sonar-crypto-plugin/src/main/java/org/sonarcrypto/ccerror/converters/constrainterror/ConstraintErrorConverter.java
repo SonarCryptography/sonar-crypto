@@ -87,7 +87,8 @@ public class ConstraintErrorConverter {
                       final var splitStringValue =
                           stringValue.split(splitter.getSplitter(), MAX_SPLIT_LEN);
 
-                      return splitStringValue[min(splitIndex, MAX_SPLIT_LEN - 1)];
+                      return splitStringValue[
+                          min(splitIndex, min(MAX_SPLIT_LEN, splitStringValue.length) - 1)];
                     })
                 .toList(),
             validValueRange),
