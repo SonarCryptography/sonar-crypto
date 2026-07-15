@@ -12,19 +12,30 @@ import org.junit.jupiter.api.Test;
 
 class E2ETests extends OrchestratorTests {
   private static final String JAVA_MAVEN_BASIC_PATH = "src/test/resources/Java/Maven/Basic";
+  private static final Pattern SENSOR_PATTERN =
+      Pattern.compile(
+          "Sensor Java(?>AndroidConfiguration|ModuleSecurity)Sensor " + "\\[securityjavafrontend]");
+  private static final Pattern UCFG_COUNT_PATTERN =
+      Pattern.compile("UCFG Bridge \\[jimple]: [1-9]\\d* UCFGs read from");
   private static final Pattern FOUND_CRYPTO_ERRORS_PATTERN =
       Pattern.compile("Found [1-9]\\d* cryptographic errors");
 
   @Test
   void java_maven_basic() {
     BuildResult result = executeMavenBuild(new File(JAVA_MAVEN_BASIC_PATH), "java-maven-basic");
-
     String log = result.getLogs();
+
     List<Integer> logIndices = new ArrayList<>();
+
     if (areSonarPrivatePluginsAvailable()) {
-      logIndices.add(log.indexOf("Sensor JavaModuleSecuritySensor [securityjavafrontend]"));
+      Matcher sensorMatcher = SENSOR_PATTERN.matcher(log);
+      logIndices.add(sensorMatcher.find() ? sensorMatcher.start() : -1);
+
       logIndices.add(log.indexOf("Sensor UCFG Bridge [ucfgbridge]"));
-      logIndices.add(log.indexOf("UCFG Bridge [jimple]: 26 UCFGs read from"));
+
+      Matcher ucfgCountMatcher = UCFG_COUNT_PATTERN.matcher(log);
+      logIndices.add(ucfgCountMatcher.find() ? ucfgCountMatcher.start() : -1);
+
       logIndices.add(log.indexOf("Sensor CogniCryptSensor [crypto]"));
       logIndices.add(log.indexOf("Using Jimple files from bridge output"));
     } else {
@@ -32,8 +43,8 @@ class E2ETests extends OrchestratorTests {
       logIndices.add(log.indexOf("No Jimple files found at"));
     }
 
-    final Matcher matcher = FOUND_CRYPTO_ERRORS_PATTERN.matcher(log);
-    logIndices.add(matcher.find() ? matcher.start() : -1);
+    final Matcher foundCryptoErrorsMatcher = FOUND_CRYPTO_ERRORS_PATTERN.matcher(log);
+    logIndices.add(foundCryptoErrorsMatcher.find() ? foundCryptoErrorsMatcher.start() : -1);
 
     for (int i = 0; i < logIndices.size() - 1; i++) {
       assertThat(logIndices.get(i)).isLessThan(logIndices.get(i + 1));
