@@ -7,18 +7,24 @@ import crypto.extractparameter.ParameterWithExtractedValues;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public record CallInfo(@Nullable CalleeInfo calleeInfo, int argumentIndex) {
 
-  public void createMessage(@Nullable String key, StringBuilder messageBuilder) {
-    messageBuilder.append(
-        String.format(
-            "The %s, given as %s to %s, ",
-            key != null ? key : "value",
+  public void createMessage(@Nullable String key, MessageCrafter messageCrafter) {
+    messageCrafter
+        .text("The ")
+        .text(key != null ? key : "value")
+        .text(", given as ")
+        .text(
             stringifyArgumentIndex(
-                argumentIndex, calleeInfo != null ? calleeInfo.argumentCount() : -1),
-            stringifyCallee(calleeInfo)));
+                argumentIndex, calleeInfo != null ? calleeInfo.argumentCount() : -1))
+        .text(" to ");
+
+    stringifyCallee(messageCrafter, calleeInfo);
+
+    messageCrafter.text(" ");
   }
 
   public static CallInfo none() {
@@ -38,14 +44,11 @@ public record CallInfo(@Nullable CalleeInfo calleeInfo, int argumentIndex) {
   }
 
   public static void createMessage(
-      @Nullable CallInfo callInfo, @Nullable String key, StringBuilder messageBuilder) {
+      @Nullable CallInfo callInfo, @Nullable String key, MessageCrafter messageCrafter) {
     if (callInfo != null) {
-      callInfo.createMessage(key, messageBuilder);
+      callInfo.createMessage(key, messageCrafter);
     } else {
-      messageBuilder
-          .append("The ")
-          .append(key != null ? key : "value")
-          .append(", given as argument, ");
+      messageCrafter.text("The ").text(key != null ? key : "value").text(", given as argument, ");
     }
   }
 }

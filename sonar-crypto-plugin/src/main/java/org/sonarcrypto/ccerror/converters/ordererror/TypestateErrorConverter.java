@@ -1,5 +1,7 @@
 package org.sonarcrypto.ccerror.converters.ordererror;
 
+import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
+
 import crypto.analysis.errors.TypestateError;
 import java.util.Objects;
 import org.jspecify.annotations.NullMarked;
@@ -8,9 +10,9 @@ import org.sonarcrypto.ccerror.FlowEntry;
 import org.sonarcrypto.ccerror.causes.UnexpectedCallCause;
 import org.sonarcrypto.ccerror.violations.CallViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
-import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
 import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
 import org.sonarcrypto.utils.sonar.FqClassName;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public class TypestateErrorConverter {
@@ -31,20 +33,26 @@ public class TypestateErrorConverter {
                 stmt -> {
                   final var position = ConverterUtils.intoPosition(stmt);
 
-                  if (position == null) return null;
-
+                  if (position == null) {
+                    return null;
+                  }
                   final var invokeExpr = stmt.getInvokeExpr();
-                  final var message =
-                      invokeExpr == null
-                          ? "Relevant call"
-                          : SignatureUtils.shortNameOf(
-                              invokeExpr.getDeclaredMethod().getDeclaringClass(),
-                              invokeExpr.getDeclaredMethod().getName());
+
+                  final var messageCrafter = new MessageCrafter();
+
+                  if (invokeExpr == null) {
+                    messageCrafter.text("Relevant call");
+                  } else {
+                    messageCrafter.code(
+                        shortNameOf(
+                            invokeExpr.getDeclaredMethod().getDeclaringClass(),
+                            invokeExpr.getDeclaredMethod().getName()));
+                  }
 
                   return new FlowEntry(
                       new FqClassName(stmt.getMethod().getDeclaringClass().getFullyQualifiedName()),
                       position,
-                      message);
+                      messageCrafter.toCraftedMessage());
                 })
             .filter(Objects::nonNull)
             .toList();

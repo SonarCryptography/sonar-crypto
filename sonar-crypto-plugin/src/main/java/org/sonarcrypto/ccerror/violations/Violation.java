@@ -8,6 +8,7 @@ import org.sonarcrypto.RuleKind;
 import org.sonarcrypto.ccerror.FlowEntry;
 import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public abstract sealed class Violation permits ValueViolation, CallViolation {
@@ -38,7 +39,7 @@ public abstract sealed class Violation permits ValueViolation, CallViolation {
     return this.flow;
   }
 
-  public abstract void createMessage(StringBuilder messageBuilder);
+  public abstract void createMessage(MessageCrafter messageCrafter);
 
   @Override
   public boolean equals(@Nullable Object o) {

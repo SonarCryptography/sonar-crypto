@@ -2,7 +2,6 @@ package org.sonarcrypto.utils.cognicrypt.crysl;
 
 import static java.lang.Math.*;
 import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
-import static org.sonarcrypto.utils.sonar.TextUtils.code;
 
 import boomerang.scope.Statement;
 import boomerang.scope.sootup.jimple.JimpleUpStatement;
@@ -10,15 +9,13 @@ import crypto.analysis.errors.AbstractError;
 import crypto.utils.CrySLUtils;
 import crysl.rule.CrySLMethod;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
-import org.sonarcrypto.utils.sonar.TextUtils;
-import org.sonarcrypto.utils.sonar.TextUtils.Code;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 import sootup.core.model.LinePosition;
 import sootup.core.model.Position;
 
@@ -33,18 +30,20 @@ public class ConverterUtils {
    * constructor are handled differently, e.g., {@code `Foo`'s constructor}. If the callee info is
    * {@code null}, the string {@code the callee} is returned.
    */
-  public static String stringifyCallee(@Nullable CalleeInfo calleeInfo) {
+  public static void stringifyCallee(
+      MessageCrafter messageCrafter, @Nullable CalleeInfo calleeInfo) {
     if (calleeInfo == null) {
-      return "the callee";
+      messageCrafter.text("the callee");
+      return;
     }
 
-    final var name = calleeInfo.methodName();
-
-    return switch (name) {
-      case "<init>" -> code(shortNameOf(calleeInfo.className())) + "'s constructor";
-      case "<clinit>" -> code(shortNameOf(calleeInfo.className())) + "'s static constructor";
-      default -> code(shortNameOf(calleeInfo.className(), calleeInfo.methodName())).toString();
-    };
+    switch (calleeInfo.methodName()) {
+      case "<init>" ->
+          messageCrafter.code(shortNameOf(calleeInfo.className())).text("'s constructor");
+      case "<clinit>" ->
+          messageCrafter.code(shortNameOf(calleeInfo.className())).text("'s static constructor");
+      default -> messageCrafter.code(shortNameOf(calleeInfo.className(), calleeInfo.methodName()));
+    }
   }
 
   /**
@@ -135,21 +134,20 @@ public class ConverterUtils {
     return null;
   }
 
-  public static String joinMethods(
+  public static void joinMethods(
+      MessageCrafter messageCrafter,
       @Nullable String prefixWhenMultiple,
       Collection<CrySLMethod> methods,
       @Nullable String lastDelimiter) {
-    final var set = new HashSet<String>(methods.size());
-    final var methodList = new ArrayList<Code>(methods.size());
+    final var collected =
+        methods.stream()
+            .map(it -> shortNameOf(it.getDeclaringClassName(), it.getMethodName()))
+            .collect(Collectors.toSet());
 
-    methods.stream()
-        .map(it -> shortNameOf(it.getDeclaringClassName(), it.getMethodName()))
-        .forEach(
-            it -> {
-              if (set.add(it)) methodList.add(code(it));
-            });
+    if (collected.size() > 1 && prefixWhenMultiple != null) {
+      messageCrafter.text(prefixWhenMultiple);
+    }
 
-    return (prefixWhenMultiple != null && methodList.size() > 1 ? prefixWhenMultiple + " " : "")
-        + TextUtils.join(methodList, lastDelimiter);
+    messageCrafter.joining(lastDelimiter, joiner -> collected.forEach(joiner::code));
   }
 }

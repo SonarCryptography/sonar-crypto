@@ -6,6 +6,7 @@ import org.sonarcrypto.RuleKind;
 import org.sonarcrypto.ccerror.FlowEntry;
 import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public final class CallViolation extends Violation {
@@ -19,7 +20,7 @@ public final class CallViolation extends Violation {
   }
 
   @Override
-  public void createMessage(StringBuilder messageBuilder) {
-    this.getCause().createMessage(messageBuilder);
+  public void createMessage(MessageCrafter messageCrafter) {
+    this.getCause().createMessage(messageCrafter);
   }
 }

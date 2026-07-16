@@ -1,7 +1,7 @@
 package org.sonarcrypto;
 
+import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
 import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
-import static org.sonarcrypto.utils.sonar.TextUtils.code;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,8 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonarcrypto.ccerror.ConvertedError;
-import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
 import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 /** Converts CogniCrypt (CryptoAnalysis) errors to SonarQube issues. */
 @NullMarked
@@ -46,10 +46,11 @@ public class CcToSonarIssues {
       final var issue = context.newIssue();
 
       final var messageBuilder =
-          new StringBuilder(
-              String.format(
-                  "Cryptographic weakness in method %s detected:%n",
-                  code(SignatureUtils.shortNameOf(method))));
+          new MessageCrafter()
+              .text("Cryptographic weakness in method ")
+              .code(shortNameOf(method))
+              .text(" detected:")
+              .newLine();
 
       final var location = issue.newLocation().on(inputFile);
 
@@ -61,13 +62,9 @@ public class CcToSonarIssues {
 
       issue.forRule(violation.getRulesDefinition().getRuleKey());
 
-      if (messageBuilder.length() > NewIssueLocation.MESSAGE_MAX_SIZE) {
-        messageBuilder.setLength(NewIssueLocation.MESSAGE_MAX_SIZE);
-      }
-
       violation.createMessage(messageBuilder);
-      final var message = messageBuilder.toString();
-      location.message(message);
+
+      messageBuilder.addMessageTo(location);
 
       final var flow = violation.getFlow();
 
@@ -87,7 +84,7 @@ public class CcToSonarIssues {
           final var flowLocation = issue.newLocation().on(flowFile);
           final var flowPosition = ConverterUtils.selectLocation(flowFile, flowEntry.position());
 
-          flowLocation.message(flowEntry.message());
+          flowEntry.message().addMessageTo(flowLocation);
           flowLocation.at(flowPosition);
           flowLocations.add(flowLocation);
         }

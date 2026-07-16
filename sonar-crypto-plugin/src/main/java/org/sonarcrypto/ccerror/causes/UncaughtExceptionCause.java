@@ -1,10 +1,9 @@
 package org.sonarcrypto.ccerror.causes;
 
-import static org.sonarcrypto.utils.sonar.TextUtils.code;
-
 import boomerang.scope.WrappedClass;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public final class UncaughtExceptionCause extends CallCause {
@@ -20,10 +19,11 @@ public final class UncaughtExceptionCause extends CallCause {
   }
 
   @Override
-  public void createMessage(StringBuilder messageBuilder) {
-    messageBuilder.append(
-        String.format(
-            "Uncaught exception %s.", code(this.getUncaughtException().getFullyQualifiedName())));
+  public void createMessage(MessageCrafter messageCrafter) {
+    messageCrafter
+        .text("Uncaught exception ")
+        .code(this.getUncaughtException().getFullyQualifiedName())
+        .text(".");
   }
 
   @Override

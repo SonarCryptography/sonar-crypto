@@ -1,6 +1,5 @@
 package org.sonarcrypto.utils.sonar;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.apache.commons.text.StringEscapeUtils;
@@ -82,43 +81,7 @@ public class TextUtils {
     return "\"" + StringEscapeUtils.escapeJava(value) + "\"";
   }
 
-  public static Code code(String value) {
-    return new Code(
-        "`" + StringEscapeUtils.escapeJava(value).replace("\\", "").replace("`", "``") + "`");
-  }
-
-  // We need a class, because records can only have public constructors
-  public static final class Code {
-    private final String wrappedCode;
-
-    Code(String wrappedCode) {
-      this.wrappedCode = wrappedCode;
-    }
-
-    @Override
-    public String toString() {
-      return wrappedCode;
-    }
-
-    public String code() {
-      return wrappedCode;
-    }
-
-    @Override
-    public boolean equals(@Nullable Object obj) {
-      if (obj == this) {
-        return true;
-      }
-      if (obj == null || obj.getClass() != this.getClass()) {
-        return false;
-      }
-      var that = (Code) obj;
-      return Objects.equals(this.wrappedCode, that.wrappedCode);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(wrappedCode);
-    }
+  public static String code(String value) {
+    return "`" + StringEscapeUtils.escapeJava(value).replace("\\", "").replace("`", "``") + "`";
   }
 }

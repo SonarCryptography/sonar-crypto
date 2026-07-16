@@ -9,6 +9,7 @@ import org.sonarcrypto.ccerror.FlowEntry;
 import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public final class ValueViolation extends Violation {
@@ -35,12 +36,12 @@ public final class ValueViolation extends Violation {
   }
 
   @Override
-  public void createMessage(StringBuilder messageBuilder) {
+  public void createMessage(MessageCrafter messageCrafter) {
     final var definitionKey = getRulesDefinition().getDefinitionKey();
     final var calleeInfo = getCallInfo();
 
-    CallInfo.createMessage(calleeInfo, definitionKey, messageBuilder);
-    this.getCause().createMessage(messageBuilder);
+    CallInfo.createMessage(calleeInfo, definitionKey, messageCrafter);
+    this.getCause().createMessage(messageCrafter);
   }
 
   @Override

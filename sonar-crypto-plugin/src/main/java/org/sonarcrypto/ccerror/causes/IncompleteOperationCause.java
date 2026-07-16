@@ -1,12 +1,11 @@
 package org.sonarcrypto.ccerror.causes;
 
-import static org.sonarcrypto.utils.sonar.TextUtils.code;
-
 import crysl.rule.CrySLMethod;
 import java.util.Collection;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public final class IncompleteOperationCause extends CallCause {
@@ -28,16 +27,15 @@ public final class IncompleteOperationCause extends CallCause {
   }
 
   @Override
-  public void createMessage(StringBuilder messageBuilder) {
-    messageBuilder.append("Incomplete operation on ");
-    getIncompleteObject().createMessage(messageBuilder);
-    messageBuilder.append('.');
+  public void createMessage(MessageCrafter messageCrafter) {
+    messageCrafter.text("Incomplete operation on ");
+    getIncompleteObject().createMessage(messageCrafter);
+    messageCrafter.text(".");
 
     if (!expectedMethods.isEmpty()) {
-      messageBuilder
-          .append(" Expected call to ")
-          .append(ConverterUtils.joinMethods("either", expectedMethods, "or"))
-          .append(".");
+      messageCrafter.text(" Expected call to ");
+      ConverterUtils.joinMethods(messageCrafter, "either", expectedMethods, ", or ");
+      messageCrafter.text(".");
     }
   }
 
@@ -71,13 +69,13 @@ public final class IncompleteOperationCause extends CallCause {
   }
 
   public abstract static sealed class IncompleteObject {
-    public abstract void createMessage(StringBuilder messageBuilder);
+    public abstract void createMessage(MessageCrafter messageCrafter);
   }
 
   public static final class UntypedIncompleteObject extends IncompleteObject {
     @Override
-    public void createMessage(StringBuilder messageBuilder) {
-      messageBuilder.append(" object ");
+    public void createMessage(MessageCrafter messageCrafter) {
+      messageCrafter.text(" object ");
     }
 
     @Override
@@ -98,8 +96,8 @@ public final class IncompleteOperationCause extends CallCause {
     }
 
     @Override
-    public void createMessage(StringBuilder messageBuilder) {
-      messageBuilder.append(" object of type ").append(code(getClassName()));
+    public void createMessage(MessageCrafter messageCrafter) {
+      messageCrafter.text(" object of type ").code(getClassName());
     }
 
     @Override

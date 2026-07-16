@@ -1,7 +1,6 @@
 package org.sonarcrypto.ccerror.causes;
 
 import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
-import static org.sonarcrypto.utils.sonar.TextUtils.code;
 
 import boomerang.scope.DeclaredMethod;
 import crysl.rule.CrySLMethod;
@@ -9,6 +8,7 @@ import java.util.Collection;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public final class ForbiddenMethodCause extends CallCause {
@@ -31,22 +31,20 @@ public final class ForbiddenMethodCause extends CallCause {
   }
 
   @Override
-  public void createMessage(StringBuilder messageBuilder) {
+  public void createMessage(MessageCrafter messageCrafter) {
 
-    messageBuilder
-        .append("Call to the prohibited method ")
-        .append(
-            code(
-                shortNameOf(
-                    forbiddenMethod.getDeclaringClass().getFullyQualifiedName(),
-                    forbiddenMethod.getName())))
-        .append('.');
+    messageCrafter
+        .text("Call to the prohibited method ")
+        .code(
+            shortNameOf(
+                forbiddenMethod.getDeclaringClass().getFullyQualifiedName(),
+                forbiddenMethod.getName()))
+        .text(".");
 
     if (!alternatives.isEmpty()) {
-      messageBuilder
-          .append(" Consider calling ")
-          .append(ConverterUtils.joinMethods("either", alternatives, "or"))
-          .append(" instead.");
+      messageCrafter.text(" Consider calling ");
+      ConverterUtils.joinMethods(messageCrafter, "either", alternatives, ", or ");
+      messageCrafter.text(" instead.");
     }
   }
 
