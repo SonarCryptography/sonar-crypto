@@ -1,5 +1,15 @@
 package org.sonarcrypto;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.sonarcrypto.cryptorules.CryptoRulesDefinition.REPOSITORY_KEY;
+import static org.sonarcrypto.utils.sonar.TextUtils.quote;
+import static org.sonarcrypto.utils.test.sonarcontext.SonarContextTesterUtils.initializeFileSystem;
+
 import com.sonarsource.scanner.engine.sensor.test.fixtures.SensorContextTester;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -22,16 +32,6 @@ import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.utility.groundtruth.GroundTruthParser;
 import org.sonarcrypto.utility.groundtruth.GroundTruthUtils;
 import org.sonarcrypto.utility.groundtruth.ValueSupport;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.sonarcrypto.cryptorules.CryptoRulesDefinition.REPOSITORY_KEY;
-import static org.sonarcrypto.utils.sonar.TextUtils.quote;
-import static org.sonarcrypto.utils.test.sonarcontext.SonarContextTesterUtils.initializeFileSystem;
 
 @NullMarked
 class CryptoSensorTest {

@@ -1,5 +1,9 @@
 package org.sonarcrypto;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import boomerang.scope.WrappedClass;
 import com.sonarsource.scanner.engine.sensor.test.fixtures.SensorContextTester;
 import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
@@ -20,10 +24,6 @@ import org.sonar.scanner.plugin.api.impl.fs.DefaultTextRange;
 import org.sonarcrypto.ccerror.ConvertedError;
 import org.sonarcrypto.ccerror.causes.UndefinedCause;
 import org.sonarcrypto.ccerror.violations.CallViolation;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class CcToSonarIssuesTest {
 

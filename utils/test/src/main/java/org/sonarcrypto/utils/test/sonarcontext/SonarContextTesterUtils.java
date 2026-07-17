@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.batch.fs.InputFile;
 
-
 @NullMarked
 public class SonarContextTesterUtils {
   private SonarContextTesterUtils() {

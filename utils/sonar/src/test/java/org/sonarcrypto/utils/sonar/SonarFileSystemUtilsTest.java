@@ -1,5 +1,10 @@
 package org.sonarcrypto.utils.sonar;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
+
 import boomerang.scope.WrappedClass;
 import com.sonarsource.scanner.engine.sensor.test.fixtures.SensorContextTester;
 import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
@@ -11,12 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.fs.InputFile;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
-
 
 class SonarFileSystemUtilsTest {
   @TempDir Path tempDir;
