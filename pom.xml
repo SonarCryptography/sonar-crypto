@@ -40,7 +40,10 @@
         <crysl.bc-jca.version>3.1.6</crysl.bc-jca.version>
         <crysl.jca-bc-jca.version>1.0.0</crysl.jca-bc-jca.version>
         <cryptoanalysis.version>5.0.2-SNAPSHOT</cryptoanalysis.version>
+        <boomerang.version>4.3.3-SNAPSHOT</boomerang.version>
         <slf4j.version>2.0.18</slf4j.version>
+        <!-- Resolved to .cmd on Windows by the windows-mvn profile below -->
+        <mvn.executable>${maven.home}/bin/mvn</mvn.executable>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -248,33 +251,84 @@
             </plugins>
         </pluginManagement>
 
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.6.3</version>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <id>build-local-dependencies</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>${session.executionRootDirectory}</workingDirectory>
-                            <executable>bash</executable>
-                            <arguments>
-                                <argument>${session.executionRootDirectory}/external/build-local-deps.sh</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+        <plugins/>
     </build>
 
     <profiles>
+        <profile>
+            <id>windows-mvn</id>
+            <activation>
+                <os><family>windows</family></os>
+            </activation>
+            <properties>
+                <mvn.executable>${maven.home}/bin/mvn.cmd</mvn.executable>
+            </properties>
+        </profile>
+        <profile>
+            <!--
+                Builds and installs the git-submodule dependencies (Boomerang, CryptoAnalysis,
+                CrySL rulesets) into the local Maven repository.  The profile auto-activates
+                when external/.deps-installed is absent, i.e. on first build and whenever that
+                file is explicitly removed (e.g. after a submodule update).
+                To force a rebuild: delete external/.deps-installed (or: git clean -X external/).
+            -->
+            <id>install-external-deps</id>
+            <activation>
+                <file>
+                    <missing>external/.deps-installed</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.6.3</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>build-local-dependencies</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${mvn.executable}</executable>
+                                    <arguments>
+                                        <argument>install</argument>
+                                        <argument>-DskipTests</argument>
+                                        <argument>-Dspds.version=${boomerang.version}</argument>
+                                        <argument>-f</argument>
+                                        <argument>${session.executionRootDirectory}/external/pom.xml</argument>
+                                        <argument>-B</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>mark-external-deps-installed</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <touch file="${project.basedir}/external/.deps-installed"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>build-local-deps</id>
             <properties>
