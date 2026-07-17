@@ -1,5 +1,28 @@
 package org.sonarcrypto;
 
+import com.sonarsource.scanner.engine.sensor.test.fixtures.SensorContextTester;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
+import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.testfixtures.log.LogTesterJUnit5;
+import org.sonarcrypto.ccerror.causes.Cause;
+import org.sonarcrypto.utility.groundtruth.GroundTruthParser;
+import org.sonarcrypto.utility.groundtruth.GroundTruthUtils;
+import org.sonarcrypto.utility.groundtruth.ValueSupport;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -9,25 +32,6 @@ import static org.mockito.Mockito.when;
 import static org.sonarcrypto.cryptorules.CryptoRulesDefinition.REPOSITORY_KEY;
 import static org.sonarcrypto.utils.sonar.TextUtils.quote;
 import static org.sonarcrypto.utils.test.sonarcontext.SonarContextTesterUtils.initializeFileSystem;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.api.io.TempDir;
-import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.testfixtures.log.LogTesterJUnit5;
-import org.sonarcrypto.ccerror.causes.Cause;
-import org.sonarcrypto.utility.groundtruth.GroundTruthParser;
-import org.sonarcrypto.utility.groundtruth.GroundTruthUtils;
-import org.sonarcrypto.utility.groundtruth.ValueSupport;
 
 @NullMarked
 class CryptoSensorTest {

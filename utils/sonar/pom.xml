@@ -46,11 +46,16 @@
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
-		<dependency>
-			<groupId>org.sonarsource.api.plugin</groupId>
-			<artifactId>sonar-plugin-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.sonarsource.scanner.engine</groupId>
+            <artifactId>sensor-test-fixtures</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.sonarsource.api.plugin</groupId>
+            <artifactId>sonar-plugin-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>org.sonarsource.sonarqube</groupId>
             <artifactId>sonar-plugin-api-impl</artifactId>
