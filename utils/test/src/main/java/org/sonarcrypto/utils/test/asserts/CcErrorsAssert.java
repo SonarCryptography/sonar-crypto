@@ -145,7 +145,9 @@ public class CcErrorsAssert {
     stringBuilder.append("###########################################################");
     stringBuilder.append(System.lineSeparator());
 
-    LOGGER.error(stringBuilder.toString());
+    if (LOGGER.isErrorEnabled()) {
+      LOGGER.error(stringBuilder.toString());
+    }
   }
 
   private static HashMap<String, Set<AbstractError>> makeComparable(

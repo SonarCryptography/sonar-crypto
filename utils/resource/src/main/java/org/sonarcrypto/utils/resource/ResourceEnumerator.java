@@ -105,10 +105,7 @@ public class ResourceEnumerator {
               listFilesystemResources(
                   resourceDirectory.toUri(), resourceFolder, fileNameEndsWith, filter));
         }
-        continue;
-      }
-
-      if (Files.isRegularFile(classPathEntry) && entry.endsWith(".jar")) {
+      } else if (Files.isRegularFile(classPathEntry) && entry.endsWith(".jar")) {
         try (final var jarFile = new JarFile(classPathEntry.toFile())) {
           resources.addAll(listJarResources(jarFile, resourceFolder, fileNameEndsWith, filter));
         }
