@@ -3,6 +3,7 @@ package org.sonarcrypto.ccerror.converters.ordererror;
 import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
 
 import crypto.analysis.errors.TypestateError;
+import java.util.Comparator;
 import java.util.Objects;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.CryptoRulesDefinitions;
@@ -22,7 +23,8 @@ public class TypestateErrorConverter {
 
   public static Violation convert(TypestateError error) {
 
-    final var unexpectedMethod = error.getErrorStatement().getInvokeExpr().getDeclaredMethod();
+    final var errorStatement = error.getErrorStatement();
+    final var unexpectedMethod = errorStatement.getInvokeExpr().getDeclaredMethod();
     final var expectedMethods = error.getExpectedMethodCalls();
 
     final var relevantStatements = error.getSeed().getRelevantStatements();
@@ -49,12 +51,17 @@ public class TypestateErrorConverter {
                             invokeExpr.getDeclaredMethod().getName()));
                   }
 
+                  if (stmt == errorStatement) {
+                    messageCrafter.text(" (unexpected call)");
+                  }
+
                   return new FlowEntry(
                       new FqClassName(stmt.getMethod().getDeclaringClass().getFullyQualifiedName()),
                       position,
                       messageCrafter.toCraftedMessage());
                 })
             .filter(Objects::nonNull)
+            .sorted(Comparator.comparing(FlowEntry::position).reversed())
             .toList();
 
     return new CallViolation(
