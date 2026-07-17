@@ -32,7 +32,8 @@
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
         <sonar.plugin.api.version>13.8.0.4399</sonar.plugin.api.version>
-        <sonarqube.api.impl.version>26.6.0.123539</sonarqube.api.impl.version>
+        <sonar.scanner.engine.version>13.4.0.3968</sonar.scanner.engine.version>
+        <sonarqube.api.impl.version>26.7.0.124771</sonarqube.api.impl.version>
         <packaging.plugin.version>1.25.1.3002</packaging.plugin.version>
         <crysl.jca.version>3.1.4</crysl.jca.version>
         <crysl.bc.version>3.1.5</crysl.bc.version>
@@ -140,6 +141,12 @@
 
             <!-- Test dependencies -->
             <dependency>
+                <groupId>org.sonarsource.scanner.engine</groupId>
+                <artifactId>sensor-test-fixtures</artifactId>
+                <version>${sonar.scanner.engine.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.sonarsource.api.plugin</groupId>
                 <artifactId>sonar-plugin-api-test-fixtures</artifactId>
                 <version>${sonar.plugin.api.version}</version>
@@ -160,7 +167,7 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>6.1.1</version>
+                <version>6.1.2</version>
                 <scope>test</scope>
             </dependency>
             <dependency>

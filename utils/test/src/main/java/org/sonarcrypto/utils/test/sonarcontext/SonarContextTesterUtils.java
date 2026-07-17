@@ -1,5 +1,7 @@
 package org.sonarcrypto.utils.test.sonarcontext;
 
+import com.sonarsource.scanner.engine.sensor.test.fixtures.SensorContextTester;
+import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -7,8 +9,6 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
-import org.sonar.api.batch.sensor.internal.SensorContextTester;
 
 @NullMarked
 public class SonarContextTesterUtils {
@@ -18,9 +18,9 @@ public class SonarContextTesterUtils {
 
   public static void initializeFileSystem(SensorContextTester context) throws IOException {
     final var fileSystem = context.fileSystem();
-    final var baseDir = fileSystem.baseDirPath();
+    final var baseDir = fileSystem.baseDir().toPath();
 
-    fileSystem.setWorkDir(fileSystem.baseDirPath());
+    fileSystem.setWorkDir(baseDir);
 
     try (Stream<Path> fileWalker = Files.walk(baseDir)) {
       fileWalker
