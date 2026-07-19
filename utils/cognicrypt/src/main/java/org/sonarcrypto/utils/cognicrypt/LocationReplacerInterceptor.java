@@ -4,13 +4,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jspecify.annotations.NonNull;
 import org.sonarcrypto.utils.jimple.mapper.LineMapping;
+import sootup.core.interceptor.BodyInterceptor;
 import sootup.core.jimple.basic.SimpleStmtPositionInfo;
 import sootup.core.jimple.basic.StmtPositionInfo;
 import sootup.core.jimple.common.stmt.*;
 import sootup.core.jimple.javabytecode.stmt.*;
 import sootup.core.jimple.visitor.StmtVisitor;
 import sootup.core.model.Body;
-import sootup.core.transform.BodyInterceptor;
 import sootup.core.views.View;
 
 public class LocationReplacerInterceptor implements BodyInterceptor {
@@ -25,7 +25,7 @@ public class LocationReplacerInterceptor implements BodyInterceptor {
   public void interceptBody(Body.BodyBuilder builder, @NonNull View view) {
     Map<Stmt, Stmt> stmtsToReplace = new LinkedHashMap<>();
     builder
-        .getStmtGraph()
+        .getControlFlowGraph()
         .iterator()
         .forEachRemaining(
             stmt -> {
@@ -41,7 +41,8 @@ public class LocationReplacerInterceptor implements BodyInterceptor {
                 }
               }
             });
-    stmtsToReplace.forEach((old, updated) -> builder.getStmtGraph().replaceNode(old, updated));
+    stmtsToReplace.forEach(
+        (old, updated) -> builder.getControlFlowGraph().replaceNode(old, updated));
   }
 
   private static class PositionReplacer implements StmtVisitor {
