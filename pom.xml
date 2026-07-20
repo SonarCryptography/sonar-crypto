@@ -394,12 +394,6 @@
             </build>
         </profile>
         <profile>
-            <id>build-local-deps</id>
-            <properties>
-                <cryptoanalysis.version>5.0.2-SNAPSHOT</cryptoanalysis.version>
-            </properties>
-        </profile>
-        <profile>
             <id>coverage</id>
             <build>
                 <plugins>
