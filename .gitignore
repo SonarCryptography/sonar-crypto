@@ -70,6 +70,10 @@ claude-*.txt
 .mcp.json
 .sonar-code-context
 
+# Sentinel file written after external git-submodule deps are installed to ~/.m2.
+# Delete this file (or run: git clean -X external/) to force a rebuild.
+external/.deps-installed
+
 # Extracted CrySL rules
 /utils/cognicrypt/src/main/resources/crysl_rules/*
 !/utils/cognicrypt/src/main/resources/crysl_rules/.gitkeep
