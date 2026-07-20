@@ -185,7 +185,7 @@ public class JimpleConvertingView extends JavaView {
     @Override
     public @NonNull Collection<? extends SootField> resolveFields() throws ResolveException {
       return resolvedClass.getFields().stream()
-          .filter(f -> f instanceof HasPosition)
+          .filter(HasPosition.class::isInstance)
           .map(
               f -> {
                 Position position = ((HasPosition) f).getPosition();
