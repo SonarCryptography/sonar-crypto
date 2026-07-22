@@ -21,7 +21,7 @@ public final class JoiningCrafter extends AbstractMessageCrafter {
       final @Nullable String lastDelimiter) {
     this.crafter = crafter;
     this.delimiter = delimiter == null ? ", " : delimiter;
-    this.lastDelimiter = lastDelimiter == null ? ", " : lastDelimiter;
+    this.lastDelimiter = this.delimiter + (lastDelimiter == null ? "" : lastDelimiter + " ");
   }
 
   private void appendLastElement(boolean isFinish) {

@@ -115,8 +115,7 @@ public class GroundTruthParser {
       Pattern.compile("CC\\s*:\\s*([^;]*)\\s*", CASE_INSENSITIVE);
   private static final Pattern ENTRY_PATTERN =
       Pattern.compile(
-          "^\\s*(\\[\\?]\\s*)?(\\w+)(?:\\s*/\\s*(\\w+))?(?:\\s+\"([^\"]+)\")?\\s*$",
-          CASE_INSENSITIVE);
+          "^\\s*(\\w+)(?:\\s*/\\s*(\\w+))?(?:\\s+\"([^\"]+)\")?\\s*$", CASE_INSENSITIVE);
 
   public Map<Location, Set<GroundTruthEntry>> parse(final FileSystem fileSystem)
       throws IOException {
@@ -171,10 +170,9 @@ public class GroundTruthParser {
                 "Invalid ground truth spec!%nFile: %s%nLine: %s", inputFile.filename(), line));
       }
 
-      final var isOptional = entrymatcher.group(1) != null;
-      final var rule = entrymatcher.group(2);
-      final var cause = entrymatcher.group(3);
-      final var value = entrymatcher.group(4);
+      final var rule = entrymatcher.group(1);
+      final var cause = entrymatcher.group(2);
+      final var value = entrymatcher.group(3);
 
       if (rule == null || cause == null) {
         throw new GroundTruthParsingException(
@@ -198,7 +196,7 @@ public class GroundTruthParser {
             String.format("Invalid cause type!%nFile: %s%nLine: %s", inputFile.filename(), line));
       }
 
-      if (!entrySet.add(new GroundTruthEntry(ruleKind, causeType, value, isOptional)))
+      if (!entrySet.add(new GroundTruthEntry(ruleKind, causeType, value)))
         throw new GroundTruthParsingException(
             String.format(
                 "Duplicate ground truth entry!%nFile: %s%nLine: %s", inputFile.filename(), line));

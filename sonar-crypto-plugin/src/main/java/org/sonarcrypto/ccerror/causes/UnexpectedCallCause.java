@@ -1,13 +1,10 @@
 package org.sonarcrypto.ccerror.causes;
 
-import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
-
 import boomerang.scope.DeclaredMethod;
 import crysl.rule.CrySLMethod;
 import java.util.Collection;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
 import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
@@ -33,16 +30,16 @@ public final class UnexpectedCallCause extends CallCause {
   public void createMessage(MessageCrafter messageCrafter) {
     messageCrafter
         .text("Unexpected call to method ")
-        .code(
-            shortNameOf(
-                unexpectedMethod.getDeclaringClass().getFullyQualifiedName(),
-                unexpectedMethod.getName()))
+        .method(
+            unexpectedMethod.getDeclaringClass().getFullyQualifiedName(),
+            unexpectedMethod.getName())
         .text(".");
 
     if (!expectedMethods.isEmpty()) {
-      messageCrafter.text(" Expected calling ");
-      ConverterUtils.joinMethods(messageCrafter, " either ", expectedMethods, ", or ");
-      messageCrafter.text(".");
+      messageCrafter
+          .text(" Expected calling ")
+          .methodsJoined(" either ", expectedMethods, "or")
+          .text(".");
     }
   }
 

@@ -4,7 +4,6 @@ import crysl.rule.CrySLMethod;
 import java.util.Collection;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
 import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
@@ -33,9 +32,10 @@ public final class IncompleteOperationCause extends CallCause {
     messageCrafter.text(".");
 
     if (!expectedMethods.isEmpty()) {
-      messageCrafter.text(" Expected call to ");
-      ConverterUtils.joinMethods(messageCrafter, "either", expectedMethods, ", or ");
-      messageCrafter.text(".");
+      messageCrafter
+          .text(" Expected call to ")
+          .methodsJoined("either", expectedMethods, "or")
+          .text(".");
     }
   }
 

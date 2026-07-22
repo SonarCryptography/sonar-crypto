@@ -77,28 +77,12 @@ class CryptoSensorTest {
 
     final var combinedMap = new TreeMap<GroundTruthParser.Location, Entry>();
 
-    final var expectedErrorCount =
-        new Object() {
-          long min = 0;
-          long max = 0;
-        };
-
     groundTruth.forEach(
         (location, gts) -> {
-          final var entry =
-              combinedMap.computeIfAbsent(
-                  location, ignored -> new Entry(new HashSet<>(), new HashMap<>()));
+          final var entry = combinedMap.computeIfAbsent(location, ignored -> new Entry());
+
           gts.forEach(
-              it -> {
-                expectedErrorCount.max++;
-
-                if (!it.isOptional()) {
-                  expectedErrorCount.min++;
-                }
-
-                entry.expected.put(
-                    new Item(it.ruleKind(), it.causeType(), it.value()), it.isOptional());
-              });
+              it -> entry.expected.add(new Item(it.ruleKind(), it.causeType(), it.value())));
         });
 
     foundErrors.forEach(
@@ -115,7 +99,7 @@ class CryptoSensorTest {
           final var entry =
               combinedMap.computeIfAbsent(
                   new GroundTruthParser.Location(inputFile.filename(), position.start().line()),
-                  location1 -> new Entry(new HashSet<>(), new HashMap<>()));
+                  _location -> new Entry());
           final var violation = error.violation();
           final var item =
               new Item(
@@ -123,27 +107,24 @@ class CryptoSensorTest {
                   violation.getCause().getClass(),
                   ValueSupport.getValue(violation.getCause()));
           entry.actual.add(item);
+          entry.count++;
         });
 
     var invalidResult = false;
 
     for (var entry : combinedMap.values()) {
-      final var actual = entry.actual();
+      final var actual = entry.actual;
       final var actualCopy = new HashSet<>(actual);
-      final var expected = entry.expected().keySet();
+      final var expected = entry.expected;
       actual.removeAll(expected);
       expected.removeAll(actualCopy);
-    }
-
-    for (var entry : combinedMap.values()) {
-      entry.expected().entrySet().removeIf(Map.Entry::getValue);
     }
 
     for (var combined : combinedMap.entrySet()) {
       final var location = combined.getKey();
       final var entry = combined.getValue();
-      final var actual = entry.actual();
-      final var expected = entry.expected().keySet();
+      final var actual = entry.actual;
+      final var expected = entry.expected;
 
       if (!actual.isEmpty() || !expected.isEmpty()) {
         invalidResult = true;
@@ -169,17 +150,19 @@ class CryptoSensorTest {
       fail("Invalid result!");
     }
 
-    final var actualCount =
+    final var sonarIssueCount =
         context.allIssues().stream()
             .map(it -> it.ruleKey().repository())
             .filter(REPOSITORY_KEY::equals)
             .count();
 
-    assertThat(actualCount)
+    final var processedCount = combinedMap.values().stream().mapToLong(it -> it.count).sum();
+
+    assertThat(processedCount)
         .withFailMessage(
-            "Wrong number of issues reported!\nActual: %d\nExpected: %d..%d",
-            actualCount, expectedErrorCount.min, expectedErrorCount.max)
-        .isBetween(expectedErrorCount.min, expectedErrorCount.max);
+            "Invalid number of issues reported!\nActual: %d\nExpected: %d",
+            processedCount, sonarIssueCount)
+        .isEqualTo(sonarIssueCount);
   }
 
   @Test
@@ -231,17 +214,13 @@ class CryptoSensorTest {
     }
   }
 
-  private record Entry(Set<Item> actual, Map<Item, Boolean> expected) {}
+  private static final class Entry {
+    public final Set<Item> actual = new HashSet<>();
+    public final Set<Item> expected = new HashSet<>();
+    public int count;
+  }
 
-  public record Item(
-      RuleKind ruleKind,
-      Class<? extends Cause> causeType,
-      @Nullable String value,
-      boolean isOptional) {
-    public Item(RuleKind ruleKind, Class<? extends Cause> causeType, @Nullable String value) {
-      this(ruleKind, causeType, value, false);
-    }
-
+  public record Item(RuleKind ruleKind, Class<? extends Cause> causeType, @Nullable String value) {
     @Override
     public String toString() {
       final var sb =

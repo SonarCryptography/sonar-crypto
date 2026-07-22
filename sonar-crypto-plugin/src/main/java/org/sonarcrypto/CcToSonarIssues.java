@@ -1,6 +1,5 @@
 package org.sonarcrypto;
 
-import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
 import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
 
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class CcToSonarIssues {
       final var messageBuilder =
           new MessageCrafter()
               .text("Cryptographic weakness in method ")
-              .code(shortNameOf(method))
+              .method(method)
               .text(" detected:")
               .newLine();
 

@@ -10,17 +10,10 @@ import org.sonarcrypto.ccerror.causes.Cause;
 
 @NullMarked
 public record GroundTruthEntry(
-    RuleKind ruleKind,
-    Class<? extends Cause> causeType,
-    @Nullable String value,
-    boolean isOptional) {
+    RuleKind ruleKind, Class<? extends Cause> causeType, @Nullable String value) {
   @Override
   public String toString() {
     final var sb = new StringBuilder();
-
-    if (isOptional) {
-      sb.append("[?] ");
-    }
 
     sb.append(ruleKind).append('/').append(toShortString(causeType));
 

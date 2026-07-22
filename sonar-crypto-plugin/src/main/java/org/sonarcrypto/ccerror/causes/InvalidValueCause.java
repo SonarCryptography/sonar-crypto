@@ -1,7 +1,6 @@
 package org.sonarcrypto.ccerror.causes;
 
 import static java.util.function.Predicate.not;
-import static org.sonarcrypto.utils.sonar.TextUtils.join;
 
 import java.util.List;
 import org.jspecify.annotations.NullMarked;
@@ -37,7 +36,7 @@ public final class InvalidValueCause extends ValueCause {
 
     if (violatingValuesCount > 0) {
       messageCrafter.text(violatingValuesCount == 1 ? "has the value " : "has the values ");
-      messageCrafter.text(join(violatingValues, "or", "respectively"));
+      messageCrafter.codeJoined(violatingValues, "or", "respectively");
     }
 
     if (validValueRangeCount > 0) {
@@ -52,9 +51,9 @@ public final class InvalidValueCause extends ValueCause {
 
     if (validValueRangeCount > 1) {
       if (violatingValuesCount > 1) {
-        messageCrafter.text("contained in ").text(join(validValueRange, ", and "));
+        messageCrafter.text("contained in ").codeJoined(validValueRange, "and");
       } else {
-        messageCrafter.text("one of ").text(join(validValueRange, ", or "));
+        messageCrafter.text("one of ").codeJoined(validValueRange, "or");
       }
     }
 

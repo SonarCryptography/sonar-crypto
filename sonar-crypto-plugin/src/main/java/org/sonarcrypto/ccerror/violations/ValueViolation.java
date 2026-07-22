@@ -37,10 +37,7 @@ public final class ValueViolation extends Violation {
 
   @Override
   public void createMessage(MessageCrafter messageCrafter) {
-    final var definitionKey = getRulesDefinition().getDefinitionKey();
-    final var calleeInfo = getCallInfo();
-
-    CallInfo.createMessage(calleeInfo, definitionKey, messageCrafter);
+    messageCrafter.callInfo(getCallInfo(), getRulesDefinition().getDefinitionKey());
     this.getCause().createMessage(messageCrafter);
   }
 
