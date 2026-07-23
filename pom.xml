@@ -32,7 +32,8 @@
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
         <sonar.plugin.api.version>13.8.0.4399</sonar.plugin.api.version>
-        <sonarqube.api.impl.version>26.6.0.123539</sonarqube.api.impl.version>
+        <sonar.scanner.engine.version>13.4.0.3968</sonar.scanner.engine.version>
+        <sonarqube.api.impl.version>26.7.0.124771</sonarqube.api.impl.version>
         <packaging.plugin.version>1.25.1.3002</packaging.plugin.version>
         <crysl.jca.version>3.1.4</crysl.jca.version>
         <crysl.bc.version>3.1.5</crysl.bc.version>
@@ -40,7 +41,10 @@
         <crysl.bc-jca.version>3.1.6</crysl.bc-jca.version>
         <crysl.jca-bc-jca.version>1.0.0</crysl.jca-bc-jca.version>
         <cryptoanalysis.version>5.0.2-SNAPSHOT</cryptoanalysis.version>
+        <boomerang.version>4.3.3-SNAPSHOT</boomerang.version>
         <slf4j.version>2.0.18</slf4j.version>
+        <!-- Resolved to .cmd on Windows by the windows-mvn profile below -->
+        <mvn.executable>${maven.home}/bin/mvn</mvn.executable>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -140,6 +144,12 @@
 
             <!-- Test dependencies -->
             <dependency>
+                <groupId>org.sonarsource.scanner.engine</groupId>
+                <artifactId>sensor-test-fixtures</artifactId>
+                <version>${sonar.scanner.engine.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.sonarsource.api.plugin</groupId>
                 <artifactId>sonar-plugin-api-test-fixtures</artifactId>
                 <version>${sonar.plugin.api.version}</version>
@@ -160,7 +170,7 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>6.1.1</version>
+                <version>6.1.2</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -248,33 +258,84 @@
             </plugins>
         </pluginManagement>
 
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.6.3</version>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <id>build-local-dependencies</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>${session.executionRootDirectory}</workingDirectory>
-                            <executable>bash</executable>
-                            <arguments>
-                                <argument>${session.executionRootDirectory}/external/build-local-deps.sh</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+        <plugins/>
     </build>
 
     <profiles>
+        <profile>
+            <id>windows-mvn</id>
+            <activation>
+                <os><family>windows</family></os>
+            </activation>
+            <properties>
+                <mvn.executable>${maven.home}/bin/mvn.cmd</mvn.executable>
+            </properties>
+        </profile>
+        <profile>
+            <!--
+                Builds and installs the git-submodule dependencies (Boomerang, CryptoAnalysis,
+                CrySL rulesets) into the local Maven repository.  The profile auto-activates
+                when external/.deps-installed is absent, i.e. on first build and whenever that
+                file is explicitly removed (e.g. after a submodule update).
+                To force a rebuild: delete external/.deps-installed (or: git clean -X external/).
+            -->
+            <id>install-external-deps</id>
+            <activation>
+                <file>
+                    <missing>external/.deps-installed</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.6.3</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>build-local-dependencies</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${mvn.executable}</executable>
+                                    <arguments>
+                                        <argument>install</argument>
+                                        <argument>-DskipTests</argument>
+                                        <argument>-Dspds.version=${boomerang.version}</argument>
+                                        <argument>-f</argument>
+                                        <argument>${session.executionRootDirectory}/external/pom.xml</argument>
+                                        <argument>-B</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>mark-external-deps-installed</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <touch file="${project.basedir}/external/.deps-installed"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>build-local-deps</id>
             <properties>

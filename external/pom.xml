@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.sonarcrypto</groupId>
+    <artifactId>local-external-deps</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Local External Dependencies</name>
+    <description>
+        Aggregator that builds local git-submodule dependencies in the correct order.
+        Pass -Dspds.version matching the Boomerang submodule version so CryptoAnalysis
+        picks up the locally-installed Boomerang artifacts.
+        Maven's reactor resolves build order automatically from inter-project dependencies.
+    </description>
+
+    <modules>
+        <module>Boomerang</module>
+        <module>CryptoAnalysis</module>
+        <module>Crypto-API-Rules/JavaCryptographicArchitecture</module>
+        <module>Crypto-API-Rules/BouncyCastle</module>
+        <module>Crypto-API-Rules/BouncyCastle-JCA</module>
+        <module>Crypto-API-Rules/JCA-BouncyCastle-JCA</module>
+        <module>Crypto-API-Rules/Tink</module>
+    </modules>
+</project>

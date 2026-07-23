@@ -6,9 +6,9 @@ import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.utils.cognicrypt.crysl.Ruleset;
 
 @NullMarked
-public abstract sealed class TestRunner<RESULT>
+public abstract sealed class TestRunner<Result>
     permits ClassPathTestRunner, MavenProjectTestRunner, JimpleTestRunner {
 
-  public abstract RESULT run(final String path, final Ruleset ruleset)
+  public abstract Result run(final String path, final Ruleset ruleset)
       throws IOException, URISyntaxException;
 }

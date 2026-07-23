@@ -75,6 +75,11 @@
 
         <!-- Test dependencies -->
         <dependency>
+            <groupId>org.sonarsource.scanner.engine</groupId>
+            <artifactId>sensor-test-fixtures</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.sonarsource.sonarqube</groupId>
             <artifactId>sonar-plugin-api-impl</artifactId>
             <scope>test</scope>
