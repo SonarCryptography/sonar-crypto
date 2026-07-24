@@ -41,7 +41,7 @@ public class ConverterUtils {
 
                   return new FlowEntry(
                       new FqClassName(stmt.getMethod().getDeclaringClass().getFullyQualifiedName()),
-                      position,
+                      position.getStmtPosition(),
                       messageCrafter.toCraftedMessage());
                 })
             .filter(Objects::nonNull)

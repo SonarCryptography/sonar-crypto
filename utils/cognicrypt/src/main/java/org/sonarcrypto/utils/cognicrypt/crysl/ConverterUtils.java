@@ -9,7 +9,8 @@ import java.io.IOException;
 import org.jspecify.annotations.Nullable;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
-import sootup.core.model.LinePosition;
+import sootup.core.jimple.basic.SimpleStmtPositionInfo;
+import sootup.core.jimple.basic.StmtPositionInfo;
 import sootup.core.model.Position;
 
 public class ConverterUtils {
@@ -23,7 +24,17 @@ public class ConverterUtils {
    * error's statement} is as {@link JimpleUpStatement}. Otherwise, it simply uses the {@link
    * AbstractError#getLineNumber() error's line number}.
    */
+  public static TextRange selectLocation(InputFile inputFile, StmtPositionInfo stmtPosition) {
+    return selectLocation(inputFile, stmtPosition.getStmtPosition());
+  }
+
+  /**
+   * Selects a location as precise as possible, if the {@link AbstractError#getErrorStatement()
+   * error's statement} is as {@link JimpleUpStatement}. Otherwise, it simply uses the {@link
+   * AbstractError#getLineNumber() error's line number}.
+   */
   public static TextRange selectLocation(InputFile inputFile, Position position) {
+
     final var startLine = max(position.getFirstLine(), 1);
 
     var startLineOffset = position.getFirstCol();
@@ -53,15 +64,15 @@ public class ConverterUtils {
         startLine, startLineOffset, max(endLine - 1, startLine), endLineOffset);
   }
 
-  public static Position intoPosition(AbstractError error) {
+  public static StmtPositionInfo intoPosition(AbstractError error) {
     final var position = intoPosition(error.getErrorStatement());
-    return position != null ? position : new LinePosition(error.getLineNumber());
+    return position != null ? position : new SimpleStmtPositionInfo(error.getLineNumber());
   }
 
   @Nullable
-  public static Position intoPosition(Statement stmt) {
+  public static StmtPositionInfo intoPosition(Statement stmt) {
     if (stmt instanceof JimpleUpStatement upStmt) {
-      return upStmt.getDelegate().getPositionInfo().getStmtPosition();
+      return upStmt.getDelegate().getPositionInfo();
     }
 
     return null;
