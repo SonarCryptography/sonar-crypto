@@ -152,6 +152,11 @@ public class WeakCryptoExamples {
      */
     public byte[] uninitializedCipherInstance(byte[] data) throws GeneralSecurityException {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        return cipher.doFinal(data); // CC: API_MISUSE/UnexpectedCall "Cipher.doFinal"
+        
+        // Oops ... forgot to initialize the cipher instance!
+        
+        cipher.update(data); // CC: API_MISUSE/UnexpectedCall "Cipher.update"
+        
+        return cipher.doFinal(data);
     }
 }
