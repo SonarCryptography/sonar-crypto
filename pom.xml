@@ -327,7 +327,72 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <touch file="${project.basedir}/external/.deps-installed"/>
+                                        <exec executable="git"
+                                              output="${project.basedir}/external/.deps-installed"
+                                              failonerror="true">
+                                            <arg value="rev-parse"/>
+                                            <arg value="HEAD:external/Boomerang"/>
+                                            <arg value="HEAD:external/CryptoAnalysis"/>
+                                            <arg value="HEAD:external/Crypto-API-Rules"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!--
+                Validates that the submodule commits recorded in external/.deps-installed
+                match the currently checked-out submodule pointers. If they differ (e.g.
+                after git submodule update), the stale flag file is deleted and the build
+                fails with a clear message. Re-run Maven once to trigger
+                install-external-deps and write fresh hashes.
+            -->
+            <id>check-external-deps-freshness</id>
+            <activation>
+                <file>
+                    <exists>external/.deps-installed</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>check-submodule-freshness</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target xmlns:if="ant:if">
+                                        <exec executable="git"
+                                              output="${project.basedir}/external/.deps-installed.tmp"
+                                              failonerror="true">
+                                            <arg value="rev-parse"/>
+                                            <arg value="HEAD:external/Boomerang"/>
+                                            <arg value="HEAD:external/CryptoAnalysis"/>
+                                            <arg value="HEAD:external/Crypto-API-Rules"/>
+                                        </exec>
+                                        <condition property="hashes.stale">
+                                            <not>
+                                                <filesmatch
+                                                    file1="${project.basedir}/external/.deps-installed"
+                                                    file2="${project.basedir}/external/.deps-installed.tmp"
+                                                    textfile="true"/>
+                                            </not>
+                                        </condition>
+                                        <delete file="${project.basedir}/external/.deps-installed.tmp"/>
+                                        <delete file="${project.basedir}/external/.deps-installed" if:set="hashes.stale"/>
+                                        <fail if:set="hashes.stale"
+                                              message="Submodule commits changed; external/.deps-installed deleted. Re-run Maven to reinstall external dependencies."/>
                                     </target>
                                 </configuration>
                             </execution>

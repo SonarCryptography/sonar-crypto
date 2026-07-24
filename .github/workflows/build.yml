@@ -46,13 +46,16 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+      - name: Compute submodule hashes for cache key
+        shell: bash
+        run: git submodule status --cached > .submodule-hashes
       - name: Cache Maven packages
         uses: actions/cache@v6
         with:
           path: |
             ~/.m2
             external/.deps-installed
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('.submodule-hashes') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build & Test (No E2E) & Analyze
         env:
@@ -73,13 +76,16 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Compute submodule hashes for cache key
+        shell: bash
+        run: git submodule status --cached > .submodule-hashes
       - name: Cache Maven packages
         uses: actions/cache@v6
         with:
           path: |
             ~/.m2
             external/.deps-installed
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('.submodule-hashes') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build & Test (No E2E) & Analyze
         env:
@@ -102,13 +108,16 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Compute submodule hashes for cache key
+        shell: bash
+        run: git submodule status --cached > .submodule-hashes
       - name: Cache Maven packages
         uses: actions/cache@v6
         with:
           path: |
             ~/.m2
             external/.deps-installed
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('.submodule-hashes') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build Plugin
         run: mvn install -pl '!e2e' -DskipTests -B
