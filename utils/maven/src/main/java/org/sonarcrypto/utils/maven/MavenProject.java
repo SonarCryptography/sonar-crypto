@@ -120,15 +120,18 @@ public class MavenProject {
       try (var in = new FileInputStream(classPathFile)) {
         fullProjectClassPath = IOUtils.toString(in, StandardCharsets.UTF_8);
       }
-      try {
-        Files.delete(classPathFile.toPath());
-      } catch (IOException e) {
-        LOGGER.warn(
-            "Failed to delete temporary classpath file: {}", classPathFile.getAbsolutePath(), e);
-      }
+      removeTemporaryFile(classPathFile);
     } catch (IOException e) {
       throw new MavenBuildException(
           "Was not able to read in class path from file classPath.temp", e);
+    }
+  }
+
+  private void removeTemporaryFile(File filePath) {
+    try {
+      Files.deleteIfExists(filePath.toPath());
+    } catch (IOException e) {
+      LOGGER.warn("Failed to delete temporary classpath file: {}", filePath.getAbsolutePath(), e);
     }
   }
 

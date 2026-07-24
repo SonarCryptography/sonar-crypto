@@ -2,7 +2,7 @@ package org.sonarcrypto.utils.jimple.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import sootup.core.model.Position;
 
 /**

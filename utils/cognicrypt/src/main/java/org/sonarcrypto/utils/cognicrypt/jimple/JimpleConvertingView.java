@@ -14,14 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.sonarcrypto.utils.cognicrypt.LocationReplacerInterceptor;
 import org.sonarcrypto.utils.jimple.mapper.LineMapping;
 import org.sonarcrypto.utils.jimple.mapper.LineMappingCollection;
-import sootup.core.frontend.AbstractClassSource;
 import sootup.core.frontend.OverridingBodySource;
-import sootup.core.frontend.OverridingClassSource;
 import sootup.core.frontend.ResolveException;
 import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.model.*;
 import sootup.core.types.ClassType;
 import sootup.java.core.*;
+import sootup.java.core.OverridingJavaClassSource;
 import sootup.java.core.views.JavaView;
 
 public class JimpleConvertingView extends JavaView {
@@ -37,20 +36,18 @@ public class JimpleConvertingView extends JavaView {
   }
 
   @Override
-  protected synchronized @NonNull JavaSootClass buildClassFrom(AbstractClassSource classSource) {
+  protected synchronized @NonNull JavaSootClass buildClassFrom(JavaSootClassSource classSource) {
     ClassType classType = classSource.getClassType();
     JavaSootClass theClass;
     if (cache.hasClass(classType)) {
       theClass = (JavaSootClass) cache.getClass(classType);
     } else {
-      if (classSource instanceof JavaSootClassSource) {
-        theClass = (JavaSootClass) classSource.buildClass(SourceType.Application);
-      } else if (classSource instanceof OverridingClassSource overridingClassSource) {
+      if (classSource instanceof OverridingJavaClassSource overridingClassSource) {
         WrappingSootClassSource wrappingSootClassSource =
             new WrappingSootClassSource(overridingClassSource);
         theClass = wrappingSootClassSource.buildClass(SourceType.Application);
       } else {
-        throw new UnsupportedClassSourceException(classSource.getClass().getName());
+        theClass = classSource.buildClass(SourceType.Application);
       }
       cache.putClass(classType, theClass);
     }
@@ -70,7 +67,7 @@ public class JimpleConvertingView extends JavaView {
             classSource -> {
               if (classSource instanceof JavaSootClassSource javaSootClassSource) {
                 return javaSootClassSource;
-              } else if (classSource instanceof OverridingClassSource overridingClassSource) {
+              } else if (classSource instanceof OverridingJavaClassSource overridingClassSource) {
                 return new WrappingSootClassSource(overridingClassSource);
               } else {
                 return null;
@@ -88,7 +85,7 @@ public class JimpleConvertingView extends JavaView {
     private final Map<Integer, LineMapping> fieldMappings;
     private final Map<Integer, LineMapping> statementMappings;
 
-    private WrappingSootClassSource(OverridingClassSource classSource) {
+    private WrappingSootClassSource(OverridingJavaClassSource classSource) {
       super(
           classSource.getAnalysisInputLocation(),
           classSource.getClassType(),
@@ -188,13 +185,13 @@ public class JimpleConvertingView extends JavaView {
     @Override
     public @NonNull Collection<? extends SootField> resolveFields() throws ResolveException {
       return resolvedClass.getFields().stream()
+          .filter(HasPosition.class::isInstance)
           .map(
               f -> {
-                LineMapping mapping = fieldMappings.get(f.getPosition().getFirstLine());
-                Position position =
-                    mapping != null
-                        ? mapping.getSourcePosition().toSootUpPosition()
-                        : f.getPosition();
+                Position position = ((HasPosition) f).getPosition();
+                LineMapping mapping = fieldMappings.get(position.getFirstLine());
+                position =
+                    mapping != null ? mapping.getSourcePosition().toSootUpPosition() : position;
                 return new JavaSootField(
                     f.getSignature(), f.getModifiers(), Collections.emptyList(), position);
               })

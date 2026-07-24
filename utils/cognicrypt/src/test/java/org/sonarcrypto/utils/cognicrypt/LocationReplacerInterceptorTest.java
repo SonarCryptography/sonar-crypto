@@ -30,7 +30,7 @@ class LocationReplacerInterceptorTest {
   @Test
   void interceptBody_replacesStatementPositionPreservingColumnInfo() {
     Body body = loadGetValueBody();
-    Stmt starting = body.getStmtGraph().getStartingStmt();
+    Stmt starting = body.getControlFlowGraph().getStartingStmt();
     int jimpleLine = starting.getPositionInfo().getStmtPosition().getFirstLine();
 
     // Build a mapping from this statement's current jimple line to a source position with columns
@@ -42,7 +42,7 @@ class LocationReplacerInterceptorTest {
     interceptor.interceptBody(builder, null);
 
     Position replaced =
-        builder.getStmtGraph().getStartingStmt().getPositionInfo().getStmtPosition();
+        builder.getControlFlowGraph().getStartingStmt().getPositionInfo().getStmtPosition();
     assertThat(replaced.getFirstLine()).isEqualTo(42);
     assertThat(replaced.getFirstCol()).isEqualTo(7);
     assertThat(replaced.getLastLine()).isEqualTo(42);
@@ -52,7 +52,7 @@ class LocationReplacerInterceptorTest {
   @Test
   void interceptBody_leavesUnmappedStatementsUnchanged() {
     Body body = loadGetValueBody();
-    Stmt starting = body.getStmtGraph().getStartingStmt();
+    Stmt starting = body.getControlFlowGraph().getStartingStmt();
     int originalLine = starting.getPositionInfo().getStmtPosition().getFirstLine();
 
     // Intercept with an empty mapping — nothing should change
@@ -61,7 +61,12 @@ class LocationReplacerInterceptorTest {
     interceptor.interceptBody(builder, null);
 
     int lineAfter =
-        builder.getStmtGraph().getStartingStmt().getPositionInfo().getStmtPosition().getFirstLine();
+        builder
+            .getControlFlowGraph()
+            .getStartingStmt()
+            .getPositionInfo()
+            .getStmtPosition()
+            .getFirstLine();
     assertThat(lineAfter).isEqualTo(originalLine);
   }
 
