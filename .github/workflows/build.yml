@@ -46,14 +46,28 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+      - name: Compute submodule hashes for cache key
+        shell: bash
+        run: git submodule status --cached > .submodule-hashes
       - name: Cache Maven packages
         uses: actions/cache@v6
         with:
           path: |
             ~/.m2
             external/.deps-installed
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('.submodule-hashes') }}
           restore-keys: ${{ runner.os }}-m2
+      - name: Delete stale deps flag if submodules changed
+        shell: bash
+        run: |
+          if [ -f external/.deps-installed ]; then
+            current=$(git rev-parse HEAD:external/Boomerang HEAD:external/CryptoAnalysis HEAD:external/Crypto-API-Rules)
+            stored=$(cat external/.deps-installed)
+            if [ "$current" != "$stored" ]; then
+              rm external/.deps-installed
+              echo "Submodule commits changed; deleted external/.deps-installed to trigger reinstall."
+            fi
+          fi
       - name: Build & Test (No E2E) & Analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -73,14 +87,28 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Compute submodule hashes for cache key
+        shell: bash
+        run: git submodule status --cached > .submodule-hashes
       - name: Cache Maven packages
         uses: actions/cache@v6
         with:
           path: |
             ~/.m2
             external/.deps-installed
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('.submodule-hashes') }}
           restore-keys: ${{ runner.os }}-m2
+      - name: Delete stale deps flag if submodules changed
+        shell: bash
+        run: |
+          if [ -f external/.deps-installed ]; then
+            current=$(git rev-parse HEAD:external/Boomerang HEAD:external/CryptoAnalysis HEAD:external/Crypto-API-Rules)
+            stored=$(cat external/.deps-installed)
+            if [ "$current" != "$stored" ]; then
+              rm external/.deps-installed
+              echo "Submodule commits changed; deleted external/.deps-installed to trigger reinstall."
+            fi
+          fi
       - name: Build & Test (No E2E) & Analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -102,14 +130,28 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Compute submodule hashes for cache key
+        shell: bash
+        run: git submodule status --cached > .submodule-hashes
       - name: Cache Maven packages
         uses: actions/cache@v6
         with:
           path: |
             ~/.m2
             external/.deps-installed
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('.submodule-hashes') }}
           restore-keys: ${{ runner.os }}-m2
+      - name: Delete stale deps flag if submodules changed
+        shell: bash
+        run: |
+          if [ -f external/.deps-installed ]; then
+            current=$(git rev-parse HEAD:external/Boomerang HEAD:external/CryptoAnalysis HEAD:external/Crypto-API-Rules)
+            stored=$(cat external/.deps-installed)
+            if [ "$current" != "$stored" ]; then
+              rm external/.deps-installed
+              echo "Submodule commits changed; deleted external/.deps-installed to trigger reinstall."
+            fi
+          fi
       - name: Build Plugin
         run: mvn install -pl '!e2e' -DskipTests -B
       - name: E2E Tests
