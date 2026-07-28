@@ -9,6 +9,10 @@ import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 public class ConverterUtils {
 
+  private ConverterUtils() {
+    throw new IllegalStateException("Cannot instantiate utility class");
+  }
+
   public static List<FlowEntry> executionFlow(AbstractError error) {
     final var relevantStatements = error.getSeed().getRelevantStatements();
     final var errorStatement = error.getErrorStatement();
