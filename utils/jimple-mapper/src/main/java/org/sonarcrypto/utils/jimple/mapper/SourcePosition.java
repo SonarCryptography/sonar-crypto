@@ -81,4 +81,12 @@ public class SourcePosition {
   public Position toSootUpPosition() {
     return new FullPosition(firstLine, firstCol, lastLine, lastCol);
   }
+
+  public static SourcePosition fromSootUpPosition(Position position) {
+    return new SourcePosition(
+        position.getFirstLine(),
+        position.getLastLine(),
+        position.getFirstCol(),
+        position.getLastCol());
+  }
 }
