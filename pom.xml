@@ -31,7 +31,7 @@
 
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
-        <sonar.plugin.api.version>13.8.0.4399</sonar.plugin.api.version>
+        <sonar.plugin.api.version>13.9.0.4428</sonar.plugin.api.version>
         <sonar.scanner.engine.version>13.5.0.4089</sonar.scanner.engine.version>
         <sonarqube.api.impl.version>26.7.0.124771</sonarqube.api.impl.version>
         <packaging.plugin.version>1.25.1.3002</packaging.plugin.version>
@@ -70,7 +70,7 @@
             <dependency>
                 <groupId>org.jspecify</groupId>
                 <artifactId>jspecify</artifactId>
-                <version>1.0.0</version>
+                <version>1.0.1</version>
             </dependency>
             <dependency>
                 <groupId>com.intellij</groupId>
@@ -91,7 +91,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.6.0</version>
+                <version>1.6.1</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -221,7 +221,7 @@
             <dependency>
                 <groupId>org.sonarsource.orchestrator</groupId>
                 <artifactId>sonar-orchestrator-junit5</artifactId>
-                <version>6.3.1.4538</version>
+                <version>6.4.0.4580</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
