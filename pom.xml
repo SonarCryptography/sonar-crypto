@@ -41,7 +41,7 @@
         <crysl.bc-jca.version>3.1.6</crysl.bc-jca.version>
         <crysl.jca-bc-jca.version>1.0.0</crysl.jca-bc-jca.version>
         <cryptoanalysis.version>5.0.2-SNAPSHOT</cryptoanalysis.version>
-        <boomerang.version>4.3.3-SNAPSHOT</boomerang.version>
+        <boomerang.version>4.4.0</boomerang.version>
         <slf4j.version>2.0.18</slf4j.version>
         <sootup.version>3.0.0</sootup.version>
         <!-- Resolved to .cmd on Windows by the windows-mvn profile below -->
