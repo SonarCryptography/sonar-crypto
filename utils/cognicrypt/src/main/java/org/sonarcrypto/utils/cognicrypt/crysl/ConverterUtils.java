@@ -6,6 +6,7 @@ import boomerang.scope.Statement;
 import boomerang.scope.sootup.jimple.JimpleUpStatement;
 import crypto.analysis.errors.AbstractError;
 import java.io.IOException;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
@@ -13,6 +14,7 @@ import sootup.core.jimple.basic.SimpleStmtPositionInfo;
 import sootup.core.jimple.basic.StmtPositionInfo;
 import sootup.core.model.Position;
 
+@NullMarked
 public class ConverterUtils {
 
   private ConverterUtils() {

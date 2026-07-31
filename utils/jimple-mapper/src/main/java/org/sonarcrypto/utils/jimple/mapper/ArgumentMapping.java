@@ -2,8 +2,11 @@ package org.sonarcrypto.utils.jimple.mapper;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /** Represents the mapping of a single method argument to its position in the source code. */
+@NullMarked
 public class ArgumentMapping {
   private final int argIndex;
   private final SourcePosition sourcePosition;
@@ -31,7 +34,7 @@ public class ArgumentMapping {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(@Nullable Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ArgumentMapping that = (ArgumentMapping) o;

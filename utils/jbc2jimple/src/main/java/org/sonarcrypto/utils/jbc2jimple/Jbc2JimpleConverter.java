@@ -31,7 +31,7 @@ public class Jbc2JimpleConverter {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Jbc2JimpleConverter.class);
 
-  private Map<String, LineMappingCollection> lineMappings = new HashMap<>();
+  private final Map<String, LineMappingCollection> lineMappings = new HashMap<>();
 
   /**
    * Converts Java classes of the given class path into Jimple files that are written into the given

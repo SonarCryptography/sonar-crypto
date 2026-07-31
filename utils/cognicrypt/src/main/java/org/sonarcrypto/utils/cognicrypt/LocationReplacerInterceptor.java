@@ -3,7 +3,8 @@ package org.sonarcrypto.utils.cognicrypt;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.utils.jimple.mapper.ArgumentMapping;
 import org.sonarcrypto.utils.jimple.mapper.LineMapping;
 import sootup.core.interceptor.BodyInterceptor;
@@ -18,6 +19,7 @@ import sootup.core.model.FullPosition;
 import sootup.core.model.Position;
 import sootup.core.views.View;
 
+@NullMarked
 public class LocationReplacerInterceptor implements BodyInterceptor {
 
   private final Map<Integer, LineMapping> statementMappings;
@@ -27,7 +29,7 @@ public class LocationReplacerInterceptor implements BodyInterceptor {
   }
 
   @Override
-  public void interceptBody(Body.BodyBuilder builder, @NonNull View view) {
+  public void interceptBody(Body.BodyBuilder builder, View view) {
     Map<Stmt, Stmt> stmtsToReplace = new LinkedHashMap<>();
     builder
         .getControlFlowGraph()
@@ -78,7 +80,7 @@ public class LocationReplacerInterceptor implements BodyInterceptor {
   private static class PositionReplacer implements StmtVisitor {
 
     private final StmtPositionInfo newPositionInfo;
-    Stmt result = null;
+    @Nullable Stmt result = null;
 
     private PositionReplacer(StmtPositionInfo newPositionInfo) {
       this.newPositionInfo = newPositionInfo;

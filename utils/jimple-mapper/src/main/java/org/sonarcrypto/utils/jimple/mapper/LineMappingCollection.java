@@ -9,12 +9,14 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
  * Collection of line mappings for a single class, with metadata. Designed with a flat structure for
  * protobuf compatibility.
  */
+@NullMarked
 public class LineMappingCollection {
   private final String className;
   @Nullable private final String sourceFileName;
