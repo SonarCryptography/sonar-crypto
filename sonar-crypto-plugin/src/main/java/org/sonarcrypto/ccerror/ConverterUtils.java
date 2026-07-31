@@ -4,9 +4,11 @@ import crypto.analysis.errors.AbstractError;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.utils.sonar.FqClassName;
 import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
+@NullMarked
 public class ConverterUtils {
 
   private ConverterUtils() {
