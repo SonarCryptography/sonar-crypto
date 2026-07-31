@@ -25,7 +25,7 @@ public class LineNumberMapper {
    *
    * @param sourceFileName The source file name (just filename, not full path)
    */
-  public void setSourceFileName(String sourceFileName) {
+  public void setSourceFileName(@Nullable String sourceFileName) {
     this.sourceFileName = sourceFileName;
   }
 
@@ -37,7 +37,7 @@ public class LineNumberMapper {
    * @param position The position in the source code
    */
   public void recordClassPosition(int jimpleLine, String signature, Position position) {
-    SourcePosition sourcePos = convertPosition(position);
+    SourcePosition sourcePos = SourcePosition.fromSootUpPosition(position);
     mappings.add(new LineMapping(jimpleLine, ElementType.CLASS, signature, sourcePos));
   }
 
@@ -49,7 +49,7 @@ public class LineNumberMapper {
    * @param position The position in the source code
    */
   public void recordMethodPosition(int jimpleLine, String signature, Position position) {
-    SourcePosition sourcePos = convertPosition(position);
+    SourcePosition sourcePos = SourcePosition.fromSootUpPosition(position);
     mappings.add(new LineMapping(jimpleLine, ElementType.METHOD, signature, sourcePos));
   }
 
@@ -61,7 +61,7 @@ public class LineNumberMapper {
    * @param position The position in the source code
    */
   public void recordFieldPosition(int jimpleLine, String signature, Position position) {
-    SourcePosition sourcePos = convertPosition(position);
+    SourcePosition sourcePos = SourcePosition.fromSootUpPosition(position);
     mappings.add(new LineMapping(jimpleLine, ElementType.FIELD, signature, sourcePos));
   }
 
@@ -73,22 +73,8 @@ public class LineNumberMapper {
    * @param position The position in the source code
    */
   public void recordStmtPosition(int jimpleLine, String stmtString, Position position) {
-    SourcePosition sourcePos = convertPosition(position);
+    SourcePosition sourcePos = SourcePosition.fromSootUpPosition(position);
     mappings.add(new LineMapping(jimpleLine, ElementType.STATEMENT, stmtString, sourcePos));
-  }
-
-  /**
-   * Converts a SootUp Position to our SourcePosition representation.
-   *
-   * @param position The SootUp position
-   * @return The converted source position
-   */
-  private SourcePosition convertPosition(Position position) {
-    return new SourcePosition(
-        position.getFirstLine(),
-        position.getLastLine(),
-        position.getFirstCol(),
-        position.getLastCol());
   }
 
   /**

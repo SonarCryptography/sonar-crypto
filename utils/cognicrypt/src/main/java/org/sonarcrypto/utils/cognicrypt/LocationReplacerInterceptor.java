@@ -1,16 +1,21 @@
 package org.sonarcrypto.utils.cognicrypt;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.jspecify.annotations.NonNull;
+import org.sonarcrypto.utils.jimple.mapper.ArgumentMapping;
 import org.sonarcrypto.utils.jimple.mapper.LineMapping;
 import sootup.core.interceptor.BodyInterceptor;
+import sootup.core.jimple.basic.FullStmtPositionInfo;
 import sootup.core.jimple.basic.SimpleStmtPositionInfo;
 import sootup.core.jimple.basic.StmtPositionInfo;
 import sootup.core.jimple.common.stmt.*;
 import sootup.core.jimple.javabytecode.stmt.*;
 import sootup.core.jimple.visitor.StmtVisitor;
 import sootup.core.model.Body;
+import sootup.core.model.FullPosition;
+import sootup.core.model.Position;
 import sootup.core.views.View;
 
 public class LocationReplacerInterceptor implements BodyInterceptor {
@@ -32,8 +37,7 @@ public class LocationReplacerInterceptor implements BodyInterceptor {
               LineMapping mapping =
                   statementMappings.get(stmt.getPositionInfo().getStmtPosition().getFirstLine());
               if (mapping != null) {
-                StmtPositionInfo newPosInfo =
-                    new SimpleStmtPositionInfo(mapping.getSourcePosition().toSootUpPosition());
+                StmtPositionInfo newPosInfo = buildFullPositionInfo(mapping);
                 PositionReplacer replacer = new PositionReplacer(newPosInfo);
                 stmt.accept(replacer);
                 if (replacer.result != null && replacer.result != stmt) {
@@ -43,6 +47,32 @@ public class LocationReplacerInterceptor implements BodyInterceptor {
             });
     stmtsToReplace.forEach(
         (old, updated) -> builder.getControlFlowGraph().replaceNode(old, updated));
+  }
+
+  private static StmtPositionInfo buildFullPositionInfo(LineMapping mapping) {
+    Position stmtPos = mapping.getSourcePosition().toSootUpPosition();
+    List<ArgumentMapping> argMappings = mapping.getArgumentMappings();
+    if (argMappings == null || argMappings.isEmpty()) {
+      return new SimpleStmtPositionInfo(stmtPos);
+    }
+    boolean hasZero = argMappings.stream().anyMatch(arg -> arg.getArgIndex() == 0);
+    int maxArgIndex = argMappings.stream().mapToInt(ArgumentMapping::getArgIndex).max().orElse(-1);
+    assert (maxArgIndex >= 0);
+
+    Position[] operandPositions = new Position[maxArgIndex + 1];
+    for (ArgumentMapping argMapping : argMappings) {
+      int index = argMapping.getArgIndex();
+      Position pos = argMapping.getSourcePosition().toSootUpPosition();
+      operandPositions[index] = pos;
+    }
+    if (!hasZero) {
+      // We assume that if there is no index 0 it's the object the method is called on
+      int start = mapping.getSourcePosition().getFirstCol();
+      int end = operandPositions[1].getFirstCol() - 2;
+      operandPositions[0] =
+          new FullPosition(stmtPos.getFirstLine(), start, stmtPos.getLastLine(), end);
+    }
+    return new FullStmtPositionInfo(stmtPos, operandPositions);
   }
 
   private static class PositionReplacer implements StmtVisitor {
