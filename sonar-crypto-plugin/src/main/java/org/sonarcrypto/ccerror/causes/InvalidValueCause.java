@@ -1,11 +1,11 @@
 package org.sonarcrypto.ccerror.causes;
 
 import static java.util.function.Predicate.not;
-import static org.sonarcrypto.utils.sonar.TextUtils.join;
 
 import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public final class InvalidValueCause extends ValueCause {
@@ -26,7 +26,8 @@ public final class InvalidValueCause extends ValueCause {
     return this.expectedValues;
   }
 
-  public void createMessage(StringBuilder messageBuilder) {
+  @Override
+  public void createMessage(MessageCrafter messageCrafter) {
     final var violatingValues = actualValues.stream().filter(not(String::isEmpty)).toList();
     final var violatingValuesCount = violatingValues.size();
 
@@ -34,29 +35,29 @@ public final class InvalidValueCause extends ValueCause {
     final var validValueRangeCount = validValueRange.size();
 
     if (violatingValuesCount > 0) {
-      messageBuilder.append(violatingValuesCount == 1 ? "has the value " : "has the values ");
-      messageBuilder.append(join(violatingValues, "or", "respectively"));
+      messageCrafter.text(violatingValuesCount == 1 ? "has the value " : "has the values ");
+      messageCrafter.codeJoined(violatingValues, "or", "respectively");
     }
 
     if (validValueRangeCount > 0) {
       if (violatingValuesCount == 0) {
-        messageBuilder.append("should be ");
+        messageCrafter.text("should be ");
       } else if (violatingValuesCount == 1) {
-        messageBuilder.append(", but it should be ");
+        messageCrafter.text(", but it should be ");
       }
     } else {
-      messageBuilder.append(", but they should be ");
+      messageCrafter.text(", but they should be ");
     }
 
     if (validValueRangeCount > 1) {
       if (violatingValuesCount > 1) {
-        messageBuilder.append("contained in ").append(join(validValueRange, "and"));
+        messageCrafter.text("contained in ").codeJoined(validValueRange, "and");
       } else {
-        messageBuilder.append("one of ").append(join(validValueRange, "or"));
+        messageCrafter.text("one of ").codeJoined(validValueRange, "or");
       }
     }
 
-    messageBuilder.append('.');
+    messageCrafter.text(".");
   }
 
   @Override

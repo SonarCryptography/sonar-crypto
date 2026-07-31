@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.sonarcrypto.cryptorules.CryptoRulesDefinition.REPOSITORY_KEY;
+import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
 import static org.sonarcrypto.utils.sonar.TextUtils.quote;
 import static org.sonarcrypto.utils.test.sonarcontext.SonarContextTesterUtils.initializeFileSystem;
 
@@ -16,9 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import org.jspecify.annotations.NullMarked;
@@ -26,12 +25,15 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.utility.groundtruth.GroundTruthParser;
 import org.sonarcrypto.utility.groundtruth.GroundTruthUtils;
 import org.sonarcrypto.utility.groundtruth.ValueSupport;
+import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
+import org.sonarcrypto.utils.maven.MavenBuildException;
 
 @NullMarked
 class CryptoSensorTest {
@@ -64,7 +66,7 @@ class CryptoSensorTest {
   }
 
   @Test
-  void testExecuteMavenProject() throws IOException {
+  void testExecuteMavenProject() throws IOException, MavenBuildException {
     CryptoSensor sensor = new CryptoSensor();
     SensorContextTester context =
         SensorContextTester.create(Path.of("../e2e/src/test/resources/Java/Maven/Basic"));
@@ -77,37 +79,29 @@ class CryptoSensorTest {
 
     final var combinedMap = new TreeMap<GroundTruthParser.Location, Entry>();
 
-    final var expectedErrorCount =
-        new Object() {
-          long min = 0;
-          long max = 0;
-        };
-
     groundTruth.forEach(
         (location, gts) -> {
-          final var entry =
-              combinedMap.computeIfAbsent(
-                  location, ignored -> new Entry(new HashSet<>(), new HashMap<>()));
+          final var entry = combinedMap.computeIfAbsent(location, ignored -> new Entry());
+
           gts.forEach(
-              it -> {
-                expectedErrorCount.max++;
-
-                if (!it.isOptional()) {
-                  expectedErrorCount.min++;
-                }
-
-                entry.expected.put(
-                    new Item(it.ruleKind(), it.causeType(), it.value()), it.isOptional());
-              });
+              it -> entry.expected.add(new Item(it.ruleKind(), it.causeType(), it.value())));
         });
 
     foundErrors.forEach(
         error -> {
+          // Find the InputFile corresponding to this class
+          InputFile inputFile = findInputFile(context.fileSystem(), error.className());
+
+          assertThat(inputFile)
+              .withFailMessage("Input file for class not found!\nError: %s")
+              .isNotNull();
+
+          final var position = ConverterUtils.selectLocation(inputFile, error.position());
+
           final var entry =
               combinedMap.computeIfAbsent(
-                  new GroundTruthParser.Location(
-                      error.inputFile().filename(), error.position().start().line()),
-                  location1 -> new Entry(new HashSet<>(), new HashMap<>()));
+                  new GroundTruthParser.Location(inputFile.filename(), position.start().line()),
+                  _location -> new Entry());
           final var violation = error.violation();
           final var item =
               new Item(
@@ -115,27 +109,24 @@ class CryptoSensorTest {
                   violation.getCause().getClass(),
                   ValueSupport.getValue(violation.getCause()));
           entry.actual.add(item);
+          entry.count++;
         });
 
     var invalidResult = false;
 
     for (var entry : combinedMap.values()) {
-      final var actual = entry.actual();
+      final var actual = entry.actual;
       final var actualCopy = new HashSet<>(actual);
-      final var expected = entry.expected().keySet();
+      final var expected = entry.expected;
       actual.removeAll(expected);
       expected.removeAll(actualCopy);
-    }
-
-    for (var entry : combinedMap.values()) {
-      entry.expected().entrySet().removeIf(Map.Entry::getValue);
     }
 
     for (var combined : combinedMap.entrySet()) {
       final var location = combined.getKey();
       final var entry = combined.getValue();
-      final var actual = entry.actual();
-      final var expected = entry.expected().keySet();
+      final var actual = entry.actual;
+      final var expected = entry.expected;
 
       if (!actual.isEmpty() || !expected.isEmpty()) {
         invalidResult = true;
@@ -161,17 +152,19 @@ class CryptoSensorTest {
       fail("Invalid result!");
     }
 
-    final var actualCount =
+    final var sonarIssueCount =
         context.allIssues().stream()
             .map(it -> it.ruleKey().repository())
             .filter(REPOSITORY_KEY::equals)
             .count();
 
-    assertThat(actualCount)
+    final var processedCount = combinedMap.values().stream().mapToLong(it -> it.count).sum();
+
+    assertThat(processedCount)
         .withFailMessage(
-            "Wrong number of issues reported!\nActual: %d\nExpected: %d..%d",
-            actualCount, expectedErrorCount.min, expectedErrorCount.max)
-        .isBetween(expectedErrorCount.min, expectedErrorCount.max);
+            "Invalid number of issues reported!\nActual: %d\nExpected: %d",
+            processedCount, sonarIssueCount)
+        .isEqualTo(sonarIssueCount);
   }
 
   @Test
@@ -224,17 +217,13 @@ class CryptoSensorTest {
     }
   }
 
-  private record Entry(Set<Item> actual, Map<Item, Boolean> expected) {}
+  private static final class Entry {
+    public final Set<Item> actual = new HashSet<>();
+    public final Set<Item> expected = new HashSet<>();
+    public int count;
+  }
 
-  public record Item(
-      RuleKind ruleKind,
-      Class<? extends Cause> causeType,
-      @Nullable String value,
-      boolean isOptional) {
-    public Item(RuleKind ruleKind, Class<? extends Cause> causeType, @Nullable String value) {
-      this(ruleKind, causeType, value, false);
-    }
-
+  public record Item(RuleKind ruleKind, Class<? extends Cause> causeType, @Nullable String value) {
     @Override
     public String toString() {
       final var sb =

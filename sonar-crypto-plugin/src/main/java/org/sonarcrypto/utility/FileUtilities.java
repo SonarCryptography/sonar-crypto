@@ -5,9 +5,12 @@ import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@NullMarked
 public class FileUtilities {
   private FileUtilities() {
     // Private constructor to prevent instantiation
@@ -18,15 +21,13 @@ public class FileUtilities {
   public static final String SONAR_SECURITY_JAVA_FRONTEND = "sonar-security-java-frontend-plugin";
   public static final String SONAR_SECURITY_UCFG_BRIDGE = "sonar-security-ucfg-bridge";
 
-  public static File findFile(String path, String fileName, String fileEnding) {
+  public static @Nullable File findFile(String path, String fileName, String fileEnding) {
     return findFile(Path.of(path), fileName, fileEnding);
   }
 
-  public static File findFile(Path path, String fileName, String fileEnding) {
-    if (path == null || !Files.exists(path)) {
-      if (path != null) {
-        LOGGER.error("Cannot search for file on non-existent path: {}", path.toAbsolutePath());
-      }
+  public static @Nullable File findFile(Path path, String fileName, String fileEnding) {
+    if (!Files.exists(path)) {
+      LOGGER.error("Cannot search for file on non-existent path: {}", path.toAbsolutePath());
       return null;
     }
     try (Stream<Path> fileWalker = Files.walk(path)) {

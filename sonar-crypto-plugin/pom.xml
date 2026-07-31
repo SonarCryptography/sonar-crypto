@@ -64,6 +64,11 @@
         </dependency>
         <dependency>
             <groupId>org.sonarcrypto</groupId>
+            <artifactId>sonar</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sonarcrypto</groupId>
             <artifactId>test</artifactId>
             <version>${project.version}</version>
         </dependency>

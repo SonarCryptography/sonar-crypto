@@ -1,6 +1,7 @@
 package org.sonarcrypto.ccerror.converters;
 
 import crypto.analysis.errors.PredicateContradictionError;
+import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.ccerror.causes.ShouldNotBeUsedHereCause;
@@ -20,6 +21,7 @@ public class PredicateContradictionErrorConverter {
     return new ValueViolation(
         CryptoRulesDefinitions.GENERAL,
         CallInfo.of(contradictedPredicate.statement(), contradictedPredicate.index()),
-        new ShouldNotBeUsedHereCause());
+        new ShouldNotBeUsedHereCause(),
+        List.of(/* empty */ ));
   }
 }

@@ -7,6 +7,7 @@ import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -57,7 +58,8 @@ public class CryptoSensor implements Sensor {
     }
   }
 
-  protected List<ConvertedError> scan(FileSystem fileSystem, RulesetPaths extractedRules) {
+  protected List<ConvertedError> scan(FileSystem fileSystem, RulesetPaths extractedRules)
+      throws FileNotFoundException, MavenBuildException {
     Table<WrappedClass, Method, Set<AbstractError>> errors;
     Path jimpleDir = fileSystem.workDir().toPath().resolve("bridge-output/jimple");
     String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
@@ -75,14 +77,9 @@ public class CryptoSensor implements Sensor {
           "No Jimple files found at {}. Compiling project at {} as analysis input.",
           jimpleDir.toAbsolutePath(),
           mavenProjectPath);
-      MavenProject mi;
-      try {
-        mi = new MavenProject(mavenProjectPath);
-        mi.compile();
-      } catch (IOException | MavenBuildException e) {
-        LOGGER.error("Failed to build Maven project", e);
-        return List.of(/* Empty */ );
-      }
+      MavenProject mi = new MavenProject(mavenProjectPath);
+      mi.compile();
+
       HeadlessJavaScanner scanner =
           new HeadlessJavaScanner(mi.getBuildDirectory(), extractedRules.rulesetZip().toString());
       scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
@@ -112,7 +109,11 @@ public class CryptoSensor implements Sensor {
       return;
     }
 
-    report(sensorContext, scan(sensorContext.fileSystem(), ruleDir));
+    try {
+      report(sensorContext, scan(sensorContext.fileSystem(), ruleDir));
+    } catch (IOException | MavenBuildException e) {
+      LOGGER.error("Failed to build Maven project", e);
+    }
   }
 
   private static boolean hasJimpleFiles(Path jimpleDir) {

@@ -1,7 +1,8 @@
 package org.sonarcrypto;
 
-import static org.sonarcrypto.utils.sonar.TextUtils.code;
+import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
@@ -11,7 +12,9 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonarcrypto.ccerror.ConvertedError;
-import org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils;
+import org.sonarcrypto.ccerror.FlowEntry;
+import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 /** Converts CogniCrypt (CryptoAnalysis) errors to SonarQube issues. */
 @NullMarked
@@ -27,18 +30,27 @@ public class CcToSonarIssues {
   public void reportAllIssues(SensorContext context, List<ConvertedError> errors) {
 
     for (final var entry : errors) {
-      final var inputFile = entry.inputFile();
-      final var position = entry.position();
+
+      // Find the InputFile corresponding to this class
+      InputFile inputFile = findInputFile(context.fileSystem(), entry.className());
+
+      if (inputFile == null) {
+        LOGGER.error("Could not find source file for class: {}", entry.className().fqn());
+        continue;
+      }
+
+      final var position = ConverterUtils.selectLocation(inputFile, entry.position());
       final var method = entry.method();
       final var violation = entry.violation();
 
       final var issue = context.newIssue();
 
       final var messageBuilder =
-          new StringBuilder(
-              String.format(
-                  "Cryptographic weakness in method %s detected:%n",
-                  code(SignatureUtils.shortNameOf(method))));
+          new MessageCrafter()
+              .text("Cryptographic weakness in method ")
+              .method(method)
+              .text(" detected:")
+              .newLine();
 
       final var location = issue.newLocation().on(inputFile);
 
@@ -50,13 +62,13 @@ public class CcToSonarIssues {
 
       issue.forRule(violation.getRulesDefinition().getRuleKey());
 
-      if (messageBuilder.length() > NewIssueLocation.MESSAGE_MAX_SIZE) {
-        messageBuilder.setLength(NewIssueLocation.MESSAGE_MAX_SIZE);
-      }
-
       violation.createMessage(messageBuilder);
-      final var message = messageBuilder.toString();
-      location.message(message);
+
+      messageBuilder.addMessageTo(location);
+
+      final var flow = violation.getFlow();
+
+      addFlow(context, issue, flow);
 
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info(
@@ -73,6 +85,33 @@ public class CcToSonarIssues {
       issue.at(location);
       issue.save();
     }
+  }
+
+  private void addFlow(SensorContext context, NewIssue issue, List<FlowEntry> flow) {
+    if (flow.isEmpty()) {
+      return;
+    }
+
+    final var flowLocations = new ArrayList<NewIssueLocation>(flow.size());
+
+    for (final var flowEntry : flow) {
+      InputFile flowFile = findInputFile(context.fileSystem(), flowEntry.className());
+
+      if (flowFile == null) {
+        LOGGER.error(
+            "Could not find source file for execution flow class: {}", flowEntry.className().fqn());
+        continue;
+      }
+
+      final var flowLocation = issue.newLocation().on(flowFile);
+      final var flowPosition = ConverterUtils.selectLocation(flowFile, flowEntry.position());
+
+      flowEntry.message().addMessageTo(flowLocation);
+      flowLocation.at(flowPosition);
+      flowLocations.add(flowLocation);
+    }
+
+    issue.addFlow(flowLocations, NewIssue.FlowType.EXECUTION, null);
   }
 
   /**

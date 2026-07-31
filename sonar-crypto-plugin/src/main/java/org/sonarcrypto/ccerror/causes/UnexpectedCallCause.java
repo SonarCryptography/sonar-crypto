@@ -1,14 +1,11 @@
 package org.sonarcrypto.ccerror.causes;
 
-import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
-import static org.sonarcrypto.utils.sonar.TextUtils.code;
-
 import boomerang.scope.DeclaredMethod;
 import crysl.rule.CrySLMethod;
 import java.util.Collection;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.sonarcrypto.utils.sonar.TextUtils;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public final class UnexpectedCallCause extends CallCause {
@@ -30,30 +27,19 @@ public final class UnexpectedCallCause extends CallCause {
   }
 
   @Override
-  public void createMessage(StringBuilder messageBuilder) {
-
-    messageBuilder
-        .append("Unexpected call to method ")
-        .append(
-            code(
-                shortNameOf(
-                    unexpectedMethod.getDeclaringClass().getFullyQualifiedName(),
-                    unexpectedMethod.getName())))
-        .append('.');
+  public void createMessage(MessageCrafter messageCrafter) {
+    messageCrafter
+        .text("Unexpected call to method ")
+        .method(
+            unexpectedMethod.getDeclaringClass().getFullyQualifiedName(),
+            unexpectedMethod.getName())
+        .text(".");
 
     if (!expectedMethods.isEmpty()) {
-      messageBuilder
-          .append(" Expected calling either ")
-          .append(
-              TextUtils.join(
-                  expectedMethods.stream()
-                      .map(
-                          it ->
-                              code(
-                                  shortNameOf(
-                                      it.getDeclaringClassName(), it.getShortMethodName()))),
-                  "or"))
-          .append(".");
+      messageCrafter
+          .text(" Expected calling ")
+          .methodsJoined(" either ", expectedMethods, "or")
+          .text(".");
     }
   }
 

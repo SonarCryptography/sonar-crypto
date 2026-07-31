@@ -1,26 +1,30 @@
 package org.sonarcrypto.ccerror.violations;
 
+import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.CryptoRulesDefinitions;
 import org.sonarcrypto.RuleKind;
+import org.sonarcrypto.ccerror.FlowEntry;
 import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.cryptorules.CryptoRulesDefinition;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public abstract sealed class Violation permits ValueViolation, CallViolation {
   private final CryptoRulesDefinition rulesDefinition;
 
   private final Cause cause;
+  private final List<FlowEntry> flow;
 
-  protected Violation(CryptoRulesDefinition rulesDefinition, Cause cause) {
+  protected Violation(CryptoRulesDefinition rulesDefinition, Cause cause, List<FlowEntry> flow) {
     this.rulesDefinition = rulesDefinition;
     this.cause = cause;
+    this.flow = flow;
   }
 
-  protected Violation(RuleKind ruleKind, Cause cause) {
-    this.rulesDefinition = CryptoRulesDefinitions.fromRuleKind(ruleKind);
-    this.cause = cause;
+  protected Violation(RuleKind ruleKind, Cause cause, List<FlowEntry> flow) {
+    this(CryptoRulesDefinitions.fromRuleKind(ruleKind), cause, flow);
   }
 
   public CryptoRulesDefinition getRulesDefinition() {
@@ -31,7 +35,11 @@ public abstract sealed class Violation permits ValueViolation, CallViolation {
     return this.cause;
   }
 
-  public abstract void createMessage(StringBuilder messageBuilder);
+  public List<FlowEntry> getFlow() {
+    return this.flow;
+  }
+
+  public abstract void createMessage(MessageCrafter messageCrafter);
 
   @Override
   public boolean equals(@Nullable Object o) {

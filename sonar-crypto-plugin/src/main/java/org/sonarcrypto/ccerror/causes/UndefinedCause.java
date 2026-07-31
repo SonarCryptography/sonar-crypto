@@ -2,23 +2,29 @@ package org.sonarcrypto.ccerror.causes;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.sonarcrypto.utils.sonar.messagecrafter.CraftedMessage;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public final class UndefinedCause extends ValueCause {
 
-  private final String message;
+  private final CraftedMessage message;
 
-  public UndefinedCause(String message) {
+  public UndefinedCause(CraftedMessage message) {
     this.message = message;
   }
 
-  public String getMessage() {
+  public UndefinedCause(String message) {
+    this(new CraftedMessage(message));
+  }
+
+  public CraftedMessage getMessage() {
     return this.message;
   }
 
   @Override
-  public void createMessage(StringBuilder messageBuilder) {
-    messageBuilder.append(getMessage());
+  public void createMessage(MessageCrafter messageCrafter) {
+    messageCrafter.append(getMessage());
   }
 
   @Override

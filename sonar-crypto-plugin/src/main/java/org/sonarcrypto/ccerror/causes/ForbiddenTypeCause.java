@@ -1,9 +1,8 @@
 package org.sonarcrypto.ccerror.causes;
 
-import static org.sonarcrypto.utils.sonar.TextUtils.*;
-
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public final class ForbiddenTypeCause extends ValueCause {
@@ -19,11 +18,8 @@ public final class ForbiddenTypeCause extends ValueCause {
   }
 
   @Override
-  public void createMessage(StringBuilder messageBuilder) {
-    messageBuilder
-        .append("should never be of the type ")
-        .append(quote(getDisallowedType()))
-        .append(".");
+  public void createMessage(MessageCrafter messageCrafter) {
+    messageCrafter.text("should never be of the type ").code(getDisallowedType()).text(".");
   }
 
   @Override

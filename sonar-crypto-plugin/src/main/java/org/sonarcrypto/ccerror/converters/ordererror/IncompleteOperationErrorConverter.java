@@ -4,6 +4,7 @@ import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.IncompleteOperationError;
 import org.jspecify.annotations.NullMarked;
 import org.sonarcrypto.CryptoRulesDefinitions;
+import org.sonarcrypto.ccerror.ConverterUtils;
 import org.sonarcrypto.ccerror.causes.IncompleteOperationCause;
 import org.sonarcrypto.ccerror.violations.CallViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
@@ -26,6 +27,7 @@ public class IncompleteOperationErrorConverter {
 
     return new CallViolation(
         CryptoRulesDefinitions.API_MISUSE,
-        new IncompleteOperationCause(incompleteObject, expectedMethods));
+        new IncompleteOperationCause(incompleteObject, expectedMethods),
+        ConverterUtils.executionFlow(error));
   }
 }

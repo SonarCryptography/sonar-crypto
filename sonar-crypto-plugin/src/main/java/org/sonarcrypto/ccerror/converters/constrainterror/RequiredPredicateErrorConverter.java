@@ -3,6 +3,7 @@ package org.sonarcrypto.ccerror.converters.constrainterror;
 import crypto.analysis.errors.AbstractRequiredPredicateError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.RequiredPredicateError;
+import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,8 @@ public class RequiredPredicateErrorConverter {
       return new ValueViolation(
           CryptoRulesDefinitions.GENERAL,
           CallInfo.none(),
-          new UndefinedCause(error.toErrorMarkerString()));
+          new UndefinedCause(error.toErrorMarkerString()),
+          List.of(/* empty */ ));
     }
   }
 
@@ -52,13 +54,15 @@ public class RequiredPredicateErrorConverter {
       return new ValueViolation(
           CryptoRulesDefinitions.GENERAL,
           CallInfo.none(),
-          new UndefinedCause(error.toErrorMarkerString()));
+          new UndefinedCause(error.toErrorMarkerString()),
+          List.of(/* empty */ ));
     }
 
     return new ValueViolation(
         RuleKindUtils.detectRuleKind(firstViolatedPredicate.predicate()),
         CallInfo.of(firstViolatedPredicate.statement(), firstViolatedPredicate.index()),
-        new ImproperGeneratedCause());
+        new ImproperGeneratedCause(),
+        List.of(/* empty */ ));
   }
 
   public static Violation generateReqPredMessage(RequiredPredicateError error) {
@@ -67,6 +71,7 @@ public class RequiredPredicateErrorConverter {
     return new ValueViolation(
         RuleKindUtils.detectRuleKind(contradictedPredicates.predicate()),
         CallInfo.of(contradictedPredicates.statement(), contradictedPredicates.index()),
-        new ImproperGeneratedCause());
+        new ImproperGeneratedCause(),
+        List.of(/* empty */ ));
   }
 }

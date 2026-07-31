@@ -1,11 +1,8 @@
 package org.sonarcrypto.utils.sonar;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.sonarcrypto.utils.sonar.SonarFileSystemUtils.findInputFile;
 
-import boomerang.scope.WrappedClass;
 import com.sonarsource.scanner.engine.sensor.test.fixtures.SensorContextTester;
 import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
 import java.io.IOException;
@@ -31,7 +28,7 @@ class SonarFileSystemUtilsTest {
     addJavaFile("com/example/MyClass.java", "package com.example;\npublic class MyClass {}");
 
     InputFile result =
-        findInputFile(sensorContext.fileSystem(), wrappedClass("com.example.MyClass"));
+        findInputFile(sensorContext.fileSystem(), new FqClassName("com.example.MyClass"));
 
     assertThat(result).isNotNull();
     assertThat(result.filename()).isEqualTo("MyClass.java");
@@ -40,7 +37,7 @@ class SonarFileSystemUtilsTest {
   @Test
   void find_input_file_returns_null_when_no_match() {
     InputFile result =
-        findInputFile(sensorContext.fileSystem(), wrappedClass("com.example.NonExistent"));
+        findInputFile(sensorContext.fileSystem(), new FqClassName("com.example.NonExistent"));
 
     assertThat(result).isNull();
   }
@@ -52,7 +49,8 @@ class SonarFileSystemUtilsTest {
         "package com.example.crypto.utils;\npublic class Helper {}");
 
     InputFile result =
-        findInputFile(sensorContext.fileSystem(), wrappedClass("com.example.crypto.utils.Helper"));
+        findInputFile(
+            sensorContext.fileSystem(), new FqClassName("com.example.crypto.utils.Helper"));
 
     assertThat(result).isNotNull();
     assertThat(result.filename()).isEqualTo("Helper.java");
@@ -77,15 +75,9 @@ class SonarFileSystemUtilsTest {
     sensorContext.fileSystem().add(testFile);
 
     InputFile result =
-        findInputFile(sensorContext.fileSystem(), wrappedClass("com.example.TestClass"));
+        findInputFile(sensorContext.fileSystem(), new FqClassName("com.example.TestClass"));
 
     assertThat(result).isNull();
-  }
-
-  private static WrappedClass wrappedClass(String fqn) {
-    WrappedClass wc = mock(WrappedClass.class);
-    when(wc.getFullyQualifiedName()).thenReturn(fqn);
-    return wc;
   }
 
   private void addJavaFile(String relativePath, String content) throws IOException {

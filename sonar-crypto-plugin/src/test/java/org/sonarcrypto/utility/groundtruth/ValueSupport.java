@@ -1,6 +1,6 @@
 package org.sonarcrypto.utility.groundtruth;
 
-import static org.sonarcrypto.utils.cognicrypt.boomerang.SignatureUtils.shortNameOf;
+import static org.sonarcrypto.utils.sonar.SignatureUtils.shortNameOf;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.jspecify.annotations.NullMarked;

@@ -15,11 +15,13 @@ public class TypestateErrorConverter {
 
   public static Violation convert(TypestateError error) {
 
-    final var unexpectedMethod = error.getErrorStatement().getInvokeExpr().getDeclaredMethod();
+    final var errorStatement = error.getErrorStatement();
+    final var unexpectedMethod = errorStatement.getInvokeExpr().getDeclaredMethod();
     final var expectedMethods = error.getExpectedMethodCalls();
 
     return new CallViolation(
         CryptoRulesDefinitions.API_MISUSE,
-        new UnexpectedCallCause(unexpectedMethod, expectedMethods));
+        new UnexpectedCallCause(unexpectedMethod, expectedMethods),
+        org.sonarcrypto.ccerror.ConverterUtils.executionFlow(error));
   }
 }

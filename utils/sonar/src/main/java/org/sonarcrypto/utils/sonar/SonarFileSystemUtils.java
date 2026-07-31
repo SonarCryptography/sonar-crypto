@@ -1,6 +1,5 @@
 package org.sonarcrypto.utils.sonar;
 
-import boomerang.scope.WrappedClass;
 import java.util.Iterator;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -18,16 +17,15 @@ public class SonarFileSystemUtils {
    * Finds the InputFile corresponding to a WrappedClass.
    *
    * @param fileSystem the file system to search in
-   * @param wrappedClass the class to find the source file for
+   * @param className the class to find the source file for
    * @return the InputFile, or null if not found
    */
   @Nullable
-  public static InputFile findInputFile(FileSystem fileSystem, WrappedClass wrappedClass) {
-    String fullyQualifiedName = wrappedClass.getFullyQualifiedName();
+  public static InputFile findInputFile(FileSystem fileSystem, FqClassName className) {
 
     // Convert fully qualified class name to file path,
     // e.g., "com.example.MyClass" -> "com/example/MyClass.java"
-    String relativePath = fullyQualifiedName.replace('.', '/') + ".java";
+    String relativePath = className.fqn().replace('.', '/') + ".java";
 
     FilePredicates predicates = fileSystem.predicates();
     Iterator<InputFile> files =
