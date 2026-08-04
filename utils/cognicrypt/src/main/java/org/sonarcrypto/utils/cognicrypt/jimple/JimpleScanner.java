@@ -13,9 +13,11 @@ import de.fraunhofer.iem.framework.FrameworkSetup;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.IOException;
 import java.util.Collection;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@NullMarked
 public class JimpleScanner extends CryptoScanner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JimpleScanner.class);

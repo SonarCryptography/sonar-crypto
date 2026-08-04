@@ -9,6 +9,8 @@ import de.fraunhofer.iem.framework.FrameworkSetup;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.nio.file.Path;
 import java.util.*;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import sootup.callgraph.CallGraph;
 import sootup.callgraph.CallGraphAlgorithm;
@@ -24,8 +26,9 @@ import sootup.java.core.JavaSootMethod;
 import sootup.java.core.views.JavaView;
 import sootup.jimple.frontend.JimpleAnalysisInputLocation;
 
+@NullMarked
 public class JimpleFrameworkSetup extends FrameworkSetup {
-  private JavaView view;
+  private @Nullable JavaView view;
   private final boolean includeJDK;
 
   protected JimpleFrameworkSetup(
@@ -72,6 +75,12 @@ public class JimpleFrameworkSetup extends FrameworkSetup {
   @Override
   public CryptoAnalysisScope createFrameworkScope() {
     Collection<JavaSootMethod> entryPoints = new HashSet<>();
+    final var view = this.view;
+
+    if (view == null) {
+      throw new IllegalStateException("The framework has not been initialized.");
+    }
+
     view.getClasses()
         .filter(SootClass::isApplicationClass)
         .forEach(

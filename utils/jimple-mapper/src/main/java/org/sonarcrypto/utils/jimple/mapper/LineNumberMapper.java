@@ -2,6 +2,7 @@ package org.sonarcrypto.utils.jimple.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import sootup.core.model.Position;
 
@@ -9,6 +10,7 @@ import sootup.core.model.Position;
  * Collects line number mappings from Jimple code to source positions. Records mappings for classes,
  * methods, fields, and statements.
  */
+@NullMarked
 public class LineNumberMapper {
   private final String className;
   private final List<LineMapping> mappings;

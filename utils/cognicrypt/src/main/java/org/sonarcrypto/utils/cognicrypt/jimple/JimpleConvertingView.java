@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,20 +23,21 @@ import sootup.java.core.*;
 import sootup.java.core.OverridingJavaClassSource;
 import sootup.java.core.views.JavaView;
 
+@NullMarked
 public class JimpleConvertingView extends JavaView {
 
   private static final Logger log = LoggerFactory.getLogger(JimpleConvertingView.class);
 
-  public JimpleConvertingView(@NonNull List<AnalysisInputLocation> inputLocations) {
+  public JimpleConvertingView(List<AnalysisInputLocation> inputLocations) {
     super(inputLocations);
   }
 
-  public JimpleConvertingView(@NonNull AnalysisInputLocation inputLocation) {
+  public JimpleConvertingView(AnalysisInputLocation inputLocation) {
     super(inputLocation);
   }
 
   @Override
-  protected synchronized @NonNull JavaSootClass buildClassFrom(JavaSootClassSource classSource) {
+  protected synchronized JavaSootClass buildClassFrom(JavaSootClassSource classSource) {
     ClassType classType = classSource.getClassType();
     JavaSootClass theClass;
     if (cache.hasClass(classType)) {
@@ -55,7 +56,7 @@ public class JimpleConvertingView extends JavaView {
   }
 
   @Override
-  protected @NonNull Optional<JavaSootClassSource> getClassSource(@NonNull ClassType type) {
+  protected Optional<JavaSootClassSource> getClassSource(ClassType type) {
     return inputLocations.parallelStream()
         .map(location -> location.getClassSource(type, this))
         .filter(Optional::isPresent)
@@ -147,7 +148,7 @@ public class JimpleConvertingView extends JavaView {
     }
 
     @Override
-    public @NonNull Collection<? extends SootMethod> resolveMethods() throws ResolveException {
+    public Collection<? extends SootMethod> resolveMethods() throws ResolveException {
 
       return resolvedClass.getMethods().stream()
           .map(
@@ -183,7 +184,7 @@ public class JimpleConvertingView extends JavaView {
     }
 
     @Override
-    public @NonNull Collection<? extends SootField> resolveFields() throws ResolveException {
+    public Collection<? extends SootField> resolveFields() throws ResolveException {
       return resolvedClass.getFields().stream()
           .filter(HasPosition.class::isInstance)
           .map(
@@ -199,27 +200,27 @@ public class JimpleConvertingView extends JavaView {
     }
 
     @Override
-    public @NonNull Set<ClassModifier> resolveModifiers() {
+    public Set<ClassModifier> resolveModifiers() {
       return resolvedClass.getModifiers();
     }
 
     @Override
-    public @NonNull Set<? extends ClassType> resolveInterfaces() {
+    public Set<? extends ClassType> resolveInterfaces() {
       return resolvedClass.getInterfaces();
     }
 
     @Override
-    public @NonNull Optional<? extends ClassType> resolveSuperclass() {
+    public Optional<? extends ClassType> resolveSuperclass() {
       return resolvedClass.getSuperclass();
     }
 
     @Override
-    public @NonNull Optional<? extends ClassType> resolveOuterClass() {
+    public Optional<? extends ClassType> resolveOuterClass() {
       return resolvedClass.getOuterClass();
     }
 
     @Override
-    public @NonNull Position resolvePosition() {
+    public Position resolvePosition() {
       return classMappings.values().stream()
           .findAny()
           .map(m -> m.getSourcePosition().toSootUpPosition())
@@ -227,7 +228,7 @@ public class JimpleConvertingView extends JavaView {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
       if (o == null || getClass() != o.getClass()) return false;
       if (!super.equals(o)) return false;
       WrappingSootClassSource that = (WrappingSootClassSource) o;

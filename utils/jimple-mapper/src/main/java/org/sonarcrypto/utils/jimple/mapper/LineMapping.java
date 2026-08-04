@@ -5,12 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a single mapping entry from a Jimple line number to source code position. Designed
  * with a flat structure for protobuf compatibility.
  */
+@NullMarked
 public class LineMapping {
   private final int jimpleLine;
   private final ElementType elementType;
@@ -95,7 +97,7 @@ public class LineMapping {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(@Nullable Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     LineMapping that = (LineMapping) o;

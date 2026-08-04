@@ -22,6 +22,7 @@ package org.sonarcrypto.utils.jimple.printer;
  * #L%
  */
 
+import org.jspecify.annotations.NullMarked;
 import sootup.core.jimple.common.ref.IdentityRef;
 import sootup.core.jimple.common.ref.JCaughtExceptionRef;
 import sootup.core.jimple.common.ref.JParameterRef;
@@ -31,6 +32,7 @@ import sootup.core.model.SootMethod;
 import sootup.core.util.printer.LabeledStmtPrinter;
 
 /** StmtPrinter implementation for normal (full) Jimple */
+@NullMarked
 public class NormalStmtPrinter extends LabeledStmtPrinter {
 
   public NormalStmtPrinter() {
@@ -65,7 +67,7 @@ public class NormalStmtPrinter extends LabeledStmtPrinter {
     }
   }
 
-  void enableImports(boolean enable) {}
+  void enableImports(@SuppressWarnings("unused") boolean enable) {}
 
   @Override
   public void literal(String s) {

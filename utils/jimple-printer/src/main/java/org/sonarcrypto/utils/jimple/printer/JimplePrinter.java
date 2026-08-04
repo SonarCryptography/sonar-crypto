@@ -26,6 +26,7 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.utils.jimple.mapper.LineNumberMapper;
 import sootup.core.graph.ControlFlowGraph;
@@ -51,6 +52,7 @@ import sootup.core.util.printer.LabeledStmtPrinter;
 // TODO: [ms] clean up or implement sth with addJimpleLn,getJimpleLnNum,addJimpleLnTags etc. check
 // old soot for intention
 
+@NullMarked
 public class JimplePrinter {
 
   /**
@@ -78,7 +80,7 @@ public class JimplePrinter {
     this.options.addAll(Arrays.asList(options));
   }
 
-  public JimplePrinter(LineNumberMapper lineNumberMapper, Option... options) {
+  public JimplePrinter(@Nullable LineNumberMapper lineNumberMapper, Option... options) {
     this.options.addAll(Arrays.asList(options));
     this.lineNumberMapper = lineNumberMapper;
   }
