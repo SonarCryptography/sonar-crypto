@@ -46,8 +46,8 @@
         <sootup.version>3.0.0</sootup.version>
         <!-- Resolved to .cmd on Windows by the windows-mvn profile below -->
         <mvn.executable>${maven.home}/bin/mvn</mvn.executable>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
