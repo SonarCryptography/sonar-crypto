@@ -9,7 +9,7 @@ import org.sonarcrypto.utils.cognicrypt.boomerang.CalleeInfo;
 @NullMarked
 public record CallInfo(@Nullable CalleeInfo calleeInfo, int argumentIndex) {
   public static CallInfo none() {
-    return new CallInfo(null, -1);
+    return new CallInfo(null, 0);
   }
 
   public static CallInfo of(ParameterWithExtractedValues param) {

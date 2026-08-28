@@ -8,11 +8,13 @@ import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonarcrypto.ccerror.ConvertedError;
 import org.sonarcrypto.ccerror.FlowEntry;
+import org.sonarcrypto.ccerror.violations.ValueViolation;
 import org.sonarcrypto.utils.cognicrypt.crysl.ConverterUtils;
 import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
@@ -29,19 +31,26 @@ public class CcToSonarIssues {
    */
   public void reportAllIssues(SensorContext context, List<ConvertedError> errors) {
 
-    for (final var entry : errors) {
+    for (final var error : errors) {
 
       // Find the InputFile corresponding to this class
-      InputFile inputFile = findInputFile(context.fileSystem(), entry.className());
+      InputFile inputFile = findInputFile(context.fileSystem(), error.className());
 
       if (inputFile == null) {
-        LOGGER.error("Could not find source file for class: {}", entry.className().fqn());
+        LOGGER.error("Could not find source file for class: {}", error.className().fqn());
         continue;
       }
 
-      final var position = ConverterUtils.selectLocation(inputFile, entry.position());
-      final var method = entry.method();
-      final var violation = entry.violation();
+      final var method = error.method();
+      final var violation = error.violation();
+
+      final TextRange position =
+          ConverterUtils.selectLocation(
+              inputFile,
+              error.position(),
+              violation instanceof ValueViolation valueViolation
+                  ? valueViolation.getCallInfo()
+                  : null);
 
       final var issue = context.newIssue();
 

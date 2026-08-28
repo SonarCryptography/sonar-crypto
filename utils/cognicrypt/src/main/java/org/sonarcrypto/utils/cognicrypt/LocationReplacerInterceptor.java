@@ -70,7 +70,7 @@ public class LocationReplacerInterceptor implements BodyInterceptor {
     if (!hasZero) {
       // We assume that if there is no index 0 it's the object the method is called on
       int start = mapping.getSourcePosition().getFirstCol();
-      int end = operandPositions[1].getFirstCol() - 2;
+      int end = operandPositions[1].getFirstCol() - 1;
       operandPositions[0] =
           new FullPosition(stmtPos.getFirstLine(), start, stmtPos.getLastLine(), end);
     }
