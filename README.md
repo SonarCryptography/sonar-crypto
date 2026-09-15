@@ -47,6 +47,52 @@ mvn spotless:apply
 > [!IMPORTANT]
 > Code formatting is enforced in the CI pipeline.
 
+## Analysis Information & Measures
+
+For every analysis run, `CryptoSensor` aggregates the following information into a
+`CryptoAnalysisInfo` record (package `org.sonarcrypto.analysis`):
+
+| Field | Description |
+| --- | --- |
+| `inputSource` | Whether CogniCrypt analyzed Jimple bridge output (`JIMPLE`) or a compiled Maven project (`MAVEN`) |
+| `compileMillis` | Time spent compiling (Maven compile / classpath resolution) |
+| `analysisMillis` | Time spent running the CogniCrypt scan itself |
+| `totalErrors` | Total number of cryptographic errors found |
+| `errorsPerRuleKind` | Error count broken down by `RuleKind` |
+| `classesAnalyzed` | Number of classes containing a crypto usage site (discovered seed) |
+| `methodsAnalyzed` | Number of methods containing a crypto usage site (discovered seed) |
+
+This information is always logged at `INFO` level (one line per measure).
+
+### Custom measures (optional)
+
+The same information can be published as SonarQube custom measures via `CryptoMetrics`.
+They are **disabled by default** and are enabled with the system property
+`sonarcrypto.measures.enabled` (or the environment variable `SONARCRYPTO_MEASURES_ENABLED`).
+
+| Metric key | Type |
+| --- | --- |
+| `crypto.analysis.compile.runtime` | `MILLISEC` |
+| `crypto.analysis.runtime` | `MILLISEC` |
+| `crypto.errors.total` | `INT` |
+| `crypto.errors.<rulekind>` (one per `RuleKind`) | `INT` |
+| `crypto.classes.analyzed` | `INT` |
+| `crypto.methods.analyzed` | `INT` |
+| `crypto.input.source` | `STRING` |
+
+Metric registration happens on the server while values are saved from the scanner, so the flag
+must be set on **both** JVMs in a real deployment, e.g. for the server:
+`sonar.web.javaAdditionalOpts=-Dsonarcrypto.measures.enabled=true`.
+
+### Adding a measure
+
+Adding a measure touches exactly two places:
+
+1. Add a field to `CryptoAnalysisInfo`.
+2. Add one `MetricDef` entry to `CryptoMetrics.DEFINITIONS`.
+
+Saving, logging, and registration iterate over that list generically and require no other changes.
+
 ## Modules / Repository Contents
 
 ### Sonar Crypto Plugin
