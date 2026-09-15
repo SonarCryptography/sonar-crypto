@@ -23,7 +23,7 @@ public class ValueSupport {
         return tio.getClassName();
       return null;
     }
-    if (instance instanceof InvalidValueCause cause) {
+    if (instance instanceof InvalidEnumerableValueCause cause) {
       final var actualValues = cause.getActualValues();
       if (actualValues.isEmpty()) return null;
       return actualValues.get(0);

@@ -6,10 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
+import javax.crypto.*;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -29,10 +27,10 @@ public class WeakCryptoExamples {
      */
     public byte[] encryptWithDES(byte[] data) throws Exception {
         // DES is considered weak and insecure
-        Cipher cipher = Cipher.getInstance("DES"); // CC: ALGORITHM/InvalidValue "DES"
+        Cipher cipher = Cipher.getInstance("DES"); // CC: ALGORITHM/InvalidEnumerableValue "DES"
 
         // Using hard-coded key - VULNERABILITY
-        SecretKeySpec keySpec = new SecretKeySpec(HARDCODED_KEY.getBytes(), "DES"); // CC: ALGORITHM/InvalidValue "DES", KEY_MATERIAL/ImproperGenerated, KEY_MATERIAL/ForbiddenType "java.lang.String"
+        SecretKeySpec keySpec = new SecretKeySpec(HARDCODED_KEY.getBytes(), "DES"); // CC: ALGORITHM/InvalidEnumerableValue "DES", KEY_MATERIAL/ImproperGenerated, KEY_MATERIAL/ForbiddenType "java.lang.String"
         cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: KEY_MATERIAL/ImproperGenerated
 
         return cipher.doFinal(data);
@@ -43,7 +41,7 @@ public class WeakCryptoExamples {
      */
     public String hashWithMD5(String input) throws NoSuchAlgorithmException {
         // MD5 is cryptographically broken
-        MessageDigest md = MessageDigest.getInstance("MD5"); // CC: ALGORITHM/InvalidValue "MD5"
+        MessageDigest md = MessageDigest.getInstance("MD5"); // CC: ALGORITHM/InvalidEnumerableValue "MD5"
         byte[] hashBytes = md.digest(input.getBytes());
 
         StringBuilder sb = new StringBuilder();
@@ -58,7 +56,7 @@ public class WeakCryptoExamples {
      */
     public String hashWithSHA1(String input) throws NoSuchAlgorithmException {
         // SHA1 is considered weak
-        MessageDigest md = MessageDigest.getInstance("SHA1"); // CC: ALGORITHM/InvalidValue "SHA1"
+        MessageDigest md = MessageDigest.getInstance("SHA1"); // CC: ALGORITHM/InvalidEnumerableValue "SHA1"
         byte[] hashBytes = md.digest(input.getBytes());
 
         StringBuilder sb = new StringBuilder();
@@ -97,7 +95,7 @@ public class WeakCryptoExamples {
     public SecretKey generateWeakAESKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         // 64-bit key might be considered weak for some applications
-        keyGen.init(64); // CC: KEY_MATERIAL/InvalidValue "64"
+        keyGen.init(64); // CC: KEY_MATERIAL/InvalidEnumerableValue "64"
         return keyGen.generateKey(); // CC: KEY_MATERIAL/ImproperGenerated
     }
 
@@ -106,7 +104,7 @@ public class WeakCryptoExamples {
      */
     public byte[] encryptWithECB(byte[] data) throws Exception {
         // ECB mode is insecure - identical plaintext blocks produce identical ciphertext
-        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding"); // CC: MODE/InvalidValue "ECB"
+        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding"); // CC: MODE/InvalidEnumerableValue "ECB"
 
         SecretKeySpec keySpec = new SecretKeySpec(HARDCODED_KEY.getBytes(), "AES"); // CC: KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
         cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: KEY_MATERIAL/ImproperGenerated
@@ -119,7 +117,7 @@ public class WeakCryptoExamples {
      */
     public byte[] encryptWithoutIV(byte[] data) throws Exception {
         // CBC mode without explicit IV - may use predictable IV
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // CC: MODE/InvalidValue "CBC"
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // CC: MODE/InvalidEnumerableValue "CBC"
 
         SecretKeySpec keySpec = new SecretKeySpec(HARDCODED_KEY.getBytes(), "AES"); // CC: KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
         cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: KEY_MATERIAL/ImproperGenerated
@@ -132,7 +130,7 @@ public class WeakCryptoExamples {
      */
     public byte[] encryptWithNullCipher(byte[] data) throws NoSuchAlgorithmException, NoSuchPaddingException {
         // NULL cipher provides no encryption
-        Cipher cipher = Cipher.getInstance("NULL"); // CC: ALGORITHM/InvalidValue "NULL", API_MISUSE/IncompleteOperation "javax.crypto.Cipher"
+        Cipher cipher = Cipher.getInstance("NULL"); // CC: ALGORITHM/InvalidEnumerableValue "NULL", API_MISUSE/IncompleteOperation "javax.crypto.Cipher"
         return data; // Returns data unencrypted
     }
 
@@ -158,5 +156,18 @@ public class WeakCryptoExamples {
         cipher.update(data); // CC: API_MISUSE/UnexpectedCall "Cipher.update"
         
         return cipher.doFinal(data);
+    }
+    
+    /**
+     * Uses PBKDF2 wrong in multiple ways - VULNERABILITY
+     */
+    public byte[] derivePassword(char[] password) throws GeneralSecurityException {
+        final var salt = new byte[16];
+        new SecureRandom().nextBytes(salt);
+        
+        final var spec = new PBEKeySpec(password, salt, 4711, 128); // CC: API_MISUSE/IncompleteOperation "javax.crypto.spec.PBEKeySpec", KEY_MATERIAL/InvalidComparableValue
+        final var factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1"); // CC: ALGORITHM/InvalidEnumerableValue "PBKDF2WithHmacSHA1"
+        
+        return factory.generateSecret(spec).getEncoded(); // CC: KEY_MATERIAL/ImproperGenerated
     }
 }

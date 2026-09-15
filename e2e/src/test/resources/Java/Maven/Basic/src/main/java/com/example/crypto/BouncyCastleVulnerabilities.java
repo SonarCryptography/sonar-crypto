@@ -76,11 +76,11 @@ public class BouncyCastleVulnerabilities {
      */
     public byte[] encryptWithWeakBlowfish(byte[] data) throws Exception {
         // Blowfish is considered weak and insecure
-        Cipher cipher = Cipher.getInstance("Blowfish", "BC"); // CC: ALGORITHM/InvalidValue "Blowfish"
+        Cipher cipher = Cipher.getInstance("Blowfish", "BC"); // CC: ALGORITHM/InvalidEnumerableValue "Blowfish"
 
         // Hard-coded key (here: very short key) - VULNERABILITY
         byte[] shortKey = "key".getBytes(); // Only 3 bytes - too short
-        SecretKeySpec keySpec = new SecretKeySpec(shortKey, "Blowfish"); // CC: ALGORITHM/InvalidValue "Blowfish", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
+        SecretKeySpec keySpec = new SecretKeySpec(shortKey, "Blowfish"); // CC: ALGORITHM/InvalidEnumerableValue "Blowfish", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
 
         cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: KEY_MATERIAL/ImproperGenerated
         return cipher.doFinal(data);
@@ -90,11 +90,11 @@ public class BouncyCastleVulnerabilities {
      * Uses IDEA cipher without proper key management - VULNERABILITY
      */
     public byte[] encryptWithIDEA(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance("IDEA", "BC"); // CC: ALGORITHM/InvalidValue "IDEA"
+        Cipher cipher = Cipher.getInstance("IDEA", "BC"); // CC: ALGORITHM/InvalidEnumerableValue "IDEA"
 
         // Hard-coded key - VULNERABILITY
         byte[] ideaKey = "0123456789abcdef".getBytes(); // 16 bytes for IDEA
-        SecretKeySpec keySpec = new SecretKeySpec(ideaKey, "IDEA"); // CC: ALGORITHM/InvalidValue "IDEA", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
+        SecretKeySpec keySpec = new SecretKeySpec(ideaKey, "IDEA"); // CC: ALGORITHM/InvalidEnumerableValue "IDEA", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
 
         cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: KEY_MATERIAL/ImproperGenerated
         return cipher.doFinal(data);
@@ -105,11 +105,11 @@ public class BouncyCastleVulnerabilities {
      */
     public byte[] encryptWithDeprecatedCipher(byte[] data) throws Exception {
         // Using old cipher transformation that may be vulnerable
-        Cipher cipher = Cipher.getInstance("DESede/ECB/NoPadding", "BC"); // CC: ALGORITHM/InvalidValue "DESede"
+        Cipher cipher = Cipher.getInstance("DESede/ECB/NoPadding", "BC"); // CC: ALGORITHM/InvalidEnumerableValue "DESede"
 
         // Hard-coded 3DES key - VULNERABILITY
         byte[] tripleDesKey = "MySecretKeyForTripleDES123!".getBytes();
-        SecretKeySpec keySpec = new SecretKeySpec(tripleDesKey, 0, 24, "DESede"); // CC: ALGORITHM/InvalidValue "DESede", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
+        SecretKeySpec keySpec = new SecretKeySpec(tripleDesKey, 0, 24, "DESede"); // CC: ALGORITHM/InvalidEnumerableValue "DESede", KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
 
         cipher.init(Cipher.ENCRYPT_MODE, keySpec); // CC: KEY_MATERIAL/ImproperGenerated
         return cipher.doFinal(data);
@@ -119,7 +119,7 @@ public class BouncyCastleVulnerabilities {
      * Uses weak parameters with AES - VULNERABILITY
      */
     public byte[] encryptAESWithWeakParams(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "BC"); // CC: MODE/InvalidValue "CBC"
+        Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "BC"); // CC: MODE/InvalidEnumerableValue "CBC"
 
         // Using predictable key - VULNERABILITY
         byte[] predictableKey = new byte[16];
@@ -149,7 +149,7 @@ public class BouncyCastleVulnerabilities {
      */
     public byte[] encryptWithNull(byte[] data) throws Exception {
         // NULL cipher - provides no security
-        Cipher cipher = Cipher.getInstance("NULL", "BC"); // CC: ALGORITHM/InvalidValue "NULL", API_MISUSE/IncompleteOperation "javax.crypto.Cipher"
+        Cipher cipher = Cipher.getInstance("NULL", "BC"); // CC: ALGORITHM/InvalidEnumerableValue "NULL", API_MISUSE/IncompleteOperation "javax.crypto.Cipher"
         return data; // Returns plaintext
     }
 

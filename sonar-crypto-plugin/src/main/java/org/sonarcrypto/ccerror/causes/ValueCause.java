@@ -5,9 +5,10 @@ import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
 public abstract sealed class ValueCause extends Cause
-    permits InvalidValueCause,
+    permits ForbiddenTypeCause,
         ImproperGeneratedCause,
-        ForbiddenTypeCause,
+        InvalidComparableValueCause,
+        InvalidEnumerableValueCause,
         ShouldNotBeUsedHereCause,
         UndefinedCause {
 

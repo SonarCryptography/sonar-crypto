@@ -4,18 +4,14 @@ import static java.lang.Math.min;
 import static org.sonarcrypto.ccerror.RuleKindUtils.detectRuleKind;
 
 import crypto.analysis.errors.ConstraintError;
-import crypto.constraints.violations.ViolatedBinaryConstraint;
-import crypto.constraints.violations.ViolatedConstraint;
-import crypto.constraints.violations.ViolatedNeverTypeOfConstraint;
-import crypto.constraints.violations.ViolatedValueConstraint;
+import crypto.constraints.violations.*;
 import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonarcrypto.CryptoRulesDefinitions;
-import org.sonarcrypto.ccerror.causes.ForbiddenTypeCause;
-import org.sonarcrypto.ccerror.causes.InvalidValueCause;
+import org.sonarcrypto.ccerror.causes.*;
 import org.sonarcrypto.ccerror.violations.ValueViolation;
 import org.sonarcrypto.ccerror.violations.Violation;
 import org.sonarcrypto.utils.cognicrypt.crysl.CallInfo;
@@ -42,6 +38,9 @@ public class ConstraintErrorConverter {
       return generateViolatedNeverTypeOfConstraintMessage(violatedNeverTypeOfConstraint);
     } else if (violatedConstraint instanceof ViolatedBinaryConstraint violatedBinaryConstraint) {
       return generateViolatedBinaryConstraintMessage(violatedBinaryConstraint);
+    } else if (violatedConstraint
+        instanceof ViolatedComparisonConstraint violatedComparisonConstraint) {
+      return generateViolatedComparisonConstraintMessage(violatedComparisonConstraint);
     } else {
       LOGGER.error(
           "Unsupported required predicate error {}! Generating general violation.",
@@ -62,7 +61,7 @@ public class ConstraintErrorConverter {
     return new ValueViolation(
         detectRuleKind(constraintVar),
         CallInfo.of(constraint.parameter()),
-        new InvalidValueCause(
+        new InvalidEnumerableValueCause(
             violatingValues.stream()
                 .map(
                     violatingValue -> {
@@ -118,5 +117,37 @@ public class ConstraintErrorConverter {
     }
 
     return generateConstraintErrorMessage(violatedConstraint);
+  }
+
+  static Violation generateViolatedComparisonConstraintMessage(
+      ViolatedComparisonConstraint constraint) {
+    final var violatedConstraint = constraint.constraint().getConstraint();
+
+    final var leftInvolvedNames = violatedConstraint.getLeft().getInvolvedVarNames();
+    final var operator = violatedConstraint.getOperator();
+
+    final Cause cause;
+
+    if (leftInvolvedNames.contains("iterationCount")) {
+      cause =
+          new InvalidComparableValueCause(
+              "iterationCount", operator, violatedConstraint.getRight().getLeft().getName());
+    } else {
+      // TODO: Stringify operands recursively without type info and irrelevant operands,
+      //       so that, e.g., "int foo + int 0 > int 42 + int 0" becomes "foo > 42"
+      cause =
+          new InvalidComparableValueCause(
+              violatedConstraint.getLeft().toString(),
+              operator,
+              violatedConstraint.getRight().toString());
+    }
+
+    return new ValueViolation(
+        CryptoRulesDefinitions.KEY_MATERIAL,
+        // Note: Cannot extract argument index, because it's a protected field
+        //       (`IArithmeticConstraint.statementToValues`).
+        CallInfo.of(constraint.statement(), -1),
+        cause,
+        List.of(/* empty */ ));
   }
 }

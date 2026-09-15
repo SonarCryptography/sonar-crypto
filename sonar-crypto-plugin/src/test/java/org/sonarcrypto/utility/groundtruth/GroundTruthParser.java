@@ -67,7 +67,7 @@ import org.sonarcrypto.ccerror.causes.ValueCause;
  *         <td>Full-qualified class name, e.g. "org.example.Foo"</td>
  *     </tr>
  *     <tr>
- *         <td>InvalidValue</td>
+ *         <td>InvalidEnumerableValue</td>
  *         <td>The invalid value in quotes, no matter if it is a string or an integer value, e.g. "ECB"</td>
  *     </tr>
  *     <tr>
@@ -84,7 +84,7 @@ import org.sonarcrypto.ccerror.causes.ValueCause;
  *
  * <pre><code>
  * public byte[] encryptWithECB(byte[] data) throws Exception {
- *     Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding"); // CC: MODE/InvalidValue "ECB"
+ *     Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding"); // CC: MODE/InvalidEnumerableValue "ECB"
  *
  *     SecretKeySpec keySpec = new SecretKeySpec(HARDCODED_KEY.getBytes(), "AES"); // CC: KEY_MATERIAL/ForbiddenType "java.lang.String", KEY_MATERIAL/ImproperGenerated
  *
@@ -193,7 +193,9 @@ public class GroundTruthParser {
 
       if (causeType == null) {
         throw new GroundTruthParsingException(
-            String.format("Invalid cause type!%nFile: %s%nLine: %s", inputFile.filename(), line));
+            String.format(
+                "Invalid cause type!%nCause: %s%nFile:  %s%nLine:  %s",
+                cause, inputFile.filename(), line));
       }
 
       if (!entrySet.add(new GroundTruthEntry(ruleKind, causeType, value)))

@@ -8,12 +8,13 @@ import org.jspecify.annotations.Nullable;
 import org.sonarcrypto.utils.sonar.messagecrafter.MessageCrafter;
 
 @NullMarked
-public final class InvalidValueCause extends ValueCause {
+public final class InvalidEnumerableValueCause extends ValueCause {
 
   private final List<String> actualValues;
   private final List<String> expectedValues;
 
-  public InvalidValueCause(final List<String> actualValues, final List<String> expectedValues) {
+  public InvalidEnumerableValueCause(
+      final List<String> actualValues, final List<String> expectedValues) {
     this.actualValues = actualValues;
     this.expectedValues = expectedValues;
   }
@@ -66,7 +67,7 @@ public final class InvalidValueCause extends ValueCause {
       return false;
     }
 
-    InvalidValueCause that = (InvalidValueCause) o;
+    InvalidEnumerableValueCause that = (InvalidEnumerableValueCause) o;
     return actualValues.equals(that.actualValues) && expectedValues.equals(that.expectedValues);
   }
 
@@ -79,7 +80,7 @@ public final class InvalidValueCause extends ValueCause {
 
   @Override
   public String toString() {
-    return "InvalidValueCause{"
+    return "InvalidEnumerableValueCause{"
         + "actualValues="
         + actualValues
         + ", expectedValues="
