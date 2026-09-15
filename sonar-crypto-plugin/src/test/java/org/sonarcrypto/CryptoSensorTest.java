@@ -28,6 +28,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
+import org.sonarcrypto.analysis.InputSource;
 import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.utility.groundtruth.GroundTruthParser;
 import org.sonarcrypto.utility.groundtruth.GroundTruthUtils;
@@ -72,8 +73,9 @@ class CryptoSensorTest {
         SensorContextTester.create(Path.of("../e2e/src/test/resources/Java/Maven/Basic"));
     initializeFileSystem(context);
 
-    final var foundErrors = sensor.scan(context.fileSystem(), sensor.extractRules());
-    sensor.report(context, foundErrors);
+    final var result = sensor.scan(context.fileSystem(), sensor.extractRules());
+    sensor.report(context, result);
+    final var foundErrors = result.errors();
 
     final var groundTruth = new GroundTruthParser().parse(context.fileSystem());
 
@@ -165,6 +167,15 @@ class CryptoSensorTest {
             "Invalid number of issues reported!\nActual: %d\nExpected: %d",
             processedCount, sonarIssueCount)
         .isEqualTo(sonarIssueCount);
+
+    final var info = result.info();
+    assertThat(info.inputSource()).isEqualTo(InputSource.MAVEN);
+    assertThat(info.compileMillis()).isNotNegative();
+    assertThat(info.analysisMillis()).isPositive();
+    assertThat(info.totalErrors()).isEqualTo(foundErrors.size());
+    assertThat(info.errorsPerRuleKind()).isNotEmpty();
+    assertThat(info.classesAnalyzed()).isPositive();
+    assertThat(info.methodsAnalyzed()).isPositive();
   }
 
   @Test

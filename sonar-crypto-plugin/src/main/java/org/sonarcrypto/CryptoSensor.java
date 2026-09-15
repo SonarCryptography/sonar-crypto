@@ -1,9 +1,6 @@
 package org.sonarcrypto;
 
-import boomerang.scope.Method;
-import boomerang.scope.WrappedClass;
-import com.google.common.collect.Table;
-import crypto.analysis.errors.AbstractError;
+import crypto.analysis.CryptoScanner;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
@@ -12,9 +9,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +21,10 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonarcrypto.analysis.CryptoAnalysisInfo;
+import org.sonarcrypto.analysis.CryptoMetrics;
+import org.sonarcrypto.analysis.InputSource;
+import org.sonarcrypto.analysis.ScanResult;
 import org.sonarcrypto.ccerror.CcErrorConverter;
 import org.sonarcrypto.ccerror.ConvertedError;
 import org.sonarcrypto.utils.cognicrypt.crysl.CryslRuleProvider;
@@ -58,44 +60,71 @@ public class CryptoSensor implements Sensor {
     }
   }
 
-  protected List<ConvertedError> scan(FileSystem fileSystem, RulesetPaths extractedRules)
+  protected ScanResult scan(FileSystem fileSystem, RulesetPaths extractedRules)
       throws FileNotFoundException, MavenBuildException {
-    Table<WrappedClass, Method, Set<AbstractError>> errors;
     Path jimpleDir = fileSystem.workDir().toPath().resolve("bridge-output/jimple");
     String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
+
+    final InputSource inputSource;
+    final long compileMillis;
+    final long analysisMillis;
+    final CryptoScanner scanner;
+
     if (hasJimpleFiles(jimpleDir)) {
+      inputSource = InputSource.JIMPLE;
       LOGGER.info(
           "Using Jimple files from bridge output ({}) as analysis input.",
           jimpleDir.toAbsolutePath());
-      var scanner = new JimpleScanner(jimpleDir.toString(), extractedRules.rulesetZip().toString());
-      scanner.setAddClassPath(
-          resolveAnalysisClassPath(mavenProjectPath, extractedRules.dependencyClasspath()));
-      scanner.scan();
-      errors = scanner.getCollectedErrors();
+
+      final long compileStart = System.nanoTime();
+      String classPath =
+          resolveAnalysisClassPath(mavenProjectPath, extractedRules.dependencyClasspath());
+      compileMillis = elapsedMillis(compileStart);
+
+      var jimpleScanner =
+          new JimpleScanner(jimpleDir.toString(), extractedRules.rulesetZip().toString());
+      jimpleScanner.setAddClassPath(classPath);
+
+      final long analysisStart = System.nanoTime();
+      jimpleScanner.scan();
+      analysisMillis = elapsedMillis(analysisStart);
+      scanner = jimpleScanner;
     } else {
+      inputSource = InputSource.MAVEN;
       LOGGER.info(
           "No Jimple files found at {}. Compiling project at {} as analysis input.",
           jimpleDir.toAbsolutePath(),
           mavenProjectPath);
-      MavenProject mi = new MavenProject(mavenProjectPath);
-      mi.compile();
 
-      HeadlessJavaScanner scanner =
+      MavenProject mi = new MavenProject(mavenProjectPath);
+      final long compileStart = System.nanoTime();
+      mi.compile();
+      compileMillis = elapsedMillis(compileStart);
+
+      HeadlessJavaScanner headlessScanner =
           new HeadlessJavaScanner(mi.getBuildDirectory(), extractedRules.rulesetZip().toString());
-      scanner.setFramework(ScannerSettings.Framework.SOOT_UP);
-      scanner.setAddClassPath(
+      headlessScanner.setFramework(ScannerSettings.Framework.SOOT_UP);
+      headlessScanner.setAddClassPath(
           joinClassPaths(
               extractedRules.dependencyClasspath(), Objects.requireNonNull(mi.getFullClassPath())));
-      scanner.scan();
-      errors = scanner.getCollectedErrors();
+
+      final long analysisStart = System.nanoTime();
+      headlessScanner.scan();
+      analysisMillis = elapsedMillis(analysisStart);
+      scanner = headlessScanner;
     }
 
-    return new CcErrorConverter(fileSystem).convertErrors(errors);
+    var errors = new CcErrorConverter(fileSystem).convertErrors(scanner.getCollectedErrors());
+    return new ScanResult(
+        errors, buildInfo(inputSource, compileMillis, analysisMillis, scanner, errors));
   }
 
-  protected void report(SensorContext sensorContext, List<ConvertedError> errors) {
-    LOGGER.info("Found {} cryptographic errors", errors.size());
-    issueReporter.reportAllIssues(sensorContext, errors);
+  protected void report(SensorContext sensorContext, ScanResult result) {
+    LOGGER.info("{}", CryptoMetrics.summarize(result.info()));
+    issueReporter.reportAllIssues(sensorContext, result.errors());
+    if (CryptoMetrics.isEnabled()) {
+      CryptoMetrics.save(sensorContext, result.info());
+    }
   }
 
   @Override
@@ -114,6 +143,41 @@ public class CryptoSensor implements Sensor {
     } catch (IOException | MavenBuildException e) {
       LOGGER.error("Failed to build Maven project", e);
     }
+  }
+
+  private static long elapsedMillis(long startNanos) {
+    return (System.nanoTime() - startNanos) / 1_000_000;
+  }
+
+  private static CryptoAnalysisInfo buildInfo(
+      InputSource inputSource,
+      long compileMillis,
+      long analysisMillis,
+      CryptoScanner scanner,
+      List<ConvertedError> errors) {
+    var classes = new HashSet<String>();
+    var methods = new HashSet<String>();
+    for (var seed : scanner.getDiscoveredSeeds()) {
+      var method = seed.getMethod();
+      var declaringClass = method.getDeclaringClass().getFullyQualifiedName();
+      classes.add(declaringClass);
+      methods.add(declaringClass + "#" + method.getSubSignature());
+    }
+
+    var errorsPerRuleKind = new EnumMap<RuleKind, Integer>(RuleKind.class);
+    for (var error : errors) {
+      errorsPerRuleKind.merge(
+          error.violation().getRulesDefinition().getRuleKind(), 1, Integer::sum);
+    }
+
+    return new CryptoAnalysisInfo(
+        inputSource,
+        compileMillis,
+        analysisMillis,
+        errors.size(),
+        errorsPerRuleKind,
+        classes.size(),
+        methods.size());
   }
 
   private static boolean hasJimpleFiles(Path jimpleDir) {
