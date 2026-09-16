@@ -31,9 +31,9 @@
 
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
-        <sonar.plugin.api.version>13.11.0.4459</sonar.plugin.api.version>
-        <sonar.scanner.engine.version>13.9.0.4593</sonar.scanner.engine.version>
-        <sonarqube.api.impl.version>26.8.0.126808</sonarqube.api.impl.version>
+        <sonar.plugin.api.version>14.0.0.4498</sonar.plugin.api.version>
+        <sonar.scanner.engine.version>13.12.0.5977</sonar.scanner.engine.version>
+        <sonarqube.api.impl.version>26.9.0.129388</sonarqube.api.impl.version>
         <packaging.plugin.version>1.25.1.3002</packaging.plugin.version>
         <crysl.jca.version>3.1.4</crysl.jca.version>
         <crysl.bc.version>3.1.5</crysl.bc.version>
@@ -221,7 +221,7 @@
             <dependency>
                 <groupId>org.sonarsource.orchestrator</groupId>
                 <artifactId>sonar-orchestrator-junit5</artifactId>
-                <version>6.4.2.4626</version>
+                <version>6.4.3.4676</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -262,7 +262,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.6</version>
+                    <version>3.6.0</version>
                 </plugin>
                 <plugin>
                     <groupId>com.googlecode.maven-download-plugin</groupId>
@@ -272,7 +272,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.15.0</version>
+                    <version>3.16.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
