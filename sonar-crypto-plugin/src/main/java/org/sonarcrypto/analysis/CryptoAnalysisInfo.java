@@ -13,4 +13,24 @@ public record CryptoAnalysisInfo(
     int totalErrors,
     Map<RuleKind, Integer> errorsPerRuleKind,
     int classesAnalyzed,
-    int methodsAnalyzed) {}
+    int methodsAnalyzed) {
+
+  @Override
+  public String toString() {
+    return "Crypto analysis summary:"
+        + "\n  inputSource="
+        + inputSource
+        + "\n  compileMillis="
+        + compileMillis
+        + "\n  analysisMillis="
+        + analysisMillis
+        + "\n  totalErrors="
+        + totalErrors
+        + "\n  errorsPerRuleKind="
+        + errorsPerRuleKind
+        + "\n  classesAnalyzed="
+        + classesAnalyzed
+        + "\n  methodsAnalyzed="
+        + methodsAnalyzed;
+  }
+}

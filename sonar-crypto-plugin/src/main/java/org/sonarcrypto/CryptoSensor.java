@@ -22,7 +22,6 @@ import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonarcrypto.analysis.CryptoAnalysisInfo;
-import org.sonarcrypto.analysis.CryptoMetrics;
 import org.sonarcrypto.analysis.InputSource;
 import org.sonarcrypto.analysis.ScanResult;
 import org.sonarcrypto.ccerror.CcErrorConverter;
@@ -120,11 +119,8 @@ public class CryptoSensor implements Sensor {
   }
 
   protected void report(SensorContext sensorContext, ScanResult result) {
-    LOGGER.info("{}", CryptoMetrics.summarize(result.info()));
+    LOGGER.info("{}", result.info());
     issueReporter.reportAllIssues(sensorContext, result.errors());
-    if (CryptoMetrics.isEnabled()) {
-      CryptoMetrics.save(sensorContext, result.info());
-    }
   }
 
   @Override

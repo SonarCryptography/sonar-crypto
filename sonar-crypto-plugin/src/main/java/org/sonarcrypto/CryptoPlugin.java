@@ -3,7 +3,6 @@ package org.sonarcrypto;
 import java.util.Arrays;
 import org.jspecify.annotations.NullMarked;
 import org.sonar.api.Plugin;
-import org.sonarcrypto.analysis.CryptoMetrics;
 
 @NullMarked
 public class CryptoPlugin implements Plugin {
@@ -16,8 +15,5 @@ public class CryptoPlugin implements Plugin {
 
     context.addExtension(CryptoQualityProfile.class);
     context.addExtension(CryptoSensor.class);
-    if (CryptoMetrics.isEnabled()) {
-      context.addExtension(CryptoMetrics.class);
-    }
   }
 }
