@@ -19,7 +19,6 @@ Multi-module Maven project (Java 17):
 - `CcToSonarIssues` — Converts CogniCrypt errors (`Table<WrappedClass, Method, Set<AbstractError>>`) to SonarQube issues
 - `analysis.CryptoAnalysisInfo` — Aggregated per-run info (compile/analysis time, error counts, input source, classes/methods analyzed)
 - `analysis.ScanResult` — Carries the converted errors plus the `CryptoAnalysisInfo`
-- `analysis.CryptoMetrics` — Optional SonarQube custom measures (off by default; see `sonarcrypto.measures.enabled`). Adding a measure touches `CryptoAnalysisInfo` + one `MetricDef` entry in `CryptoMetrics.DEFINITIONS`
 
 ### E2E tests
 
