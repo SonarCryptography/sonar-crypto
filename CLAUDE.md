@@ -17,6 +17,8 @@ Multi-module Maven project (Java 17):
 - `CryptoQualityProfile` — Built-in quality profile "Crypto Security" for Java (set as default)
 - `CryptoSensor` — Runs CogniCrypt analysis: compiles the Maven project, extracts CrySL rules, runs HeadlessJavaScanner, reports errors
 - `CcToSonarIssues` — Converts CogniCrypt errors (`Table<WrappedClass, Method, Set<AbstractError>>`) to SonarQube issues
+- `analysis.CryptoAnalysisInfo` — Aggregated per-run info (compile/analysis time, error counts, input source, classes/methods analyzed)
+- `analysis.ScanResult` — Carries the converted errors plus the `CryptoAnalysisInfo`
 
 ### E2E tests
 

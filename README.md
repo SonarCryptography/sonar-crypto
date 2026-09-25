@@ -47,6 +47,23 @@ mvn spotless:apply
 > [!IMPORTANT]
 > Code formatting is enforced in the CI pipeline.
 
+## Analysis Information
+
+For every analysis run, `CryptoSensor` aggregates the following information into a
+`CryptoAnalysisInfo` record (package `org.sonarcrypto.analysis`):
+
+| Field | Description |
+| --- | --- |
+| `inputSource` | Whether CogniCrypt analyzed Jimple bridge output (`JIMPLE`) or a compiled Maven project (`MAVEN`) |
+| `compileMillis` | Time spent compiling (Maven compile / classpath resolution) |
+| `analysisMillis` | Time spent running the CogniCrypt scan itself |
+| `totalErrors` | Total number of cryptographic errors found |
+| `errorsPerRuleKind` | Error count broken down by `RuleKind` |
+| `classesAnalyzed` | Number of classes containing a crypto usage site (discovered seed) |
+| `methodsAnalyzed` | Number of methods containing a crypto usage site (discovered seed) |
+
+This information is always logged at `INFO` level (one line per measure).
+
 ## Modules / Repository Contents
 
 ### Sonar Crypto Plugin
