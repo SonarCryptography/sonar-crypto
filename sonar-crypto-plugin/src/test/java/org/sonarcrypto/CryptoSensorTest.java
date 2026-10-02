@@ -18,6 +18,8 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import org.jspecify.annotations.NullMarked;
@@ -28,7 +30,10 @@ import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
+import org.sonarcrypto.analysis.CryptoAnalysisInfo;
 import org.sonarcrypto.analysis.InputSource;
+import org.sonarcrypto.analysis.MetricDefinitions;
+import org.sonarcrypto.analysis.ScanResult;
 import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.utility.groundtruth.GroundTruthParser;
 import org.sonarcrypto.utility.groundtruth.GroundTruthUtils;
@@ -72,9 +77,11 @@ class CryptoSensorTest {
     SensorContextTester context =
         SensorContextTester.create(Path.of("../e2e/src/test/resources/Java/Maven/Basic"));
     initializeFileSystem(context);
+    context.fileSystem().setWorkDir(tempDir);
 
     final var result = sensor.scan(context.fileSystem(), sensor.extractRules());
     sensor.report(context, result);
+    assertThat(tempDir.resolve(CryptoSensor.DEFAULT_METRICS_FILE)).isNotEmptyFile();
     final var foundErrors = result.errors();
 
     final var groundTruth = new GroundTruthParser().parse(context.fileSystem());
@@ -169,13 +176,49 @@ class CryptoSensorTest {
         .isEqualTo(sonarIssueCount);
 
     final var info = result.info();
-    assertThat(info.inputSource()).isEqualTo(InputSource.MAVEN);
-    assertThat(info.compileMillis()).isNotNegative();
-    assertThat(info.analysisMillis()).isPositive();
-    assertThat(info.totalErrors()).isEqualTo(foundErrors.size());
-    assertThat(info.errorsPerRuleKind()).isNotEmpty();
-    assertThat(info.classesAnalyzed()).isPositive();
-    assertThat(info.methodsAnalyzed()).isPositive();
+    assertThat(info.get(MetricDefinitions.INPUT_SOURCE)).isEqualTo(InputSource.MAVEN);
+    assertThat(info.get(MetricDefinitions.COMPILE_MILLIS)).isNotNegative();
+    assertThat(info.get(MetricDefinitions.ANALYSIS_MILLIS)).isPositive();
+    assertThat(info.get(MetricDefinitions.TOTAL_ERRORS)).isEqualTo(foundErrors.size());
+    assertThat(info.get(MetricDefinitions.ERRORS_PER_RULE_KIND)).isNotEmpty();
+    assertThat(info.get(MetricDefinitions.CLASSES_ANALYZED)).isPositive();
+    assertThat(info.get(MetricDefinitions.METHODS_ANALYZED)).isPositive();
+    assertThat(info.asMap())
+        .containsOnlyKeys(
+            MetricDefinitions.INPUT_SOURCE.name(),
+            MetricDefinitions.COMPILE_MILLIS.name(),
+            MetricDefinitions.ANALYSIS_MILLIS.name(),
+            MetricDefinitions.TOTAL_ERRORS.name(),
+            MetricDefinitions.ERRORS_PER_RULE_KIND.name(),
+            MetricDefinitions.CLASSES_ANALYZED.name(),
+            MetricDefinitions.METHODS_ANALYZED.name())
+        .containsEntry(MetricDefinitions.INPUT_SOURCE.name(), InputSource.MAVEN.name())
+        .hasEntrySatisfying(
+            MetricDefinitions.ERRORS_PER_RULE_KIND.name(),
+            counts ->
+                assertThat((Map<?, ?>) counts)
+                    .allSatisfy((kind, count) -> assertThat(kind).isInstanceOf(String.class)));
+  }
+
+  @Test
+  void report_writes_metrics_to_configured_file() throws IOException {
+    CryptoSensor sensor = new CryptoSensor();
+    SensorContextTester context = SensorContextTester.create(tempDir);
+    context.fileSystem().setWorkDir(tempDir.resolve("work"));
+    final var result =
+        new ScanResult(List.of(), new CryptoAnalysisInfo().put(MetricDefinitions.TOTAL_ERRORS, 0));
+
+    context.config().setProperty(CryptoSensor.METRICS_FILE_PROPERTY, "out/metrics.json");
+    sensor.report(context, result);
+    assertThat(tempDir.resolve("out/metrics.json")).content().contains("\"totalErrors\": 0");
+    assertThat(tempDir.resolve("work").resolve(CryptoSensor.DEFAULT_METRICS_FILE)).doesNotExist();
+
+    // A file cannot be used as parent directory, so writing fails without aborting the report.
+    Files.writeString(tempDir.resolve("blocked"), "");
+    context.config().setProperty(CryptoSensor.METRICS_FILE_PROPERTY, "blocked/metrics.json");
+    sensor.report(context, result);
+    assertThat(logTester.logs())
+        .anyMatch(it -> it.contains("Failed to write crypto analysis metrics"));
   }
 
   @Test

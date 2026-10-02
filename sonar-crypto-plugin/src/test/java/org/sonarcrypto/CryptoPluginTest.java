@@ -10,6 +10,7 @@ import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.SonarRuntime;
+import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.utils.Version;
 
 class CryptoPluginTest {
@@ -26,6 +27,14 @@ class CryptoPluginTest {
     new CryptoPlugin().define(context);
 
     assertThat(context.getExtensions())
-        .contains(CryptoRulesDefinitions.ALGORITHM, CryptoQualityProfile.class, CryptoSensor.class);
+        .contains(CryptoRulesDefinitions.ALGORITHM, CryptoQualityProfile.class, CryptoSensor.class)
+        .anySatisfy(
+            extension ->
+                assertThat(extension)
+                    .isInstanceOfSatisfying(
+                        PropertyDefinition.class,
+                        property ->
+                            assertThat(property.key())
+                                .isEqualTo(CryptoSensor.METRICS_FILE_PROPERTY)));
   }
 }

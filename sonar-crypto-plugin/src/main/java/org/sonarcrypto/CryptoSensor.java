@@ -23,6 +23,7 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonarcrypto.analysis.CryptoAnalysisInfo;
 import org.sonarcrypto.analysis.InputSource;
+import org.sonarcrypto.analysis.MetricDefinitions;
 import org.sonarcrypto.analysis.ScanResult;
 import org.sonarcrypto.ccerror.CcErrorConverter;
 import org.sonarcrypto.ccerror.ConvertedError;
@@ -36,6 +37,11 @@ import org.sonarcrypto.utils.maven.MavenProject;
 @NullMarked
 @Phase(name = Phase.Name.POST)
 public class CryptoSensor implements Sensor {
+
+  /** Path of the metrics JSON file; relative paths are resolved against the project base dir. */
+  public static final String METRICS_FILE_PROPERTY = "sonar.crypto.metricsFile";
+
+  static final String DEFAULT_METRICS_FILE = "crypto-metrics.json";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CryptoSensor.class);
   private final CcToSonarIssues issueReporter = new CcToSonarIssues();
@@ -64,13 +70,11 @@ public class CryptoSensor implements Sensor {
     Path jimpleDir = fileSystem.workDir().toPath().resolve("bridge-output/jimple");
     String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
 
-    final InputSource inputSource;
-    final long compileMillis;
-    final long analysisMillis;
+    var info = new CryptoAnalysisInfo();
     final CryptoScanner scanner;
 
     if (hasJimpleFiles(jimpleDir)) {
-      inputSource = InputSource.JIMPLE;
+      info.put(MetricDefinitions.INPUT_SOURCE, InputSource.JIMPLE);
       LOGGER.info(
           "Using Jimple files from bridge output ({}) as analysis input.",
           jimpleDir.toAbsolutePath());
@@ -78,7 +82,7 @@ public class CryptoSensor implements Sensor {
       final long compileStart = System.nanoTime();
       String classPath =
           resolveAnalysisClassPath(mavenProjectPath, extractedRules.dependencyClasspath());
-      compileMillis = elapsedMillis(compileStart);
+      info.put(MetricDefinitions.COMPILE_MILLIS, elapsedMillis(compileStart));
 
       var jimpleScanner =
           new JimpleScanner(jimpleDir.toString(), extractedRules.rulesetZip().toString());
@@ -86,10 +90,10 @@ public class CryptoSensor implements Sensor {
 
       final long analysisStart = System.nanoTime();
       jimpleScanner.scan();
-      analysisMillis = elapsedMillis(analysisStart);
+      info.put(MetricDefinitions.ANALYSIS_MILLIS, elapsedMillis(analysisStart));
       scanner = jimpleScanner;
     } else {
-      inputSource = InputSource.MAVEN;
+      info.put(MetricDefinitions.INPUT_SOURCE, InputSource.MAVEN);
       LOGGER.info(
           "No Jimple files found at {}. Compiling project at {} as analysis input.",
           jimpleDir.toAbsolutePath(),
@@ -98,7 +102,7 @@ public class CryptoSensor implements Sensor {
       MavenProject mi = new MavenProject(mavenProjectPath);
       final long compileStart = System.nanoTime();
       mi.compile();
-      compileMillis = elapsedMillis(compileStart);
+      info.put(MetricDefinitions.COMPILE_MILLIS, elapsedMillis(compileStart));
 
       HeadlessJavaScanner headlessScanner =
           new HeadlessJavaScanner(mi.getBuildDirectory(), extractedRules.rulesetZip().toString());
@@ -109,17 +113,18 @@ public class CryptoSensor implements Sensor {
 
       final long analysisStart = System.nanoTime();
       headlessScanner.scan();
-      analysisMillis = elapsedMillis(analysisStart);
+      info.put(MetricDefinitions.ANALYSIS_MILLIS, elapsedMillis(analysisStart));
       scanner = headlessScanner;
     }
 
     var errors = new CcErrorConverter(fileSystem).convertErrors(scanner.getCollectedErrors());
-    return new ScanResult(
-        errors, buildInfo(inputSource, compileMillis, analysisMillis, scanner, errors));
+    addResultMetrics(info, scanner, errors);
+    return new ScanResult(errors, info);
   }
 
   protected void report(SensorContext sensorContext, ScanResult result) {
     LOGGER.info("{}", result.info());
+    writeMetrics(sensorContext, result.info());
     issueReporter.reportAllIssues(sensorContext, result.errors());
   }
 
@@ -141,16 +146,28 @@ public class CryptoSensor implements Sensor {
     }
   }
 
+  private static void writeMetrics(SensorContext sensorContext, CryptoAnalysisInfo info) {
+    var fileSystem = sensorContext.fileSystem();
+    var file =
+        sensorContext
+            .config()
+            .get(METRICS_FILE_PROPERTY)
+            .map(path -> fileSystem.baseDir().toPath().resolve(path))
+            .orElseGet(() -> fileSystem.workDir().toPath().resolve(DEFAULT_METRICS_FILE));
+    try {
+      info.writeJson(file);
+      LOGGER.info("Wrote crypto analysis metrics to {}", file);
+    } catch (IOException e) {
+      LOGGER.warn("Failed to write crypto analysis metrics to {}", file, e);
+    }
+  }
+
   private static long elapsedMillis(long startNanos) {
     return (System.nanoTime() - startNanos) / 1_000_000;
   }
 
-  private static CryptoAnalysisInfo buildInfo(
-      InputSource inputSource,
-      long compileMillis,
-      long analysisMillis,
-      CryptoScanner scanner,
-      List<ConvertedError> errors) {
+  private static void addResultMetrics(
+      CryptoAnalysisInfo info, CryptoScanner scanner, List<ConvertedError> errors) {
     var classes = new HashSet<String>();
     var methods = new HashSet<String>();
     for (var seed : scanner.getDiscoveredSeeds()) {
@@ -166,14 +183,10 @@ public class CryptoSensor implements Sensor {
           error.violation().getRulesDefinition().getRuleKind(), 1, Integer::sum);
     }
 
-    return new CryptoAnalysisInfo(
-        inputSource,
-        compileMillis,
-        analysisMillis,
-        errors.size(),
-        errorsPerRuleKind,
-        classes.size(),
-        methods.size());
+    info.put(MetricDefinitions.TOTAL_ERRORS, errors.size())
+        .put(MetricDefinitions.ERRORS_PER_RULE_KIND, errorsPerRuleKind)
+        .put(MetricDefinitions.CLASSES_ANALYZED, classes.size())
+        .put(MetricDefinitions.METHODS_ANALYZED, methods.size());
   }
 
   private static boolean hasJimpleFiles(Path jimpleDir) {

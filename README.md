@@ -49,10 +49,13 @@ mvn spotless:apply
 
 ## Analysis Information
 
-For every analysis run, `CryptoSensor` aggregates the following information into a
-`CryptoAnalysisInfo` record (package `org.sonarcrypto.analysis`):
+For every analysis run, `CryptoSensor` collects typed metrics into a `CryptoAnalysisInfo`
+(package `org.sonarcrypto.analysis`). Each metric is a typed `Metric<T>` key defined in `MetricDefinitions`, so values are read and
+written type-safely via `info.put(MetricDefinitions.X, value)` / `info.get(MetricDefinitions.X)`. `CryptoAnalysisInfo.asMap()`
+returns all metrics in insertion order, keyed by name, with values converted to strings, numbers and
+flat maps of those, so it can be serialized directly (e.g. to JSON):
 
-| Field | Description |
+| Metric | Description |
 | --- | --- |
 | `inputSource` | Whether CogniCrypt analyzed Jimple bridge output (`JIMPLE`) or a compiled Maven project (`MAVEN`) |
 | `compileMillis` | Time spent compiling (Maven compile / classpath resolution) |
@@ -62,7 +65,32 @@ For every analysis run, `CryptoSensor` aggregates the following information into
 | `classesAnalyzed` | Number of classes containing a crypto usage site (discovered seed) |
 | `methodsAnalyzed` | Number of methods containing a crypto usage site (discovered seed) |
 
-This information is always logged at `INFO` level (one line per measure).
+To add a metric, declare a constant in `MetricDefinitions` using one of the `Metric` factories
+(`ofNumber`, `ofEnum`, `ofEnumCounts`; add a new factory for other value kinds) and call
+`info.put(MetricDefinitions.X, value)` in `CryptoSensor`.
+
+The metrics are logged at `INFO` level and written as JSON to `crypto-metrics.json` in the scanner
+working directory (`.scannerwork/` by default). Set `sonar.crypto.metricsFile` to write them
+elsewhere; relative paths are resolved against the project base directory. Failing to write the file
+only logs a warning. The file looks like this:
+
+```json
+{
+  "schemaVersion": 1,
+  "timestamp": "2026-09-25T11:42:07.123Z",
+  "metrics": {
+    "inputSource": "MAVEN",
+    "compileMillis": 5321,
+    "analysisMillis": 8120,
+    "totalErrors": 4,
+    "errorsPerRuleKind": { "ALGORITHM": 3, "KEY_MATERIAL": 1 },
+    "classesAnalyzed": 2,
+    "methodsAnalyzed": 3
+  }
+}
+```
+
+`schemaVersion` is bumped whenever the layout changes incompatibly.
 
 ## Modules / Repository Contents
 
