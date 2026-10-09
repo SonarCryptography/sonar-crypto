@@ -29,7 +29,7 @@
     <properties>
         <sonar.organization>sonarcryptography</sonar.organization>
 
-        <sonar.qube.version>25.11.0.114957</sonar.qube.version>
+        <sonar.qube.version>26.9.0.129388</sonar.qube.version>
 
         <sonar.plugin.api.version>14.0.0.4498</sonar.plugin.api.version>
         <sonar.scanner.engine.version>13.12.0.5977</sonar.scanner.engine.version>
@@ -62,6 +62,26 @@
                 <scope>provided</scope>
             </dependency>
             <!-- Runtime dependencies -->
+            <!--
+                EMF (pulled in by CrySLParser via Xtext) is pinned to the versions of the Xtext
+                2.39.0 BOM. Otherwise the open range of emf.ecore on emf.common can resolve to an
+                incompatible emf.common (>= 2.31.0 lacks EMFPlugin.IS_OSGI_RUNNING used by ecore 2.36.0).
+            -->
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>org.eclipse.emf.common</artifactId>
+                <version>2.30.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>org.eclipse.emf.ecore</artifactId>
+                <version>2.36.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+                <version>2.37.0</version>
+            </dependency>
             <dependency>
                 <groupId>de.fraunhofer.iem</groupId>
                 <artifactId>HeadlessJavaScanner</artifactId>
