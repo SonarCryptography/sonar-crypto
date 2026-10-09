@@ -18,7 +18,6 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -33,7 +32,6 @@ import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 import org.sonarcrypto.analysis.CryptoAnalysisInfo;
 import org.sonarcrypto.analysis.InputSource;
 import org.sonarcrypto.analysis.MetricDefinitions;
-import org.sonarcrypto.analysis.ScanResult;
 import org.sonarcrypto.ccerror.causes.Cause;
 import org.sonarcrypto.utility.groundtruth.GroundTruthParser;
 import org.sonarcrypto.utility.groundtruth.GroundTruthUtils;
@@ -69,6 +67,14 @@ class CryptoSensorTest {
 
     assertThat(context.allIssues()).isEmpty();
     assertThat(logTester.logs()).contains("Failed to build Maven project");
+    // Metrics are written for failed runs too.
+    assertThat(tempDir.resolve(CryptoSensor.DEFAULT_METRICS_FILE))
+        .content()
+        .contains("\"outcome\": \"COMPILE_FAILED\"")
+        .contains("\"ruleset\": \"JCA_BC_JCA\"")
+        .contains("\"ruleExtractionMillis\"")
+        .contains("\"totalMillis\"")
+        .doesNotContain("\"analysisMillis\"");
   }
 
   @Test
@@ -79,10 +85,9 @@ class CryptoSensorTest {
     initializeFileSystem(context);
     context.fileSystem().setWorkDir(tempDir);
 
-    final var result = sensor.scan(context.fileSystem(), sensor.extractRules());
-    sensor.report(context, result);
-    assertThat(tempDir.resolve(CryptoSensor.DEFAULT_METRICS_FILE)).isNotEmptyFile();
-    final var foundErrors = result.errors();
+    final var info = new CryptoAnalysisInfo();
+    final var foundErrors = sensor.scan(context.fileSystem(), sensor.extractRules(), info);
+    sensor.report(context, foundErrors);
 
     final var groundTruth = new GroundTruthParser().parse(context.fileSystem());
 
@@ -175,48 +180,59 @@ class CryptoSensorTest {
             processedCount, sonarIssueCount)
         .isEqualTo(sonarIssueCount);
 
-    final var info = result.info();
     assertThat(info.get(MetricDefinitions.INPUT_SOURCE)).isEqualTo(InputSource.MAVEN);
     assertThat(info.get(MetricDefinitions.COMPILE_MILLIS)).isNotNegative();
+    assertThat(info.get(MetricDefinitions.CLASSPATH_FALLBACK)).isFalse();
     assertThat(info.get(MetricDefinitions.ANALYSIS_MILLIS)).isPositive();
     assertThat(info.get(MetricDefinitions.TOTAL_ERRORS)).isEqualTo(foundErrors.size());
     assertThat(info.get(MetricDefinitions.ERRORS_PER_RULE_KIND)).isNotEmpty();
-    assertThat(info.get(MetricDefinitions.CLASSES_ANALYZED)).isPositive();
-    assertThat(info.get(MetricDefinitions.METHODS_ANALYZED)).isPositive();
+    assertThat(info.get(MetricDefinitions.ERRORS_PER_CRYSL_RULE))
+        .isNotEmpty()
+        .allSatisfy((rule, count) -> assertThat(rule).contains("."))
+        .satisfies(
+            counts ->
+                assertThat(counts.values().stream().mapToInt(Integer::intValue).sum())
+                    .isEqualTo(foundErrors.size()));
+    assertThat(info.get(MetricDefinitions.SEEDS))
+        .isGreaterThanOrEqualTo(info.get(MetricDefinitions.METHODS_WITH_CRYPTO_USAGE));
+    assertThat(info.get(MetricDefinitions.CLASSES_WITH_CRYPTO_USAGE)).isPositive();
+    assertThat(info.get(MetricDefinitions.METHODS_WITH_CRYPTO_USAGE)).isPositive();
     assertThat(info.asMap())
         .containsOnlyKeys(
             MetricDefinitions.INPUT_SOURCE.name(),
             MetricDefinitions.COMPILE_MILLIS.name(),
+            MetricDefinitions.CLASSPATH_FALLBACK.name(),
             MetricDefinitions.ANALYSIS_MILLIS.name(),
             MetricDefinitions.TOTAL_ERRORS.name(),
             MetricDefinitions.ERRORS_PER_RULE_KIND.name(),
-            MetricDefinitions.CLASSES_ANALYZED.name(),
-            MetricDefinitions.METHODS_ANALYZED.name())
+            MetricDefinitions.ERRORS_PER_CRYSL_RULE.name(),
+            MetricDefinitions.SEEDS.name(),
+            MetricDefinitions.CLASSES_WITH_CRYPTO_USAGE.name(),
+            MetricDefinitions.METHODS_WITH_CRYPTO_USAGE.name())
         .containsEntry(MetricDefinitions.INPUT_SOURCE.name(), InputSource.MAVEN.name())
         .hasEntrySatisfying(
             MetricDefinitions.ERRORS_PER_RULE_KIND.name(),
             counts ->
                 assertThat((Map<?, ?>) counts)
+                    .hasSize(RuleKind.values().length)
                     .allSatisfy((kind, count) -> assertThat(kind).isInstanceOf(String.class)));
   }
 
   @Test
-  void report_writes_metrics_to_configured_file() throws IOException {
-    CryptoSensor sensor = new CryptoSensor();
+  void writeMetrics() throws IOException {
     SensorContextTester context = SensorContextTester.create(tempDir);
     context.fileSystem().setWorkDir(tempDir.resolve("work"));
-    final var result =
-        new ScanResult(List.of(), new CryptoAnalysisInfo().put(MetricDefinitions.TOTAL_ERRORS, 0));
+    final var info = new CryptoAnalysisInfo().put(MetricDefinitions.TOTAL_ERRORS, 0);
 
     context.config().setProperty(CryptoSensor.METRICS_FILE_PROPERTY, "out/metrics.json");
-    sensor.report(context, result);
+    CryptoSensor.writeMetrics(context, info);
     assertThat(tempDir.resolve("out/metrics.json")).content().contains("\"totalErrors\": 0");
     assertThat(tempDir.resolve("work").resolve(CryptoSensor.DEFAULT_METRICS_FILE)).doesNotExist();
 
-    // A file cannot be used as parent directory, so writing fails without aborting the report.
+    // A file cannot be used as parent directory, so writing fails with a warning only.
     Files.writeString(tempDir.resolve("blocked"), "");
     context.config().setProperty(CryptoSensor.METRICS_FILE_PROPERTY, "blocked/metrics.json");
-    sensor.report(context, result);
+    CryptoSensor.writeMetrics(context, info);
     assertThat(logTester.logs())
         .anyMatch(it -> it.contains("Failed to write crypto analysis metrics"));
   }
@@ -230,31 +246,33 @@ class CryptoSensorTest {
     final var jimpleDir = tempDir.resolve("bridge-output/jimple");
     final var filesystem = context.fileSystem();
     final var rules = sensor.extractRules();
+    final var info = new CryptoAnalysisInfo();
     Files.createDirectories(jimpleDir);
     Files.writeString(jimpleDir.resolve("Invalid.jimple"), "invalid jimple");
-    assertThatThrownBy(() -> sensor.scan(filesystem, rules))
+    assertThatThrownBy(() -> sensor.scan(filesystem, rules, info))
         .isInstanceOfAny(AssertionError.class, RuntimeException.class);
+    assertThat(info.get(MetricDefinitions.INPUT_SOURCE)).isEqualTo(InputSource.JIMPLE);
+    assertThat(info.get(MetricDefinitions.CLASSPATH_FALLBACK)).isTrue();
+    // The failed analysis is still timed.
+    assertThat(info.get(MetricDefinitions.ANALYSIS_MILLIS)).isNotNegative();
     assertThat(logTester.logs())
         .anyMatch(it -> it.contains("Using Jimple files from bridge output"))
         .anyMatch(it -> it.contains("Falling back to ruleset dependencies only."));
   }
 
   @Test
-  void resolveAnalysisClassPath() throws Exception {
+  void resolveMavenClassPath() throws Exception {
     final var result =
         (String)
             invokePrivateStatic(
-                "resolveAnalysisClassPath",
-                new Class<?>[] {String.class, String.class},
+                "resolveMavenClassPath",
+                new Class<?>[] {String.class},
                 Path.of("../e2e/src/test/resources/Java/Maven/Basic")
                     .toAbsolutePath()
                     .normalize()
-                    .toString(),
-                "rules.jar");
+                    .toString());
 
-    assertThat(result)
-        .startsWith("rules.jar" + java.io.File.pathSeparator)
-        .contains("bcprov-jdk18on");
+    assertThat(result).contains("bcprov-jdk18on");
   }
 
   private static Object invokePrivateStatic(

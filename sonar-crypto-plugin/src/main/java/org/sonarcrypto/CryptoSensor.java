@@ -10,10 +10,13 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
@@ -24,7 +27,7 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonarcrypto.analysis.CryptoAnalysisInfo;
 import org.sonarcrypto.analysis.InputSource;
 import org.sonarcrypto.analysis.MetricDefinitions;
-import org.sonarcrypto.analysis.ScanResult;
+import org.sonarcrypto.analysis.Outcome;
 import org.sonarcrypto.ccerror.CcErrorConverter;
 import org.sonarcrypto.ccerror.ConvertedError;
 import org.sonarcrypto.utils.cognicrypt.crysl.CryslRuleProvider;
@@ -43,6 +46,8 @@ public class CryptoSensor implements Sensor {
 
   static final String DEFAULT_METRICS_FILE = "crypto-metrics.json";
 
+  private static final Ruleset RULESET = Ruleset.JCA_BC_JCA;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(CryptoSensor.class);
   private final CcToSonarIssues issueReporter = new CcToSonarIssues();
 
@@ -53,24 +58,23 @@ public class CryptoSensor implements Sensor {
   }
 
   protected RulesetPaths extractRules() throws IOException {
-    final Ruleset ruleset = Ruleset.JCA_BC_JCA;
     try {
-      return new CryslRuleProvider().extractRulesetToTempDir(ruleset);
+      return new CryslRuleProvider().extractRulesetToTempDir(RULESET);
     } catch (IOException | URISyntaxException e) {
       final var message =
           String.format(
-              "I/O error extracting CrySL rules for ruleset '%s': %s", ruleset, e.getMessage());
+              "I/O error extracting CrySL rules for ruleset '%s': %s", RULESET, e.getMessage());
       LOGGER.error(message);
       throw new IOException(message, e);
     }
   }
 
-  protected ScanResult scan(FileSystem fileSystem, RulesetPaths extractedRules)
+  protected List<ConvertedError> scan(
+      FileSystem fileSystem, RulesetPaths extractedRules, CryptoAnalysisInfo info)
       throws FileNotFoundException, MavenBuildException {
     Path jimpleDir = fileSystem.workDir().toPath().resolve("bridge-output/jimple");
     String mavenProjectPath = fileSystem.baseDir().getAbsolutePath();
 
-    var info = new CryptoAnalysisInfo();
     final CryptoScanner scanner;
 
     if (hasJimpleFiles(jimpleDir)) {
@@ -79,18 +83,17 @@ public class CryptoSensor implements Sensor {
           "Using Jimple files from bridge output ({}) as analysis input.",
           jimpleDir.toAbsolutePath());
 
-      final long compileStart = System.nanoTime();
-      String classPath =
-          resolveAnalysisClassPath(mavenProjectPath, extractedRules.dependencyClasspath());
-      info.put(MetricDefinitions.COMPILE_MILLIS, elapsedMillis(compileStart));
+      var mavenClassPath =
+          info.timeAndGet(
+              MetricDefinitions.COMPILE_MILLIS, () -> resolveMavenClassPath(mavenProjectPath));
+      info.put(MetricDefinitions.CLASSPATH_FALLBACK, mavenClassPath == null);
 
       var jimpleScanner =
           new JimpleScanner(jimpleDir.toString(), extractedRules.rulesetZip().toString());
-      jimpleScanner.setAddClassPath(classPath);
+      jimpleScanner.setAddClassPath(
+          joinClassPaths(extractedRules.dependencyClasspath(), mavenClassPath));
 
-      final long analysisStart = System.nanoTime();
-      jimpleScanner.scan();
-      info.put(MetricDefinitions.ANALYSIS_MILLIS, elapsedMillis(analysisStart));
+      info.time(MetricDefinitions.ANALYSIS_MILLIS, jimpleScanner::scan);
       scanner = jimpleScanner;
     } else {
       info.put(MetricDefinitions.INPUT_SOURCE, InputSource.MAVEN);
@@ -100,9 +103,8 @@ public class CryptoSensor implements Sensor {
           mavenProjectPath);
 
       MavenProject mi = new MavenProject(mavenProjectPath);
-      final long compileStart = System.nanoTime();
-      mi.compile();
-      info.put(MetricDefinitions.COMPILE_MILLIS, elapsedMillis(compileStart));
+      info.time(MetricDefinitions.COMPILE_MILLIS, mi::compile);
+      info.put(MetricDefinitions.CLASSPATH_FALLBACK, false);
 
       HeadlessJavaScanner headlessScanner =
           new HeadlessJavaScanner(mi.getBuildDirectory(), extractedRules.rulesetZip().toString());
@@ -111,42 +113,73 @@ public class CryptoSensor implements Sensor {
           joinClassPaths(
               extractedRules.dependencyClasspath(), Objects.requireNonNull(mi.getFullClassPath())));
 
-      final long analysisStart = System.nanoTime();
-      headlessScanner.scan();
-      info.put(MetricDefinitions.ANALYSIS_MILLIS, elapsedMillis(analysisStart));
+      info.time(MetricDefinitions.ANALYSIS_MILLIS, headlessScanner::scan);
       scanner = headlessScanner;
     }
 
     var errors = new CcErrorConverter(fileSystem).convertErrors(scanner.getCollectedErrors());
     addResultMetrics(info, scanner, errors);
-    return new ScanResult(errors, info);
+    return errors;
   }
 
-  protected void report(SensorContext sensorContext, ScanResult result) {
-    LOGGER.info("{}", result.info());
-    writeMetrics(sensorContext, result.info());
-    issueReporter.reportAllIssues(sensorContext, result.errors());
+  protected void report(SensorContext sensorContext, List<ConvertedError> errors) {
+    LOGGER.info("Found {} cryptographic errors", errors.size());
+    issueReporter.reportAllIssues(sensorContext, errors);
   }
 
   @Override
   public void execute(SensorContext sensorContext) {
+    var info = new CryptoAnalysisInfo();
+    addRunMetadata(info, sensorContext);
+    try {
+      info.time(MetricDefinitions.TOTAL_MILLIS, () -> analyze(sensorContext, info));
+    } finally {
+      LOGGER.info("{}", info);
+      writeMetrics(sensorContext, info);
+    }
+  }
+
+  private void analyze(SensorContext sensorContext, CryptoAnalysisInfo info) {
     final RulesetPaths ruleDir;
 
     try {
-      ruleDir = extractRules();
+      ruleDir = info.timeAndGet(MetricDefinitions.RULE_EXTRACTION_MILLIS, this::extractRules);
     } catch (IOException e) {
       // Logging is done by `extractRules`.
+      info.put(MetricDefinitions.OUTCOME, Outcome.RULE_EXTRACTION_FAILED);
       return;
     }
 
     try {
-      report(sensorContext, scan(sensorContext.fileSystem(), ruleDir));
+      report(sensorContext, scan(sensorContext.fileSystem(), ruleDir, info));
+      info.put(MetricDefinitions.OUTCOME, Outcome.SUCCESS);
     } catch (IOException | MavenBuildException e) {
+      info.put(MetricDefinitions.OUTCOME, Outcome.COMPILE_FAILED);
       LOGGER.error("Failed to build Maven project", e);
+    } catch (RuntimeException | Error e) {
+      info.put(MetricDefinitions.OUTCOME, Outcome.ANALYSIS_FAILED);
+      throw e;
     }
   }
 
-  private static void writeMetrics(SensorContext sensorContext, CryptoAnalysisInfo info) {
+  private static void addRunMetadata(CryptoAnalysisInfo info, SensorContext sensorContext) {
+    var versions = new Properties();
+    try (var in = CryptoSensor.class.getResourceAsStream("versions.properties")) {
+      if (in != null) {
+        versions.load(in);
+      }
+    } catch (IOException e) {
+      LOGGER.warn("Failed to read version information", e);
+    }
+
+    info.put(MetricDefinitions.PROJECT_KEY, sensorContext.project().key())
+        .put(MetricDefinitions.PLUGIN_VERSION, versions.getProperty("plugin", "unknown"))
+        .put(MetricDefinitions.COGNICRYPT_VERSION, versions.getProperty("cognicrypt", "unknown"))
+        .put(MetricDefinitions.RULESET, RULESET)
+        .put(MetricDefinitions.RULESET_VERSION, versions.getProperty("ruleset", "unknown"));
+  }
+
+  static void writeMetrics(SensorContext sensorContext, CryptoAnalysisInfo info) {
     var fileSystem = sensorContext.fileSystem();
     var file =
         sensorContext
@@ -162,15 +195,12 @@ public class CryptoSensor implements Sensor {
     }
   }
 
-  private static long elapsedMillis(long startNanos) {
-    return (System.nanoTime() - startNanos) / 1_000_000;
-  }
-
   private static void addResultMetrics(
       CryptoAnalysisInfo info, CryptoScanner scanner, List<ConvertedError> errors) {
+    var seeds = scanner.getDiscoveredSeeds();
     var classes = new HashSet<String>();
     var methods = new HashSet<String>();
-    for (var seed : scanner.getDiscoveredSeeds()) {
+    for (var seed : seeds) {
       var method = seed.getMethod();
       var declaringClass = method.getDeclaringClass().getFullyQualifiedName();
       classes.add(declaringClass);
@@ -183,10 +213,19 @@ public class CryptoSensor implements Sensor {
           error.violation().getRulesDefinition().getRuleKind(), 1, Integer::sum);
     }
 
+    var errorsPerCryslRule = new HashMap<String, Integer>();
+    for (var cellErrors : scanner.getCollectedErrors().values()) {
+      for (var error : cellErrors) {
+        errorsPerCryslRule.merge(error.getRule().getClassName(), 1, Integer::sum);
+      }
+    }
+
     info.put(MetricDefinitions.TOTAL_ERRORS, errors.size())
         .put(MetricDefinitions.ERRORS_PER_RULE_KIND, errorsPerRuleKind)
-        .put(MetricDefinitions.CLASSES_ANALYZED, classes.size())
-        .put(MetricDefinitions.METHODS_ANALYZED, methods.size());
+        .put(MetricDefinitions.ERRORS_PER_CRYSL_RULE, errorsPerCryslRule)
+        .put(MetricDefinitions.SEEDS, seeds.size())
+        .put(MetricDefinitions.CLASSES_WITH_CRYPTO_USAGE, classes.size())
+        .put(MetricDefinitions.METHODS_WITH_CRYPTO_USAGE, methods.size());
   }
 
   private static boolean hasJimpleFiles(Path jimpleDir) {
@@ -200,23 +239,22 @@ public class CryptoSensor implements Sensor {
     }
   }
 
-  private static String resolveAnalysisClassPath(
-      String mavenProjectPath, String rulesetDependencyClasspath) {
+  /** Returns the project's Maven classpath, or {@code null} if it cannot be resolved. */
+  private static @Nullable String resolveMavenClassPath(String mavenProjectPath) {
     try {
       var mavenProject = new MavenProject(mavenProjectPath);
       mavenProject.compile();
-      return joinClassPaths(
-          rulesetDependencyClasspath, Objects.requireNonNull(mavenProject.getFullClassPath()));
+      return Objects.requireNonNull(mavenProject.getFullClassPath());
     } catch (IOException | MavenBuildException e) {
       LOGGER.warn(
           "Failed to resolve Maven dependency classpath for {}. Falling back to ruleset dependencies only.",
           mavenProjectPath,
           e);
-      return rulesetDependencyClasspath;
+      return null;
     }
   }
 
-  private static String joinClassPaths(String... classPaths) {
+  private static String joinClassPaths(@Nullable String... classPaths) {
     final var joiner = new StringBuilder();
 
     for (var classPath : classPaths) {
