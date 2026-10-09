@@ -48,6 +48,9 @@ public class CryptoSensor implements Sensor {
 
   private static final Ruleset RULESET = Ruleset.JCA_BC_JCA;
 
+  /** Reported for versions missing from {@code versions.properties}. */
+  private static final String UNKNOWN_VERSION = "unknown";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(CryptoSensor.class);
   private final CcToSonarIssues issueReporter = new CcToSonarIssues();
 
@@ -150,15 +153,16 @@ public class CryptoSensor implements Sensor {
       return;
     }
 
+    // Stays ANALYSIS_FAILED if the scan throws anything other than a build failure.
+    var outcome = Outcome.ANALYSIS_FAILED;
     try {
       report(sensorContext, scan(sensorContext.fileSystem(), ruleDir, info));
-      info.put(MetricDefinitions.OUTCOME, Outcome.SUCCESS);
+      outcome = Outcome.SUCCESS;
     } catch (IOException | MavenBuildException e) {
-      info.put(MetricDefinitions.OUTCOME, Outcome.COMPILE_FAILED);
+      outcome = Outcome.COMPILE_FAILED;
       LOGGER.error("Failed to build Maven project", e);
-    } catch (RuntimeException | Error e) {
-      info.put(MetricDefinitions.OUTCOME, Outcome.ANALYSIS_FAILED);
-      throw e;
+    } finally {
+      info.put(MetricDefinitions.OUTCOME, outcome);
     }
   }
 
@@ -173,10 +177,12 @@ public class CryptoSensor implements Sensor {
     }
 
     info.put(MetricDefinitions.PROJECT_KEY, sensorContext.project().key())
-        .put(MetricDefinitions.PLUGIN_VERSION, versions.getProperty("plugin", "unknown"))
-        .put(MetricDefinitions.COGNICRYPT_VERSION, versions.getProperty("cognicrypt", "unknown"))
+        .put(MetricDefinitions.PLUGIN_VERSION, versions.getProperty("plugin", UNKNOWN_VERSION))
+        .put(
+            MetricDefinitions.COGNICRYPT_VERSION,
+            versions.getProperty("cognicrypt", UNKNOWN_VERSION))
         .put(MetricDefinitions.RULESET, RULESET)
-        .put(MetricDefinitions.RULESET_VERSION, versions.getProperty("ruleset", "unknown"));
+        .put(MetricDefinitions.RULESET_VERSION, versions.getProperty("ruleset", UNKNOWN_VERSION));
   }
 
   static void writeMetrics(SensorContext sensorContext, CryptoAnalysisInfo info) {

@@ -39,17 +39,18 @@ class CryptoAnalysisInfoTest {
     Map<String, Object> json =
         new Gson()
             .fromJson(Files.readString(file), new TypeToken<Map<String, Object>>() {}.getType());
-    assertThat(json).containsOnlyKeys("schemaVersion", "timestamp", "metrics");
-    // Gson reads all JSON numbers back as doubles.
-    assertThat(json.get("schemaVersion")).isEqualTo((double) CryptoAnalysisInfo.SCHEMA_VERSION);
     assertThat(Instant.parse((String) json.get("timestamp"))).isBeforeOrEqualTo(Instant.now());
     // Rule kinds without errors are written as 0.
     var expectedPerRuleKind = new LinkedHashMap<String, Object>();
     for (var kind : RuleKind.values()) {
       expectedPerRuleKind.put(kind.name(), kind == ruleKind ? 3.0 : 0.0);
     }
-    assertThat(json.get("metrics"))
-        .isEqualTo(
+    // Gson reads all JSON numbers back as doubles.
+    assertThat(json)
+        .containsOnlyKeys("schemaVersion", "timestamp", "metrics")
+        .containsEntry("schemaVersion", (double) CryptoAnalysisInfo.SCHEMA_VERSION)
+        .containsEntry(
+            "metrics",
             Map.of(
                 "inputSource",
                 "MAVEN",
