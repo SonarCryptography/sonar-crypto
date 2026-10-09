@@ -6,10 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
+import javax.crypto.*;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -158,5 +156,33 @@ public class WeakCryptoExamples {
         cipher.update(data); // CC: API_MISUSE/UnexpectedCall "Cipher.update"
         
         return cipher.doFinal(data);
+    }
+    
+    public byte[] derivePasswordWithInvalidIterations(char[] password) throws GeneralSecurityException {
+        final var salt = new byte[16];
+        new SecureRandom().nextBytes(salt);
+        
+        final var keySpec = new PBEKeySpec(password, salt, 456789, 256);
+        final var keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        
+        final var secretKey = keyFactory.generateSecret(keySpec); // CC: KEY_MATERIAL/ImproperGenerated
+        
+        keySpec.clearPassword();
+        
+        return secretKey.getEncoded();
+    }
+    
+    public byte[] derivePasswordWithInvalidKeyLength(char[] password) throws GeneralSecurityException {
+        final var salt = new byte[16];
+        new SecureRandom().nextBytes(salt);
+        
+        final var keySpec = new PBEKeySpec(password, salt, 600000, 224);
+        final var keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        
+        final var secretKey = keyFactory.generateSecret(keySpec); // CC: KEY_MATERIAL/ImproperGenerated
+        
+        keySpec.clearPassword();
+        
+        return secretKey.getEncoded();
     }
 }
