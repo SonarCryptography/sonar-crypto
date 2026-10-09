@@ -31,10 +31,10 @@
 
         <sonar.qube.version>25.11.0.114957</sonar.qube.version>
 
-        <sonar.plugin.api.version>14.0.0.4498</sonar.plugin.api.version>
-        <sonar.scanner.engine.version>13.12.0.5977</sonar.scanner.engine.version>
-        <sonarqube.api.impl.version>26.9.0.129388</sonarqube.api.impl.version>
-        <packaging.plugin.version>1.25.1.3002</packaging.plugin.version>
+        <sonar.plugin.api.version>14.1.0.5543</sonar.plugin.api.version>
+        <sonar.scanner.engine.version>13.15.0.6376</sonar.scanner.engine.version>
+        <sonarqube.api.impl.version>26.10.0.132816</sonarqube.api.impl.version>
+        <packaging.plugin.version>2.0.0.3035</packaging.plugin.version>
         <crysl.jca.version>3.1.4</crysl.jca.version>
         <crysl.bc.version>3.1.5</crysl.bc.version>
         <crysl.tink.version>3.1.4</crysl.tink.version>
@@ -42,7 +42,7 @@
         <crysl.jca-bc-jca.version>1.0.0</crysl.jca-bc-jca.version>
         <cryptoanalysis.version>5.0.2-SNAPSHOT</cryptoanalysis.version>
         <boomerang.version>4.4.0</boomerang.version>
-        <slf4j.version>2.0.19</slf4j.version>
+        <slf4j.version>2.0.20</slf4j.version>
         <sootup.version>3.0.1</sootup.version>
         <!-- Resolved to .cmd on Windows by the windows-mvn profile below -->
         <mvn.executable>${maven.home}/bin/mvn</mvn.executable>
@@ -91,7 +91,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.6.3</version>
+                <version>1.6.5</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -102,7 +102,7 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <!-- common-lang3 version must be aligned with sonar-plugin-api-impl -->
-                <version>3.20.0</version>
+                <version>3.21.0</version>
             </dependency>
             <dependency>
                 <groupId>info.picocli</groupId>
@@ -239,7 +239,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.23.0</version>
+                <version>5.24.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
