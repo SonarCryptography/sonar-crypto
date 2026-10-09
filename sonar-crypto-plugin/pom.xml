@@ -27,6 +27,10 @@
             <artifactId>picocli</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>HeadlessJavaScanner</artifactId>
             <exclusions>
@@ -115,6 +119,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
