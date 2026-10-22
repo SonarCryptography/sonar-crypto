@@ -14,20 +14,18 @@ public class CryptoRulesDefinitionBuilderImpl
     implements CryptoRulesDefinitionBuilder.WithKey,
         CryptoRulesDefinitionBuilder.WithRuleKind,
         CryptoRulesDefinitionBuilder.WithName,
-        CryptoRulesDefinitionBuilder.WithDescription,
         CryptoRulesDefinitionBuilder.WithStatus,
         CryptoRulesDefinitionBuilder.WithSeverity,
         CryptoRulesDefinitionBuilder.WithHowToFixSection,
-        CryptoRulesDefinitionBuilder.WithAssessSection,
+        CryptoRulesDefinitionBuilder.WithDescription,
         CryptoRulesDefinitionBuilder.WithResourcesSection,
         CryptoRulesDefinitionBuilder.Build {
   private @Nullable RuleKind ruleKind;
   private @Nullable String name;
-  private @Nullable String description;
   private @Nullable String definitionKey;
   private @Nullable RuleStatus ruleStatus;
   private @Nullable Severity severity;
-  private @Nullable String assessSection;
+  private @Nullable String description;
   private @Nullable String howToFixSection;
   private @Nullable String resourceSection;
 
@@ -38,14 +36,8 @@ public class CryptoRulesDefinitionBuilderImpl
   }
 
   @Override
-  public CryptoRulesDefinitionBuilder.WithDescription withName(String name) {
+  public CryptoRulesDefinitionBuilder.WithKey withName(String name) {
     this.name = name;
-    return this;
-  }
-
-  @Override
-  public CryptoRulesDefinitionBuilder.WithKey withDescription(String html) {
-    this.description = html;
     return this;
   }
 
@@ -62,14 +54,14 @@ public class CryptoRulesDefinitionBuilderImpl
   }
 
   @Override
-  public CryptoRulesDefinitionBuilder.WithAssessSection withSeverity(Severity severity) {
+  public CryptoRulesDefinitionBuilder.WithDescription withSeverity(Severity severity) {
     this.severity = severity;
     return this;
   }
 
   @Override
-  public CryptoRulesDefinitionBuilder.WithHowToFixSection withAssessSection(String html) {
-    this.assessSection = html;
+  public CryptoRulesDefinitionBuilder.WithHowToFixSection withDescription(String html) {
+    this.description = html;
     return this;
   }
 
@@ -90,11 +82,10 @@ public class CryptoRulesDefinitionBuilderImpl
     return new CryptoRulesDefinition(
         requireNonNull(this.ruleKind),
         requireNonNull(this.name),
-        requireNonNull(this.description),
         this.definitionKey,
         requireNonNull(this.ruleStatus),
         requireNonNull(this.severity),
-        this.assessSection,
+        requireNonNull(this.description),
         this.howToFixSection,
         this.resourceSection);
   }

@@ -17,12 +17,7 @@ public interface CryptoRulesDefinitionBuilder {
 
   interface WithName {
     /** Sets the name. */
-    WithDescription withName(String name);
-  }
-
-  interface WithDescription {
-    /** Sets the description in HTML format. */
-    WithKey withDescription(@Language("html") String html);
+    WithKey withName(String name);
   }
 
   interface WithKey extends WithStatus {
@@ -36,21 +31,21 @@ public interface CryptoRulesDefinitionBuilder {
 
   interface WithSeverity {
     /** Sets the severity. */
-    WithAssessSection withSeverity(Severity severity);
+    WithDescription withSeverity(Severity severity);
   }
 
-  interface WithAssessSection extends WithHowToFixSection {
-    /** Sets the "assess" section description in HTML format. */
-    WithHowToFixSection withAssessSection(@Language("html") String html);
+  interface WithDescription extends WithHowToFixSection {
+    /** Sets the description as well as the "why is this an issue" section in HTML format. */
+    WithHowToFixSection withDescription(@Language("html") String html);
   }
 
   interface WithHowToFixSection extends WithResourcesSection {
-    /** Sets the "how to fix" section description in HTML format. */
+    /** Sets the "how to fix" section in HTML format. */
     WithResourcesSection withHowToFixSection(@Language("html") String html);
   }
 
   interface WithResourcesSection extends Build {
-    /** Sets the "resources" section description in HTML format. */
+    /** Sets the "resources" section in HTML format. */
     Build withResourcesSection(@Language("html") String html);
   }
 

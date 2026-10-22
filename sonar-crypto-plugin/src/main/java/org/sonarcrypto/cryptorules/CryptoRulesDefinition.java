@@ -24,32 +24,29 @@ public class CryptoRulesDefinition implements RulesDefinition {
   private final RuleKind ruleKind;
   private final RuleKey ruleKey;
   private final String name;
-  private final String description;
   private final @Nullable String definitionKey;
   private final RuleStatus ruleStatus;
   private final Severity severity;
-  private final @Nullable String assessSection;
+  private final String description;
   private final @Nullable String howToFixSection;
   private final @Nullable String resourceSection;
 
   public CryptoRulesDefinition(
       RuleKind ruleKind,
       String name,
-      String description,
       @Nullable String definitionKey,
       RuleStatus ruleStatus,
       Severity severity,
-      @Nullable String assessSection,
+      String description,
       @Nullable String howToFixSection,
       @Nullable String resourceSection) {
     this.ruleKind = ruleKind;
     this.ruleKey = RuleKey.of(REPOSITORY_KEY, ruleKind.toSQRuleName());
     this.name = name;
-    this.description = description;
     this.definitionKey = definitionKey;
     this.ruleStatus = ruleStatus;
     this.severity = severity;
-    this.assessSection = assessSection;
+    this.description = description;
     this.howToFixSection = howToFixSection;
     this.resourceSection = resourceSection;
   }
@@ -87,19 +84,17 @@ public class CryptoRulesDefinition implements RulesDefinition {
             .setCleanCodeAttribute(CleanCodeAttribute.TRUSTWORTHY)
             .addDefaultImpact(SoftwareQuality.SECURITY, severity.toImpactSeverity());
 
+    newRule.addDescriptionSection(
+        RuleDescriptionSection.builder()
+            .sectionKey(RuleDescriptionSectionKeys.ROOT_CAUSE_SECTION_KEY)
+            .htmlContent(description)
+            .build());
+
     if (howToFixSection != null) {
       newRule.addDescriptionSection(
           RuleDescriptionSection.builder()
               .sectionKey(RuleDescriptionSectionKeys.HOW_TO_FIX_SECTION_KEY)
               .htmlContent(howToFixSection)
-              .build());
-    }
-
-    if (assessSection != null) {
-      newRule.addDescriptionSection(
-          RuleDescriptionSection.builder()
-              .sectionKey(RuleDescriptionSectionKeys.ASSESS_THE_PROBLEM_SECTION_KEY)
-              .htmlContent(assessSection)
               .build());
     }
 
