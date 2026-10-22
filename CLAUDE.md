@@ -17,6 +17,10 @@ Multi-module Maven project (Java 17):
 - `CryptoQualityProfile` — Built-in quality profile "Crypto Security" for Java (set as default)
 - `CryptoSensor` — Runs CogniCrypt analysis: compiles the Maven project, extracts CrySL rules, runs HeadlessJavaScanner, reports errors
 - `CcToSonarIssues` — Converts CogniCrypt errors (`Table<WrappedClass, Method, Set<AbstractError>>`) to SonarQube issues
+- `analysis.CryptoAnalysisInfo` — Ordered per-run metrics keyed by `analysis.Metric<T>` (run metadata, timings, error counts, seeds, outcome); `time()`/`timeAndGet()` record durations even when the action throws; `asMap()` gives a serialization-friendly view, `writeJson()` writes it (Gson) with a schema version and timestamp; `CryptoSensor` writes it after every run (also failed ones) to `crypto-metrics.json` in the work dir or to `sonar.crypto.metricsFile`
+- `analysis.Metric` — Typed metric key; each knows how to convert its value to a portable form (package-private factories)
+- `analysis.MetricDefinitions` — All metric constants; defines the layout of the metrics JSON
+- `analysis.Outcome` — How far a run got (`SUCCESS`, `RULE_EXTRACTION_FAILED`, `COMPILE_FAILED`, `ANALYSIS_FAILED`)
 
 ### E2E tests
 
@@ -79,5 +83,6 @@ GitHub Actions (`.github/workflows/build.yml`):
 
 - The shaded plugin JAR bundles a minimized subset of commons-io that can conflict with other classpath entries at runtime
 - `AbstractError` overrides `equals`/`hashCode` based on its fields; mocked instances with null fields are all considered equal by `Set.of()`
+- Plugin/CogniCrypt/ruleset versions in the metrics come from the Maven-filtered resource `org/sonarcrypto/versions.properties`; outside a Maven build they show up as unfiltered `${...}` placeholders
 - E2E tests require `sonar.working.directory` set to a temp directory (CI runners may not allow writing to the source tree)
 - The sonar-java plugin (8.22.0.41895) must be loaded alongside sonar-crypto in E2E to provide Java language infrastructure
