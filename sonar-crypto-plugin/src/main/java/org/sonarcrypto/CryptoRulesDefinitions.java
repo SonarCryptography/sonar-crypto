@@ -426,7 +426,7 @@ public class CryptoRulesDefinitions {
                   <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a>
                 </li>
               </ul>
-             """)
+              """)
           .build();
 
   public static final CryptoRulesDefinition KEY_MATERIAL =
@@ -508,31 +508,40 @@ public class CryptoRulesDefinitions {
           .withDescription(
               """
               <h3>Cryptographically Unsecure Method</h3>
+              
               <p>A call to a cryptographically unsecure method may result a weak encryption.</p>
 
-              <h3>Non-constant Time Computation</h3>
-              <p>Using functions that compute in non-constant time, such as `Object.equals`,
-              allow an attacker to gain information about the encryption, e.g.,
+              <h3>Non-constant Time Comparison</h3>
+              
+              <p>Using functions that compare hashes in non-constant time,
+              such as
+              <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Arrays.html#equals(byte[],byte[])"><code>Arrays.equals</code></a>,
+              allow an attacker to gain information, e.g.,
               how many digits they guessed correctly.</p>
               """)
           .withHowToFixSection(
               """
               <h3>Cryptographically Secure Method</h3>
+              
               <p>Use a cryptographically secure method for the operation.</p>
 
-              <h3>Constant-Time Computation</h3>
-              <p>Use methods that compute values in a constant time,
-              such as `MessageDigest.isEqual` to compare two byte arrays.</p>
+              <h3>Constant-Time Comparison</h3>
+              
+              <p>Use methods that compare hashes in constant time,
+              such as
+              <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/security/MessageDigest.html#isEqual(byte[],byte[])"><code>MessageDigest.isEqual</code></a>
+              to compare two byte arrays.</p>
               """)
           .withResourcesSection(
               """
+              <h3>Oracle</h3>
               <ul>
-                <li><a href="https://docs.oracle.com/en/java/javase/25/security/java-cryptography-architecture-jca-reference-guide.html">Java Cryptography Architecture (JCA) Reference Guide</a>
-                  <ul>
-                      <li><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/security/MessageDigest.html#isEqual(byte%5B%5D,byte%5B%5D)"><code>MessageDigest.isEqual</code></a></a></li>
-                  </ul>
-                </li>
-                <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation">Secure Random Number Generation</a></li>
+                  <li><a href="https://docs.oracle.com/en/java/javase/25/security/java-cryptography-architecture-jca-reference-guide.html">Java Cryptography Architecture (JCA) Reference Guide</a></li>
+              </ul>
+
+              <h3>Wikipedia</h3>
+              <ul>
+                <li><a href="https://en.wikipedia.org/wiki/Timing_attack">Timing attack</a></li>
               </ul>
               """)
           .build();
@@ -546,20 +555,24 @@ public class CryptoRulesDefinitions {
           .withSeverity(Severity.CRITICAL)
           .withDescription(
               """
-              <h3>Uncaught Exception</h3>
-
               <p>Exceptions concerning cryptography, e.g., an invalid padding,
-              may contain sensitive information that might be useful for the attacker
-              to break the encryption.</p>
+              may contain sensitive information allowing an attacker to break the encryption.</p>
               """)
           .withHowToFixSection(
               """
-              <p>Do not expose details about cryptographic errors.</p>
+              <p>Do never expose details about cryptographic errors.
+              Provide a generic error message that does not allow any conclusions
+              to be drawn about the cryptographic cause.</p>
               """)
           .withResourcesSection(
               """
+              <h3>Oracle</h3>
               <ul>
                 <li><a href="https://docs.oracle.com/en/java/javase/25/security/java-cryptography-architecture-jca-reference-guide.html">Java Cryptography Architecture (JCA) Reference Guide</a></li>
+              </ul>
+              
+              <h3>Wikipedia</h3>
+              <ul>
                 <li><a href="https://en.wikipedia.org/wiki/Padding_oracle_attack">Padding oracle attack</a></li>
               </ul>
               """)
@@ -574,26 +587,28 @@ public class CryptoRulesDefinitions {
           .withSeverity(Severity.CRITICAL)
           .withDescription(
               """
-              <h3>API Misuse</h3>
-              <p>To gain a secure cryptography, it is mandatory to use the crypto API correctly.
-              A misuse may result in poorly encrypted data
-              that an attacker might beable to decrypt.</p>
+              <p>Cryptographic APIs, such as the JCA, are easy to use in ways that compile and run
+              without errors but silently produce insecure results, for example:</p>
+              
+              <ul>
+                <li>Calling methods in an invalid order, such as using a <code>Cipher</code> before initializing it or missing a call on <code>doFinal</code></li>
+                <li>Omitting a required call, such as never clearing a password from a <code>PBEKeySpec</code></li>
+              </ul>
               """)
           .withHowToFixSection(
               """
-              <p>Use cryptographic APIs exactly as intended.
-              It is therefore recommended to read the documentation thorougly.</p>
+              <p>Change the code so that it satisfies the requirement, for example:</p>
+              
+              <ul>
+                <li>Calling methods in a valid order, such as initializing a <code>Cipher</code> before using it or calling on <code>doFinal</code> to finish the operation.</li>
+                <li>Performing required calls, such as clearing a password from a <code>PBEKeySpec</code></li>
+              </ul>
               """)
           .withResourcesSection(
               """
+              <h3>Oracle</h3>
               <ul>
                 <li><a href="https://docs.oracle.com/en/java/javase/25/security/java-cryptography-architecture-jca-reference-guide.html">Java Cryptography Architecture (JCA) Reference Guide</a></li>
-                <li><a href="https://cheatsheetseries.owasp.org/index.html">OWASP Cheat Sheet Series</a>
-                  <ul>
-                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html">Cryptographic Storage Cheat Sheet</a></li>
-                    <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a></li>
-                  </ul>
-                </li>
               </ul>
               """)
           .build();
